@@ -4,6 +4,7 @@
 ### Sovelluksen toiminnot
 - Käyttäjä pystyy luomaan tunnukksen ja kirjautumaan sisään sovellukseen.
 - Käyttäjä voi luoda ja muokata omaa profiiliaan (lempinimi, kuvaus, profiilikuva ja taustakuva)
+- Käyttäjä näkee äänestystilastoja profiilistaan
 - Käyttäjä pystyy lisäämään, muokkaamaan ja poistamaan haasteita.
 - Käyttäjä pystyy lisäämään liitteitä haasteisiin
 - Käyttäjä näkee sovellukseen itse ja toisten käyttäjien toimesta julkaistut haasteet, sekä niiden vastaukset, kommentit ja äänet.
@@ -21,7 +22,7 @@ Forum/kilpailu-sivusto, jossa käyttäjät voivat luoda ja osallistua code-golf 
 Perinteisen code golfin sijaan sivulla on kategoriat:
 - Least Lines of Javascript
 - One Line of Javascript
-- No Explicit Variables
+- No Variable Declaration
 
 - Etusivu
     - Haasteita ja vastauksia voi selata avoimesti, mutta oman ratkaisun lähetys vaatii rekisteröitymisen ja kirjautumisen.
@@ -39,3 +40,5 @@ Perinteisen code golfin sijaan sivulla on kategoriat:
     - Kirjautunut käyttäjä voi muokata omaa profiiliaan
     - Rekisteröityessä valittu käyttäjänimi on muuttumaton ja uniikki
     - Muokattavia tietoja ovat lempinimi, kuvaus, profiilikuva ja profiilibanner
+    - Profiilista näkyy kaikki käyttäjän haasteet, vastaukset ja kommentit
+    - Profiilista näkyy käyttäjän saamien äänien summa
