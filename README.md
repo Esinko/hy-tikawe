@@ -13,8 +13,11 @@
 - Käyttäjä voi luoda uuden haasteen, antaa sille nimen, kuvaukset, liitteet ja kategorian.
 - Käyttäjä voi äänestää haasteita, niiden ratkaisuja ja kommentteja
 
-### Sovelluksen asennus
-TBA
+### Sovelluksen käyttö
+Suorita sovellus:
+```bash
+$ flask --app ./src/app.py run --debug
+```
 
 ### Suunnitelma
 Forum/kilpailu-sivusto, jossa käyttäjät voivat luoda ja osallistua code-golf haasteisiin.

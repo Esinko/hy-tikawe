@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Code Golf Club</title>
+    <link rel="stylesheet" href="/public/main.css">
+</head>
+<body>
+    <main>
+        <div class="header">
+            <div class="stack">
+                <h1>JS Code Golf Club</h1>
+                <nav style="height: 100%;">
+                    <a href="/">
+                        Home
+                    </a>
+                    {% for category in categories %}
+                    <a href="/c/{{ category.id }}">
+                        {{ category.name }}
+                    </a>
+                    {% endfor %}
+                </nav>
+            </div>
+        </div>
+        <div class="content">
+            <div class="center">
+                <div
+                    class="stack"
+                    style="width: 300px; padding-top: 12px;"
+                >
+                    <div class="stack" style="justify-content: flex-start;">
+                        <h2 style="margin-left: 0px; padding-left: 0px;">Login</h2>
+                        <p>Use your username and password.</p>
+                        {% if 'fail' in request.args %}
+                        <p class="error">Check your username and password.</p>
+                        {% endif %}
+                        <form action="/api/login" method="POST">
+                            <label for="username">Username</label>
+                            <input
+                                type="text"
+                                name="username"
+                                required
+                            >
+                            <label for="password">Password</label>
+                            <input
+                                type="password"
+                                name="password"
+                                required
+                            >
+                            <div class="flex" style="justify-content: flex-end;">
+                                <button type="submit">Login</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
