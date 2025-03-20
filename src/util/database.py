@@ -69,7 +69,7 @@ class DatabaseConnection:
             print("ERR", e)
         print("DID")
         results = cursor.fetchmany(limit)
-        print("QUERY RES", results)
+        #print("QUERY RES", results)
         cursor.close()
         return results
     
@@ -179,6 +179,7 @@ sql_table = {
     "edit_profile": "UPDATE Profiles SET description = ?, image_asset_id = ?, banner_asset_id = ? WHERE user_id = ?",
     "create_asset": "INSERT INTO Assets (filename, value) VALUES (?, ?)",
     "get_asset": "SELECT filename, value FROM Assets WHERE id = ?",
+    "delete_asset": "DELETE FROM Assets WHERE id = ?",
     "get_categories": "SELECT id, name FROM ChallengeCategories"
 }
 
@@ -240,6 +241,7 @@ class AbstractDatabase:
             raise ProfileNotFoundException(user_id)
         
         # Get assets
+        print("PROFILE DAT", profile_data)
         image_asset = self.get_asset(profile_data[2]) if profile_data[2] else None
         banner_asset = self.get_asset(profile_data[3]) if profile_data[3] else None
         
@@ -250,7 +252,7 @@ class AbstractDatabase:
                        banner_asset)
 
     def profile_exists(self, user_id: int):
-        return self.connection.query(query=sql_table["profile_exists"], parameters=(user_id), limit=1)[0][0] == 1
+        return self.connection.query(query=sql_table["profile_exists"], parameters=(user_id,), limit=1)[0][0] == 1
 
     def edit_profile(self, user_id: int, new_fields: ProfileEditable):
         if not self.profile_exists(user_id):
@@ -268,11 +270,15 @@ class AbstractDatabase:
         return Asset(asset_id, filename, value)
     
     def get_asset(self, asset_id: int) -> Asset:
-        [asset] = self.connection.query(query=sql_table["get_asset"], parameters=(asset_id), limit=1)
+        [asset] = self.connection.query(query=sql_table["get_asset"], parameters=(asset_id,), limit=1)
         if not asset:
             raise AssetNotFoundException(asset_id)
-        return Asset(asset_id, asset["filename"], asset["value"])
+        return Asset(asset_id, asset[0], asset[1])
     
+    def delete_asset(self, asset_id: int):
+        self.connection.execute(query=sql_table["delete_asset"], parameters=(asset_id,))
+    
+    # MARK: Categ. abstractions
     def get_categories(self) -> List[Category]:
         results = self.connection.query(query=sql_table["get_categories"])
         categories = []

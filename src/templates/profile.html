@@ -21,7 +21,7 @@
                         style="justify-content: flex-end; width: 100%; align-items: center;"
                     >
                         {% if session.user and session.user.profile.image_asset %}
-                        <img width="25px" height="25px" class="profile-image" href="/a/{{ session.user.profile.image_asset.id }}"></img>
+                        <img width="25px" height="25px" class="profile-image" src="/a/{{ session.user.profile.image_asset.id }}"></img>
                         {% endif %}
                         {% if session.user %}
                         <a href="/me">
@@ -54,22 +54,23 @@
             >
                 {% if username == session.user.username %}
                 <div class="row" style="justify-content: flex-end;">
-                    <a>Edit Profile</a>
+                    <a href="/me/edit">Edit Profile</a>
                 </div>
                 {% endif %}
                 {% if profile.banner_asset %}
-                <img class="profile-banner" src="{{ '/a/' + profile.banner_asset.id }}">
+                <img class="profile-banner" src="/a/{{ session.user.profile.banner_asset.id }}">
                 {% else %}
                 <span class="profile-banner profile-banner-placeholder"></span>
                 {% endif %}
                 <div class="row" style="padding: 8px;">
                     {% if profile.image_asset %}
-                    <img width="80px" height="80px" class="profile-image" href="/a/{{ session.user.profile.image_asset.id }}"></img>
+                    <img width="80px" height="80px" class="profile-image" src="/a/{{ session.user.profile.image_asset.id }}"></img>
                     {% else %}
                     <p class="profile-text">{{ username[0].upper() + username[1] }}</p>
                     {% endif %}
                     <h2 style="margin-left: 20px;">{{ username }}</h2>
                 </div>
+                <p style="padding: 8px;">{{ profile.description if profile.description != "" else "No description."}}</p>
             </div>
         </div>
     </main>

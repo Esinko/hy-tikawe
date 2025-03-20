@@ -1,7 +1,7 @@
 -- Assets and attachments
 CREATE TABLE Assets (
     id INTEGER PRIMARY KEY,
-    filename TEXT UNIQUE NOT NULL,
+    filename TEXT NOT NULL,
     value BLOB NOT NULL
 );
 

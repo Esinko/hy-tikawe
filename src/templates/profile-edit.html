@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Code Golf Club</title>
+    <link rel="stylesheet" href="/public/main.css">
+</head>
+<body>
+    <main>
+        <div class="header">
+            <div class="stack">
+                <h1>JS Code Golf Club</h1>
+                <nav style="height: 100%;">
+                    <a href="/">
+                        Home
+                    </a>
+
+                    <div
+                        class="flex"
+                        style="justify-content: flex-end; width: 100%; align-items: center;"
+                    >
+                        {% if session.user and session.user.profile.image_asset %}
+                        <img width="25px" height="25px" class="profile-image" href="/a/{{ session.user.profile.image_asset.id }}"></img>
+                        {% endif %}
+                        {% if session.user %}
+                        <a href="/me">
+                            User: {{ session.user.username }}
+                        </a>
+                        <a href="/logout">
+                            Logout
+                        </a>
+                        {% endif %}
+                        {% if not session.user %}
+                        <a href="/login">
+                            Login
+                        </a>
+                        {% endif %}
+                    </div>
+                </nav>
+                <nav>
+                    {% for category in categories %}
+                    <a href="/c/{{ category.id }}" style="font-size: 12px">
+                        {{ category.name }}
+                    </a>
+                    {% endfor %}
+                </nav>
+            </div>
+        </div>
+        <div class="content">
+            <div
+                class="stack"
+                style="width: 100%; padding-top: 12px; gap: 8px;"
+            >
+                <div class="row" style="justify-content: flex-end;">
+                    <a href="/me">Cancel Edits</a>
+                </div>
+                <form action="/api/profile/edit" method="POST" enctype="multipart/form-data">
+                    <div class="profile-banner profile-banner-placeholder" style="padding: 0px;">
+                        {% if profile.banner_asset %}
+                        <img class="profile-banner" style="padding: 0px;" src="/a/{{profile.banner_asset.id }}">
+                        {% endif %}
+                        <div class="center" style="position: absolute; top: 0px; width: 100%; height: 100%;">
+                            <div class="stack" style="width: min-content; justify-content: center;">
+                                <label for="Banner">Upload New Profile Banner</label>
+                                <input
+                                    type="file"
+                                    name="banner"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="padding: 8px;">
+                        {% if profile.image_asset %}
+                        <img width="80px" height="80px" class="profile-image" src="/a/{{ session.user.profile.image_asset.id }}"></img>
+                        {% else %}
+                        <p class="profile-text">{{ username[0].upper() + username[1] }}</p>
+                        {% endif %}
+                        <h2 style="margin-left: 20px;">{{ username }}</h2>
+                    </div>
+                    
+                    <div class="stack" style="width: min-content; height: min-content; margin-bottom: 10px;">
+                        <label for="image">Upload New Profile Image</label>
+                        <input
+                            type="file"
+                            name="image"
+                        >
+                    </div>
+                    
+                    <label for="description">Profile Description</label>
+                    <textarea
+                        name="description"
+                        placeholder="No description"
+                        style="padding: 8px;"
+                    >{{ profile.description}}</textarea>
+    
+                    <div class="row" style="justify-content: flex-end;">
+                        <button
+                            type="submit"
+                        >
+                            Submit
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

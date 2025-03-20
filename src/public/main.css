@@ -85,9 +85,14 @@ input {
     border-bottom: 2px black solid;
 }
 
+input[type="file"] {
+    background-color: black;
+}
+
 button[type="submit"] {
     width: min-content;
     margin-top: 5px;
+    cursor: pointer;
 }
 
 main {
@@ -149,6 +154,7 @@ nav a {
 }
 
 .profile-banner {
+    position: relative;
     width: 100%;
     height: 120px;
     padding: 8px;
