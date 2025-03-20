@@ -1,0 +1,1 @@
+- Check auth in methods (now just errors)
