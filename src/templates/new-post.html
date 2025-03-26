@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Code Golf Club</title>
+    <link rel="stylesheet" href="/public/main.css">
+</head>
+<body>
+    <main>
+        {% include "./components/header.html" %}
+        <div class="content">
+            <form action="/api/post/challenge" method="POST">
+                <label for="category">Challenge Category</label>
+                <select name="category" style="width: 300px;">
+                    {% for category in categories %}
+                        <option value="{{ category.id }}">
+                            {{ category.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <label for="title">Challenge Title</label>
+                <input
+                    type="text"
+                    name="title"
+                    style="width: 400px;"
+                    placeholder="Attention Grabbing Title"
+                    required
+                >
+                <label for="description">Challenge Description</label>
+                <textarea
+                    name="description"
+                    placeholder="No description"
+                    style="padding: 8px;"
+                ></textarea>
+
+                <div class="flex" style="justify-content: flex-end;">
+                    <button type="submit">Post</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

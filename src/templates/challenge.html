@@ -10,11 +10,8 @@
     <main>
         {% include "./components/header.html" %}
         <div class="content">
-            <p>Challenges from all categories:</p>
             <div class="stack">
-                {% for challenge in challenges %}
-                    {% include "./components/challenge.html" %}
-                {% endfor %}
+                {% include "./components/challenge.html" %}
             </div>
         </div>
     </main>

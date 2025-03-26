@@ -57,7 +57,7 @@ a:hover {
     text-decoration: underline;
 }
 
-button {
+button, select {
     font-family: monospace;
     background-color: white;
     color: black;
@@ -78,7 +78,7 @@ form {
     gap: 8px;
 }
 
-input {
+input, textarea {
     border-top: 2px var(--very-yellow) solid;
     border-left: 2px var(--very-yellow) solid;
     border-right: 2px black solid;
@@ -178,6 +178,7 @@ nav a {
     font-family: monospace;
     font-weight: bold;
     margin: 0px;
+    user-select: none;
 }
 
 .content {
@@ -194,4 +195,56 @@ nav a {
 
 .error {
     color: red
+}
+
+.challenge {
+    display: flex;
+    min-width: 100%;
+    padding: 8px;
+    background-color: rgba(255, 255, 255, 0.123);
+    gap: 15px;
+    max-width: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 18px;
+    margin-bottom: 15px;
+}
+.challenge a {
+    padding-left: 0px;
+    margin-bottom: 0px;
+    margin-top: 0px;
+    font-size: 24px;
+    color: white;
+}
+.vote {
+    width: 50px;
+    justify-content: flex-start;
+    align-items: center;
+    align-content: flex-start;
+    gap: 3px;
+    height: 100%;
+}
+.vote button {
+    background-color: transparent;
+    border: 0px;
+    padding: 0px;
+    stroke: black;
+}
+.vote button > svg {
+    width: 40px;
+    stroke: inherit;
+    height: 40px;
+}
+.vote button:hover {
+    background-color: #000;
+    stroke: var(--very-yellow);
+}
+.vote > p {
+    font-size: 20px;
+}
+.challenge .profile-text {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 10px;
 }

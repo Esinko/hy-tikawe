@@ -1,0 +1,45 @@
+<div class="header">
+    <div class="stack">
+        <h1>JS Code Golf Club</h1>
+        <nav style="height: 100%;">
+            <a href="/">
+                Home
+            </a>
+
+            <div
+                class="flex"
+                style="justify-content: flex-end; width: 100%; align-items: center;"
+            >
+                {% if session.user and session.user.profile.image_asset %}
+                <img width="25px" height="25px" class="profile-image" href="/a/{{ session.user.profile.image_asset.id }}"></img>
+                {% endif %}
+                {% if session.user %}
+                <a href="/new-post">
+                    New Challenge
+                </a>
+                <a href="/me">
+                    User: {{ session.user.username }}
+                </a>
+                <a href="/logout">
+                    Logout
+                </a>
+                {% endif %}
+                {% if not session.user %}
+                <a href="/login">
+                    Login
+                </a>
+                <a href="/register">
+                    Register
+                </a>
+                {% endif %}
+            </div>
+        </nav>
+        <nav>
+            {% for category in categories %}
+            <a href="/c/{{ category.id }}" style="font-size: 12px">
+                {{ category.name }}
+            </a>
+            {% endfor %}
+        </nav>
+    </div>
+</div>
