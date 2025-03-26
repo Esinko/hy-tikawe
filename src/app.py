@@ -16,7 +16,7 @@ app.secret_key = "TOTALLY_SECRET_KEY"
 # MARK: Filters
 @app.template_filter("epoch_to_date")
 def epoch_to_date_filter(epoch):
-    return datetime.fromtimestamp(epoch).strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.fromtimestamp(epoch).strftime("%H:%M %d.%m.%Y")
 
 # Public dir route
 @app.route("/public/<path>")
@@ -30,7 +30,7 @@ def home():
     categories = database.get_categories()
     challenges = database.get_challenges(session["user"]["id"] if "user" in session else -1 , None, 0)
     database.connection.close()
-    return render_template("./home.html", categories=categories, challenges=challenges, autofocus_id=-1)
+    return render_template("./home.html", categories=categories, challenges=challenges)
 
 @app.route("/login")
 def login():
@@ -241,4 +241,33 @@ def api_post_challenge():
     except Exception as err:
         print("ERR", err)
         return "Internal Server Error.", 500
+
+@app.post("/api/vote/<type>/<target_id>")
+def api_vote_challenge(type, target_id):
+    user_id = session["user"]["id"]
+    vote_action  = request.form["vote_action"]
+    from_page = request.form["from_page"]
+
+    if user_id == None or vote_action == None or from_page == None:
+        return "Some required field missing.", 400
     
+    try:
+        # Create database connection
+        database = AbstractDatabase(DatabaseConnection(*database_params).open())
+
+        # Vote for or remove
+        if vote_action == "1":
+            database.vote_for(type, target_id, user_id)
+        else:
+            database.remove_vote_from(type, target_id, user_id)
+        
+        # Redirect back
+        # Needs separate rules for each place the request can be from to properly focus/go to the right place back
+        if from_page.startswith("/chall/"):
+            return redirect("/chall/" + target_id)
+        elif from_page == "/":
+            return redirect("/#chall-" + target_id)
+        
+    except Exception as err:
+        print("ERR", err)
+        return "Internal Server Error.", 500 
