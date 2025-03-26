@@ -200,6 +200,10 @@ class Challenge:
             "votes": self.votes,
             "has_my_vote": self.has_my_vote
         }
+    
+class ChallengeNotFound(Exception):
+    def __init__(self, challenge_id):
+        super().__init__(f"Challenge'{challenge_id}' not found.")
 
 # MARK: Query table
 sql_table = {
@@ -244,7 +248,35 @@ sql_table = {
         WHERE (? IS NULL OR C.category_id = ?)
         ORDER BY C.created DESC
         LIMIT ? OFFSET ?;
-
+    """,
+    "get_full_challenge": """
+        SELECT 
+            C.id, 
+            C.created, 
+            C.title, 
+            C.body, 
+            ChallengeCategories.name AS category_name, 
+            Users.username, 
+            Profiles.image_asset_id AS profile_image,
+            COALESCE(VoteCounts.vote_count, 0) AS vote_count,
+            CASE WHEN UserVotes.voter_id IS NOT NULL THEN 1 ELSE 0 END AS has_voted
+        FROM Challenges C
+        JOIN ChallengeCategories ON C.category_id = ChallengeCategories.id
+        JOIN Users ON C.author_id = Users.id
+        JOIN Profiles ON Profiles.user_id = Users.id
+        LEFT JOIN (
+            SELECT challenge_id, COUNT(*) AS vote_count
+            FROM Votes
+            WHERE challenge_id IS NOT NULL
+            GROUP BY challenge_id
+        ) AS VoteCounts ON VoteCounts.challenge_id = C.id
+        LEFT JOIN (
+            SELECT challenge_id, voter_id
+            FROM Votes
+            WHERE voter_id = ?
+        ) AS UserVotes ON UserVotes.challenge_id = C.id
+        WHERE C.id = ?
+        LIMIT 1
     """,
     "create_challenge": "INSERT INTO Challenges (created, title, body, category_id, author_id) VALUES (?, ?, ?, ?, ?)",
     "create_vote_for_challenge": "INSERT INTO Votes (challenge_id, voter_id) VALUES (?, ?)",
@@ -382,8 +414,17 @@ class AbstractDatabase:
             challenges.append(Challenge(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8]))
         return challenges
     
-    def create_challenge(self, title: str, body: str, category_id: int, author_id: int):
-        self.connection.execute(query=sql_table["create_challenge"], parameters=(int(time(), title, body, category_id, author_id)))
+    def get_challenge(self, current_user_id: int, challenge_id: int) -> Challenge:
+        [result] = self.connection.query(query=sql_table["get_full_challenge"], parameters=(current_user_id, challenge_id))
+        if not result:
+            raise ChallengeNotFound(challenge_id)
+        return Challenge(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8])
+    
+    def create_challenge(self, title: str, body: str, category_id: int, author_id: int) -> int:
+        _, cursor = self.connection.execute(query=sql_table["create_challenge"], parameters=(int(time()), title, body, category_id, author_id))
+        post_id = cursor.lastrowid
+        cursor.close()
+        return post_id
 
     # MARK: Voting abstractions
     def vote_for(self, type: Literal["submission", "comment", "challenge"], target_id: int, user_id: int):

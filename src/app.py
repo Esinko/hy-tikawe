@@ -1,7 +1,7 @@
 from flask import Flask, Response, redirect, render_template, request, send_from_directory, session
-from util.database import AbstractDatabase, AssetNotFoundException, DatabaseConnection, ProfileEditable, UserNotFoundException
+from util.database import AbstractDatabase, AssetNotFoundException, ChallengeNotFound, DatabaseConnection, ProfileEditable, UserNotFoundException
 from werkzeug.security import check_password_hash, generate_password_hash
-
+from datetime import datetime
 from util.filetype import filename_to_file_type
 
 # Initialize database
@@ -13,6 +13,11 @@ database_connection.close()
 app = Flask(__name__)
 app.secret_key = "TOTALLY_SECRET_KEY"
 
+# MARK: Filters
+@app.template_filter("epoch_to_date")
+def epoch_to_date_filter(epoch):
+    return datetime.fromtimestamp(epoch).strftime("%Y-%m-%d %H:%M:%S")
+
 # Public dir route
 @app.route("/public/<path>")
 def public(path):
@@ -23,8 +28,9 @@ def public(path):
 def home():
     database = AbstractDatabase(DatabaseConnection(*database_params).open())
     categories = database.get_categories()
+    challenges = database.get_challenges(session["user"]["id"] if "user" in session else -1 , None, 0)
     database.connection.close()
-    return render_template("./home.html", categories=categories)
+    return render_template("./home.html", categories=categories, challenges=challenges, autofocus_id=-1)
 
 @app.route("/login")
 def login():
@@ -38,6 +44,29 @@ def register():
 def logout():
     session.clear()
     return redirect("/")
+
+@app.get("/new-post")
+def new_post():
+    database = AbstractDatabase(DatabaseConnection(*database_params).open())
+    categories = database.get_categories()
+    database.connection.close()
+    return render_template("./new-post.html", categories=categories)
+
+@app.get("/chall/<challenge_id>")
+def challenge(challenge_id):
+    database = AbstractDatabase(DatabaseConnection(*database_params).open())
+    categories = database.get_categories()
+    try:
+        challenge = database.get_challenge(session["user"]["id"] if "user" in session else -1, challenge_id)
+        database.connection.close()
+        return render_template("./challenge.html", categories=categories, challenge=challenge)
+    except ChallengeNotFound:
+        database.connection.close()
+        return render_template("./challenge.html", categories=categories, challenge=challenge)
+    except Exception as err:
+        database.connection.close()
+        print("ERR", err)
+        return "Internal Server Error.", 500
 
 @app.get("/me")
 def profile_me():
@@ -94,8 +123,9 @@ def api_login():
         database.connection.close()
     except UserNotFoundException:
         return redirect("/login?fail")
-    except Exception:
-        return "Internal Server Error", 500
+    except Exception as err:
+        print("ERR", err)
+        return "Internal Server Error.", 500
 
     # Check password
     if check_password_hash(user.password_hash, password):
@@ -120,7 +150,7 @@ def api_register():
             database.user_exists(username)
             return redirect("/register?taken")
     except Exception:
-        return "Internal Server Error", 500
+        return "Internal Server Error.", 500
     
     # Check passwords match
     if password != password_again:
@@ -183,4 +213,32 @@ def api_profile_edit():
         return redirect("/me")
     except Exception as err:
         print("ERR", err)
-        return "Internal Server Error", 500
+        return "Internal Server Error.", 500
+
+@app.post("/api/post/challenge")
+def api_post_challenge():
+    user_id = session["user"]["id"]
+    title = request.form["title"]
+    category_id = int(request.form["category"])
+    description = request.form["description"]
+
+    if not title or not category_id or not description:
+        return "Some required field missing.", 400
+
+    try:
+        # Create database connection
+        database = AbstractDatabase(DatabaseConnection(*database_params).open())
+
+        # Check challenge category is valid
+        categories = database.get_categories()
+        if not any(category.id == category_id for category in categories):
+            return "Invalid category.", 400
+            
+        # Create challenge post
+        post_id = database.create_challenge(title, description, category_id, user_id)
+        return redirect(f"/chall/{post_id}")
+        
+    except Exception as err:
+        print("ERR", err)
+        return "Internal Server Error.", 500
+    
