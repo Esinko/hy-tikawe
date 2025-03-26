@@ -16,7 +16,8 @@ CREATE TABLE Users (
     id INTEGER PRIMARY KEY,
     username TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
-    require_new_password INTEGER NOT NULL DEFAULT 0
+    require_new_password INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(username)
 );
 
 CREATE TABLE Profiles (
@@ -39,7 +40,7 @@ CREATE TABLE Challenges (
     created INTEGER NOT NULL,
     title TEXT NOT NULL,
     body TEXT NOT NULL,
-    category INTEGER NOT NULL REFERENCES ChallengeCategories(id) ON DELETE CASCADE,
+    category_id INTEGER NOT NULL REFERENCES ChallengeCategories(id) ON DELETE CASCADE,
     author_id INTEGER NOT NULL REFERENCES Users(id)
 );
 
@@ -49,7 +50,7 @@ CREATE TABLE Submissions (
     challenge_id INTEGER NOT NULL REFERENCES Challenges(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     body TEXT NOT NULL,
-    solution_asset_id INTEGER NOT NULL REFERENCES Assets(id) ON DELETE CASCADE,
+    solution_asset_id INTEGER NOT NULL REFERENCES Assets(id),
     author_id INTEGER NOT NULL
 );
 
@@ -72,17 +73,20 @@ CREATE TABLE Votes (
         (challenge_id IS NOT NULL AND submission_id IS NULL AND comment_id IS NULL) OR
         (challenge_id IS NULL AND submission_id IS NOT NULL AND comment_id IS NULL) OR
         (challenge_id IS NULL AND submission_id IS NULL AND comment_id IS NOT NULL)
-    )
+    ),
+    UNIQUE(voter_id, challenge_id),
+    UNIQUE(voter_id, submission_id),
+    UNIQUE(voter_id, comment_id)
 );
 
-CREATE TABLE VoteCounts ( -- Once and a while updated count based on the votes
-    challenge_id INTEGER REFERENCES Challenges(id) ON DELETE CASCADE,
-    submission_id INTEGER REFERENCES Submissions(id) ON DELETE CASCADE,
-    comment_id INTEGER REFERENCES Comments(id) ON DELETE CASCADE,
-    count INTEGER NOT NULL,
-    CHECK (
-        (challenge_id IS NOT NULL AND submission_id IS NULL AND comment_id IS NULL) OR
-        (challenge_id IS NULL AND submission_id IS NOT NULL AND comment_id IS NULL) OR
-        (challenge_id IS NULL AND submission_id IS NULL AND comment_id IS NOT NULL)
-    )
-);
+-- Count votes per challenge
+CREATE INDEX votes_challenge_id ON Votes(challenge_id)
+WHERE challenge_id IS NOT NULL;
+
+-- Count votes per submission
+CREATE INDEX votes_submission_id ON Votes(submission_id)
+WHERE submission_id IS NOT NULL;
+
+-- Count votes per comment
+CREATE INDEX votes_comment_id ON Votes(comment_id)
+WHERE comment_id IS NOT NULL;

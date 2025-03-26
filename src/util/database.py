@@ -1,6 +1,7 @@
 from sqlite3 import connect, Connection, Cursor
 from pathlib import Path
-from typing import Any, List, Tuple, TypedDict
+from time import time
+from typing import Any, List, Literal, Tuple, TypedDict
 
 class DatabaseConnection:
     def __init__(self, database="./main.db", schema="./schema.sql", init="./init.sql"):
@@ -167,6 +168,39 @@ class Category:
         self.id = id
         self.name = name
 
+class Challenge:
+    id: int
+    created: int
+    title: str
+    body: str
+    category_name: str
+    author_image_id: int
+    votes: int
+    has_my_vote: bool
+    def __init__(self, id, created, title, body, category_name, author_name, author_image_id, votes, has_my_vote):
+        self.id = id
+        self.created = created
+        self.title = title
+        self.body = body
+        self.category_name = category_name
+        self.author_name = author_name
+        self.author_image_id = author_image_id
+        self.votes = votes
+        self.has_my_vote = has_my_vote == 1
+
+    def __dict__(self):
+        return {
+            "id": self.id,
+            "created": self.created,
+            "title": self.title,
+            "body": self.body,
+            "category_name": self.category_name,
+            "author_name": self.author_name,
+            "author_image_id": self.author_image_id,
+            "votes": self.votes,
+            "has_my_vote": self.has_my_vote
+        }
+
 # MARK: Query table
 sql_table = {
     "user_exists": "SELECT EXISTS (SELECT username FROM Users WHERE username = ?)",
@@ -180,7 +214,59 @@ sql_table = {
     "create_asset": "INSERT INTO Assets (filename, value) VALUES (?, ?)",
     "get_asset": "SELECT filename, value FROM Assets WHERE id = ?",
     "delete_asset": "DELETE FROM Assets WHERE id = ?",
-    "get_categories": "SELECT id, name FROM ChallengeCategories"
+    "get_categories": "SELECT id, name FROM ChallengeCategories",
+    "get_full_challenges": """
+        SELECT 
+            C.id, 
+            C.created, 
+            C.title, 
+            C.body, 
+            ChallengeCategories.name AS category_name, 
+            Users.username, 
+            Profiles.image_asset_id AS profile_image,
+            COALESCE(VoteCounts.vote_count, 0) AS vote_count,
+            CASE WHEN UserVotes.voter_id IS NOT NULL THEN 1 ELSE 0 END AS has_voted
+        FROM Challenges C
+        JOIN ChallengeCategories ON C.category_id = ChallengeCategories.id
+        JOIN Users ON C.author_id = Users.id
+        JOIN Profiles ON Profiles.user_id = Users.id
+        LEFT JOIN (
+            SELECT challenge_id, COUNT(*) AS vote_count
+            FROM Votes
+            WHERE challenge_id IS NOT NULL
+            GROUP BY challenge_id
+        ) AS VoteCounts ON VoteCounts.challenge_id = C.id
+        LEFT JOIN (
+            SELECT challenge_id, voter_id
+            FROM Votes
+            WHERE voter_id = ?
+        ) AS UserVotes ON UserVotes.challenge_id = C.id
+        WHERE (? IS NULL OR C.category_id = ?)
+        ORDER BY C.created DESC
+        LIMIT ? OFFSET ?;
+
+    """,
+    "create_challenge": "INSERT INTO Challenges (created, title, body, category_id, author_id) VALUES (?, ?, ?, ?, ?)",
+    "create_vote_for_challenge": "INSERT INTO Votes (challenge_id, voter_id) VALUES (?, ?)",
+    "create_vote_for_comment": "INSERT INTO Votes (comment_id, voter_id) VALUES (?, ?)" ,
+    "create_vote_for_submission": "INSERT INTO Votes (submission_id, voter_id) VALUES (?, ?)",
+    "remove_vote_from_challenge": "DELETE FROM Votes WHERE challenge_id = ? AND voter_id = ?",
+    "remove_vote_from_comment": "DELETE FROM Votes WHERE comment_id = ? AND voter_id = ?" ,
+    "remove_vote_from_submission": "DELETE FROM Votes WHERE submission_id = ? AND voter_id = ?",
+    "create_comment": "INSERT INTO Comments (created, challenge_id, body, author_id) VALUES (?, ?, ?, ?)",
+    "get_comments": """ 
+        SELECT
+            Comments.id,
+            Comments.created,
+            Comments.body,
+            Users.username,
+            Profiles.image_asset_id
+        FROM Comments
+        JOIN Users ON Comments.author_id = Users.id
+        LEFT JOIN Profiles ON Users.id = Profiles.user_id
+        WHERE Comments.challenge_id = ?
+        ORDER BY Comments.created ASC
+    """ 
 }
 
 class AbstractDatabase:
@@ -286,4 +372,42 @@ class AbstractDatabase:
             categories.append(Category(result[0], result[1]))
 
         return categories
+    
+    # MARK: Chall. abstractions
+    def get_challenges(self, current_user_id: int, category_id: int | None, page: int) -> List[Challenge]:
+        page_size = 10
+        results = self.connection.query(query=sql_table["get_full_challenges"], parameters=(current_user_id, category_id, category_id, page_size, page * page_size))
+        challenges = []
+        for result in results:
+            challenges.append(Challenge(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8]))
+        return challenges
+    
+    def create_challenge(self, title: str, body: str, category_id: int, author_id: int):
+        self.connection.execute(query=sql_table["create_challenge"], parameters=(int(time(), title, body, category_id, author_id)))
 
+    # MARK: Voting abstractions
+    def vote_for(self, type: Literal["submission", "comment", "challenge"], target_id: int, user_id: int):
+        statement = ""
+        if type == "submission":
+            statement = sql_table["create_vote_for_submission"]
+        elif type == "challenge":
+            statement = sql_table["create_vote_for_challenge"]
+        elif type == "comment":
+            statement  = sql_table["create_vote_for_comment"]
+        else:
+            raise Exception("Unknown target type!")
+
+        self.connection.execute(query=statement, parameters=(target_id, user_id))
+
+    def remove_vote_from(self, type: Literal["submission", "comment", "challenge"], target_id: int, user_id: int):
+        statement = ""
+        if type == "submission":
+            statement = sql_table["remove_vote_from_submission"]
+        elif type == "challenge":
+            statement = sql_table["remove_vote_from_challenge"]
+        elif type == "comment":
+            statement  = sql_table["remove_vote_from_comment"]
+        else:
+            raise Exception("Unknown target type!")
+
+        self.connection.execute(query=statement, parameters=(target_id, user_id))
