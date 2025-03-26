@@ -52,25 +52,20 @@ class DatabaseConnection:
         if not self.connection:
             raise Exception("Database not open!")
         cursor = self.connection.cursor()
-        print("EXEC", query, parameters)
         cursor.execute(query, parameters)
         self.connection.commit()
         return self.connection, cursor
     
     # Query the database
     def query(self, query = str, parameters: Tuple[Any] | dict = {}, limit: int = -1) -> list[Any]:
-        print("IN QUERY", query, self.connection, parameters)
         if not self.connection:
             raise Exception("Database not open!")
         cursor = self.connection.cursor()
-        print("PERFORM")
         try:
             cursor.execute(query, parameters)
         except Exception as e:
             print("ERR", e)
-        print("DID")
         results = cursor.fetchmany(limit)
-        #print("QUERY RES", results)
         cursor.close()
         return results
     
@@ -201,7 +196,12 @@ class Challenge:
             "has_my_vote": self.has_my_vote
         }
     
-class ChallengeNotFound(Exception):
+class ChallengeEditable(TypedDict):
+    title: str
+    body: str
+    category_id: int
+    
+class ChallengeNotFoundException(Exception):
     def __init__(self, challenge_id):
         super().__init__(f"Challenge'{challenge_id}' not found.")
 
@@ -279,6 +279,8 @@ sql_table = {
         LIMIT 1
     """,
     "create_challenge": "INSERT INTO Challenges (created, title, body, category_id, author_id) VALUES (?, ?, ?, ?, ?)",
+    "challenge_exists": "SELECT EXISTS (SELECT id FROM Challenges WHERE id = ?)",
+    "edit_challenge": "UPDATE Challenges SET title = ?, body = ?, category_id = ? WHERE id = ?",
     "create_vote_for_challenge": "INSERT INTO Votes (challenge_id, voter_id) VALUES (?, ?)",
     "create_vote_for_comment": "INSERT INTO Votes (comment_id, voter_id) VALUES (?, ?)" ,
     "create_vote_for_submission": "INSERT INTO Votes (submission_id, voter_id) VALUES (?, ?)",
@@ -308,7 +310,6 @@ class AbstractDatabase:
     # MARK: User Abstractions
     def user_exists(self, username: str) -> bool:
         # Check if user exists
-        print(self.connection.query(query=sql_table["user_exists"], parameters=(username,)))
         return self.connection.query(query=sql_table["user_exists"], parameters=(username,), limit=1)[0][0] == 1
 
     def create_user(self, username: str, password_hash: str) -> User:
@@ -329,9 +330,7 @@ class AbstractDatabase:
     def get_user(self, username: str) -> User:
         # TODO: Use table joins to get all the user info at once?
         # Get user
-        print("GET USER")
         [user_data] = self.connection.query(query=sql_table["get_user"], parameters=(username,), limit=1)
-        print("GOT", user_data)
         if not user_data:
             raise UserNotFoundException(username)
         
@@ -359,7 +358,6 @@ class AbstractDatabase:
             raise ProfileNotFoundException(user_id)
         
         # Get assets
-        print("PROFILE DAT", profile_data)
         image_asset = self.get_asset(profile_data[2]) if profile_data[2] else None
         banner_asset = self.get_asset(profile_data[3]) if profile_data[3] else None
         
@@ -417,9 +415,20 @@ class AbstractDatabase:
     def get_challenge(self, current_user_id: int, challenge_id: int) -> Challenge:
         [result] = self.connection.query(query=sql_table["get_full_challenge"], parameters=(current_user_id, challenge_id))
         if not result:
-            raise ChallengeNotFound(challenge_id)
+            raise ChallengeNotFoundException(challenge_id)
         return Challenge(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8])
     
+    def challenge_exists(self, challenge_id) -> bool:
+        return self.connection.query(query=sql_table["challenge_exists"], parameters=(challenge_id,), limit=1)[0][0] == 1
+
+    def edit_challenge(self, challenge_id: int, new_fields: ChallengeEditable):
+        # Check if challenge exists
+        if not self.challenge_exists(challenge_id):
+            raise ChallengeNotFoundException(challenge_id)
+        
+        _, cursor = self.connection.execute(query=sql_table["edit_user"], parameters=(new_fields["title"], new_fields["body"], new_fields["category_id"], challenge_id))
+        cursor.close()
+
     def create_challenge(self, title: str, body: str, category_id: int, author_id: int) -> int:
         _, cursor = self.connection.execute(query=sql_table["create_challenge"], parameters=(int(time()), title, body, category_id, author_id))
         post_id = cursor.lastrowid
@@ -438,7 +447,8 @@ class AbstractDatabase:
         else:
             raise Exception("Unknown target type!")
 
-        self.connection.execute(query=statement, parameters=(target_id, user_id))
+        _, cursor = self.connection.execute(query=statement, parameters=(target_id, user_id))
+        cursor.close()
 
     def remove_vote_from(self, type: Literal["submission", "comment", "challenge"], target_id: int, user_id: int):
         statement = ""
@@ -451,4 +461,5 @@ class AbstractDatabase:
         else:
             raise Exception("Unknown target type!")
 
-        self.connection.execute(query=statement, parameters=(target_id, user_id))
+        _, cursor = self.connection.execute(query=statement, parameters=(target_id, user_id))
+        cursor.close()

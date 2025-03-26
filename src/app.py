@@ -1,5 +1,5 @@
 from flask import Flask, Response, redirect, render_template, request, send_from_directory, session
-from util.database import AbstractDatabase, AssetNotFoundException, ChallengeNotFound, DatabaseConnection, ProfileEditable, UserNotFoundException
+from util.database import AbstractDatabase, AssetNotFoundException, ChallengeNotFoundException, DatabaseConnection, ProfileEditable, UserNotFoundException
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
 from util.filetype import filename_to_file_type
@@ -60,7 +60,7 @@ def challenge(challenge_id):
         challenge = database.get_challenge(session["user"]["id"] if "user" in session else -1, challenge_id)
         database.connection.close()
         return render_template("./challenge.html", categories=categories, challenge=challenge)
-    except ChallengeNotFound:
+    except ChallengeNotFoundException:
         database.connection.close()
         return render_template("./challenge.html", categories=categories, challenge=challenge)
     except Exception as err:
