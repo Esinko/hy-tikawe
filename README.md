@@ -16,6 +16,8 @@
 ### Sovelluksen käyttö
 Suorita sovellus:
 ```bash
+$ python3 -m venv venv
+$ source venv/bin/activate
 $ flask --app ./src/app.py run --debug
 ```
 
