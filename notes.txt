@@ -1,1 +1,8 @@
+Developer's Notes to Self:
 - Check auth in methods (now just errors)
+- Sessions need to timeout
+- Make sure database connections are always closed
+- Request form needs key checks, otherwise we error
+- Add .env secret key logic
+- Move typings to their own files from db abstractions
+- Break up SQL table into clean sections
