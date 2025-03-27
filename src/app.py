@@ -45,24 +45,32 @@ def logout():
     session.clear()
     return redirect("/")
 
-@app.get("/new-post")
+@app.get("/challenge-new")
 def new_post():
     database = AbstractDatabase(DatabaseConnection(*database_params).open())
     categories = database.get_categories()
     database.connection.close()
-    return render_template("./new-post.html", categories=categories)
+    return render_template("./challenge-new.html", categories=categories)
 
-@app.get("/chall/<challenge_id>")
-def challenge(challenge_id):
+@app.route("/chall/<challenge_id>", defaults={"subpath": ""})
+@app.route("/chall/<challenge_id>/<path:subpath>")
+def challenge(challenge_id, subpath):
     database = AbstractDatabase(DatabaseConnection(*database_params).open())
     categories = database.get_categories()
     try:
         challenge = database.get_challenge(session["user"]["id"] if "user" in session else -1, challenge_id)
         database.connection.close()
-        return render_template("./challenge.html", categories=categories, challenge=challenge)
+        
+        # Select template based on subpath
+        template = "./challenge.html"
+        if subpath == "edit":
+            template = "./challenge-edit.html"
+        elif subpath == "delete":
+            template = "./challenge-delete.html"
+        return render_template(template, categories=categories, challenge=challenge)
     except ChallengeNotFoundException:
         database.connection.close()
-        return render_template("./challenge.html", categories=categories, challenge=challenge)
+        return redirect("/")
     except Exception as err:
         database.connection.close()
         print("ERR", err)
@@ -104,7 +112,6 @@ def asset(id):
     response = Response(asset.value)
     response.headers["Content-Type"] = filename_to_file_type(asset.filename)
     return response
-
 
 # MARK: API
 
@@ -220,9 +227,9 @@ def api_post_challenge():
     user_id = session["user"]["id"]
     title = request.form["title"]
     category_id = int(request.form["category"])
-    description = request.form["description"]
+    body = request.form["body"]
 
-    if not title or not category_id or not description:
+    if not title or not category_id or not body:
         return "Some required field missing.", 400
 
     try:
@@ -235,8 +242,68 @@ def api_post_challenge():
             return "Invalid category.", 400
             
         # Create challenge post
-        post_id = database.create_challenge(title, description, category_id, user_id)
+        post_id = database.create_challenge(title, body, category_id, user_id)
         return redirect(f"/chall/{post_id}")
+        
+    except Exception as err:
+        print("ERR", err)
+        return "Internal Server Error.", 500
+    
+@app.post("/api/edit/challenge")
+def api_edit_challenge():
+    title = request.form["title"]
+    category_id = int(request.form["category"])
+    description = request.form["description"]
+    challenge_id = request.form["id"]
+
+    if not title or not category_id or not description:
+        return "Some required field missing.", 400
+
+    try:
+        # Create database connection
+        database = AbstractDatabase(DatabaseConnection(*database_params).open())
+
+        # Check challenge category is valid
+        categories = database.get_categories()
+        if not any(category.id == category_id for category in categories):
+            return "Invalid category.", 400
+        
+        # Check challenge already exists
+        if not database.challenge_exists(challenge_id):
+            return "Challenge does not exit.", 400
+            
+        # Edit challenge post
+        # TODO: Add edited date?
+        database.edit_challenge(challenge_id, {
+            "body": description,
+            "category_id": category_id,
+            "title": title
+        })
+        return redirect(f"/chall/{challenge_id}")
+        
+    except Exception as err:
+        print("ERR", err)
+        return "Internal Server Error.", 500
+    
+@app.post("/api/delete/challenge")
+def api_delete_challenge():
+    challenge_id = request.form["id"]
+
+    if not challenge_id:
+        return "Some required field missing.", 400
+
+    try:
+        # Create database connection
+        database = AbstractDatabase(DatabaseConnection(*database_params).open())
+        
+        # Check challenge already exists
+        if not database.challenge_exists(challenge_id):
+            return "Challenge does not exit.", 400
+            
+        # Edit challenge post
+        # TODO: Add edited date?
+        database.remove_challenge(challenge_id)
+        return redirect(f"/")
         
     except Exception as err:
         print("ERR", err)

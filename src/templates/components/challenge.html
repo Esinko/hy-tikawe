@@ -22,16 +22,21 @@
         <p>{{ challenge.votes }}</p>
     </form>
     <div class="stack" style="width: 100%">
-        <a href="/chall/{{ challenge.id }}">{{ challenge.title }}</a>
-        <p style="margin: 0px 0px 2px 0px;">{{ challenge.created | epoch_to_date }}</p>
-        <div class="row">
-            {% if challenge.author_image_id is not none %}
-            <img width="30px" height="30px" class="profile-image" src="/a/{{ session.user.profile.image_asset.id }}"></img>
-            {% else %}
-            <p class="profile-text">{{ challenge.author_name[0].upper() + challenge.author_name[1] }}</p>
-            {% endif %}
-            <p style="margin-left: 10px">{{ challenge.author_name }}</p>
+        <div class="row" style="align-items: center; gap: 5px; margin-bottom: 10px;">
+            <div class="row" style="width: min-content">
+                {% if challenge.author_image_id is not none %}
+                <img width="20px" height="20px" class="profile-image" src="/a/{{ session.user.profile.image_asset.id }}"></img>
+                {% else %}
+                <p class="profile-text">{{ challenge.author_name[0].upper() + challenge.author_name[1] }}</p>
+                {% endif %}
+                <a style="margin-left: 10px; font-size: 14px; max-width: 200px; overflow: hidden;" href="/user/{{ challenge.author_name }}">{{ challenge.author_name }}</a>
+            </div>
+            <p class="minimal">|</p>
+            <p class="minimal">{{ challenge.created | epoch_to_date }}</p>
+            <p class="minimal">|</p>
+            <a class="minimal truncate" href="/c/{{ challenge.category_id }}" style="font-size: 14px; max-width: 200px;"><i>{{ challenge.category_name }}</i></a>
         </div>
+        <a href="/chall/{{ challenge.id }}">{{ challenge.title }}</a>
         <p>{{ challenge.body }}</p>
     </div>
 </div>

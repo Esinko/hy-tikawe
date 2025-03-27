@@ -156,6 +156,11 @@ nav a {
     align-items: center;
 }
 
+.minimal {
+    margin: 0px;
+    padding: 0px;
+}
+
 .profile-image {
     border-radius: 50%;
 }
@@ -244,16 +249,21 @@ nav a {
     stroke: inherit;
     height: 40px;
 }
-.vote button:hover {
-    background-color: #000;
-    stroke: var(--very-yellow);
+.vote svg:hover {
+    stroke: var(--very-yellow) !important;
 }
 .vote > p {
     font-size: 20px;
 }
 .challenge .profile-text {
-    width: 30px;
-    height: 30px;
-    line-height: 30px;
-    font-size: 10px;
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+    font-size: 12px;
+}
+
+.truncate {
+    overflow: hidden; 
+    white-space: nowrap; 
+    text-overflow: ellipsis;
 }

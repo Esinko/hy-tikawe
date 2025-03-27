@@ -10,6 +10,7 @@
     <main>
         {% include "./components/header.html" %}
         <div class="content">
+            <p>Create a new post:</p>
             <form action="/api/post/challenge" method="POST">
                 <label for="category">Challenge Category</label>
                 <select name="category" style="width: 300px;">

@@ -168,15 +168,17 @@ class Challenge:
     created: int
     title: str
     body: str
+    category_id: str
     category_name: str
     author_image_id: int
     votes: int
     has_my_vote: bool
-    def __init__(self, id, created, title, body, category_name, author_name, author_image_id, votes, has_my_vote):
+    def __init__(self, id, created, title, body, category_id, category_name, author_name, author_image_id, votes, has_my_vote):
         self.id = id
         self.created = created
         self.title = title
         self.body = body
+        self.category_id = category_id
         self.category_name = category_name
         self.author_name = author_name
         self.author_image_id = author_image_id
@@ -225,6 +227,7 @@ sql_table = {
             C.created, 
             C.title, 
             C.body, 
+            ChallengeCategories.id AS category_id, 
             ChallengeCategories.name AS category_name, 
             Users.username, 
             Profiles.image_asset_id AS profile_image,
@@ -255,6 +258,7 @@ sql_table = {
             C.created, 
             C.title, 
             C.body, 
+            ChallengeCategories.id AS category_id, 
             ChallengeCategories.name AS category_name, 
             Users.username, 
             Profiles.image_asset_id AS profile_image,
@@ -281,6 +285,7 @@ sql_table = {
     "create_challenge": "INSERT INTO Challenges (created, title, body, category_id, author_id) VALUES (?, ?, ?, ?, ?)",
     "challenge_exists": "SELECT EXISTS (SELECT id FROM Challenges WHERE id = ?)",
     "edit_challenge": "UPDATE Challenges SET title = ?, body = ?, category_id = ? WHERE id = ?",
+    "remove_challenge": "DELETE FROM Challenges WHERE id = ?",
     "create_vote_for_challenge": "INSERT INTO Votes (challenge_id, voter_id) VALUES (?, ?)",
     "create_vote_for_comment": "INSERT INTO Votes (comment_id, voter_id) VALUES (?, ?)" ,
     "create_vote_for_submission": "INSERT INTO Votes (submission_id, voter_id) VALUES (?, ?)",
@@ -409,16 +414,16 @@ class AbstractDatabase:
         results = self.connection.query(query=sql_table["get_full_challenges"], parameters=(current_user_id, category_id, category_id, page_size, page * page_size))
         challenges = []
         for result in results:
-            challenges.append(Challenge(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8]))
+            challenges.append(Challenge(*result))
         return challenges
     
     def get_challenge(self, current_user_id: int, challenge_id: int) -> Challenge:
         [result] = self.connection.query(query=sql_table["get_full_challenge"], parameters=(current_user_id, challenge_id))
         if not result:
             raise ChallengeNotFoundException(challenge_id)
-        return Challenge(result[0], result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8])
+        return Challenge(*result)
     
-    def challenge_exists(self, challenge_id) -> bool:
+    def challenge_exists(self, challenge_id: int) -> bool:
         return self.connection.query(query=sql_table["challenge_exists"], parameters=(challenge_id,), limit=1)[0][0] == 1
 
     def edit_challenge(self, challenge_id: int, new_fields: ChallengeEditable):
@@ -427,6 +432,10 @@ class AbstractDatabase:
             raise ChallengeNotFoundException(challenge_id)
         
         _, cursor = self.connection.execute(query=sql_table["edit_user"], parameters=(new_fields["title"], new_fields["body"], new_fields["category_id"], challenge_id))
+        cursor.close()
+
+    def remove_challenge(self, challenge_id: int):
+        _, cursor = self.connection.execute(query=sql_table["remove_challenge"], parameters=(challenge_id,))
         cursor.close()
 
     def create_challenge(self, title: str, body: str, category_id: int, author_id: int) -> int:

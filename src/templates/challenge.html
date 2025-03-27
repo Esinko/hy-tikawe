@@ -11,6 +11,13 @@
         {% include "./components/header.html" %}
         <div class="content">
             <div class="stack">
+                {% if session.user %}
+                <div class="row" style="justify-content: flex-end; gap: 15px;">
+                    <p>Tools</p>
+                    <a href="{{ request.path + '/edit' }}">Edit</a>
+                    <a href="{{ request.path + '/delete'}}">Delete</a>
+                </div>
+                {% endif %}
                 {% include "./components/challenge.html" %}
             </div>
         </div>
