@@ -97,6 +97,44 @@ sql_table = {
 
     "remove_challenge": "DELETE FROM Challenges WHERE id = ?",
 
+    "search_challenges": """
+        SELECT 
+            C.id, 
+            C.created, 
+            C.title, 
+            C.body,
+            C.accepts_submissions,
+            ChallengeCategories.id AS category_id, 
+            ChallengeCategories.name AS category_name, 
+            Users.username, 
+            Profiles.image_asset_id AS profile_image,
+            COALESCE(VoteCounts.vote_count, 0) AS vote_count,
+            CASE WHEN UserVotes.voter_id IS NOT NULL THEN 1 ELSE 0 END AS has_voted
+        FROM Challenges C
+        JOIN ChallengeCategories ON C.category_id = ChallengeCategories.id
+        JOIN Users ON C.author_id = Users.id
+        JOIN Profiles ON Profiles.user_id = Users.id
+        LEFT JOIN (
+            SELECT challenge_id, COUNT(*) AS vote_count
+            FROM Votes
+            WHERE challenge_id IS NOT NULL
+            GROUP BY challenge_id
+        ) AS VoteCounts ON VoteCounts.challenge_id = C.id
+        LEFT JOIN (
+            SELECT challenge_id, voter_id
+            FROM Votes
+            WHERE voter_id = ?
+        ) AS UserVotes ON UserVotes.challenge_id = C.id
+        WHERE 
+            (? IS NULL OR C.category_id = ?)
+            AND (
+                LOWER(C.title) LIKE LOWER('%' || ? || '%') OR
+                LOWER(C.body) LIKE LOWER('%' || ? || '%')
+            )
+        ORDER BY C.created DESC
+        LIMIT ? OFFSET ?;
+    """,
+
     "create_vote_for_challenge": "INSERT INTO Votes (challenge_id, voter_id) VALUES (?, ?)",
     
     "create_vote_for_comment": "INSERT INTO Votes (comment_id, voter_id) VALUES (?, ?)" ,

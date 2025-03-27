@@ -143,6 +143,14 @@ class AbstractDatabase:
         post_id = cursor.lastrowid
         cursor.close()
         return post_id
+    
+    def search_challenge(self, search_string: str, current_user_id: int, category_id: int | None, page: int):
+        page_size = 10
+        results = self.connection.query(query=sql_table["search_challenges"], parameters=(current_user_id, category_id, category_id, search_string, search_string, page_size, page * page_size))
+        challenges = []
+        for result in results:
+            challenges.append(Challenge(*result))
+        return challenges
 
     # MARK: Voting abstractions
     def vote_for(self, type: Literal["submission", "comment", "challenge"], target_id: int, user_id: int):

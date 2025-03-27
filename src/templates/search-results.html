@@ -11,7 +11,7 @@
         {% include "./components/header.html" %}
         <div class="content">
             <div class="row" style="justify-content: space-between; margin-bottom: 10px;">
-                <p><i>Challenges from {{ 'all categories' if not category_id else challenges[0].category_name}}</i></p>
+                <p><i>Search results for '{{ search_string }}'</i></p>
                 {% include "./components/search-box.html" %}
             </div>
             <div class="stack">

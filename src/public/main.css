@@ -10,10 +10,6 @@
 
 /* MARK: Overrides */
 
-html {
-    scroll-behavior: smooth;
-}
-
 body {
     position: absolute;
     top: 0px;

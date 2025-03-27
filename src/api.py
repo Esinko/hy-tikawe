@@ -224,6 +224,8 @@ def api_vote(type, target_id):
             return redirect("/chall/" + target_id)
         elif from_page == "/":
             return redirect("/#chall-" + target_id)
+        else:
+            return redirect(from_page + "#chall-" + target_id)
         
     except Exception as err:
         print("ERR", err)

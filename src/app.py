@@ -1,4 +1,4 @@
-from flask import Flask, Response, redirect, render_template, send_from_directory, session
+from flask import Flask, Response, redirect, render_template, request, send_from_directory, session
 from api import api_delete_challenge, api_edit_challenge, api_login, api_post_challenge, api_profile_edit, api_register, api_vote
 from database.params import database_params
 from database.abstract import AbstractDatabase, AssetNotFoundException, ChallengeNotFoundException, DatabaseConnection, UserNotFoundException
@@ -25,12 +25,23 @@ def public(path):
 
 # MARK: Pages
 @app.route("/")
-def home():
+@app.route("/c/<category_id>")
+def home(category_id=None):
     database = AbstractDatabase(DatabaseConnection(*database_params).open())
     categories = database.get_categories()
-    challenges = database.get_challenges(session["user"]["id"] if "user" in session else -1 , None, 0)
+    challenges = database.get_challenges(session["user"]["id"] if "user" in session else -1 , category_id, 0)
     database.connection.close()
-    return render_template("./home.html", categories=categories, challenges=challenges)
+    return render_template("./home.html", categories=categories, challenges=challenges, category_id=category_id)
+
+@app.route("/search")
+def search():
+    search_string = request.args.get("s")
+    if not search_string:
+        return "No search to perform.", 400
+    database = AbstractDatabase(DatabaseConnection(*database_params).open())
+    categories = database.get_categories()
+    challenges = database.search_challenge(search_string, session["user"]["id"] if "user" in session else -1 , None, 0)
+    return render_template("./search-results.html", categories=categories, challenges=challenges, search_string=search_string)
 
 @app.route("/login")
 def login():
