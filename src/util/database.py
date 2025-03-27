@@ -123,11 +123,13 @@ class User:
     password_hash: str
     require_new_password: bool
     profile: Profile
-    def __init__(self, id, username, password_hash, require_new_password, profile):
+    is_admin: bool
+    def __init__(self, id, username, password_hash, require_new_password, is_admin, profile):
         self.id = id
         self.username = username
         self.password_hash = password_hash
-        self.require_new_password = require_new_password
+        self.require_new_password = require_new_password == 1
+        self.is_admin = is_admin == 1
         self.profile = profile
 
     def __dict__(self):
@@ -136,6 +138,7 @@ class User:
             "username": self.username,
             "password_hash": self.password_hash,
             "require_new_password": self.require_new_password,
+            "is_admin": self.is_admin,
             "profile": self.profile.__dict__()
         }
 
@@ -168,16 +171,18 @@ class Challenge:
     created: int
     title: str
     body: str
+    accepts_submissions: bool
     category_id: str
     category_name: str
     author_image_id: int
     votes: int
     has_my_vote: bool
-    def __init__(self, id, created, title, body, category_id, category_name, author_name, author_image_id, votes, has_my_vote):
+    def __init__(self, id, created, title, body, accepts_submissions, category_id, category_name, author_name, author_image_id, votes, has_my_vote):
         self.id = id
         self.created = created
         self.title = title
         self.body = body
+        self.accepts_submissions = accepts_submissions == 1
         self.category_id = category_id
         self.category_name = category_name
         self.author_name = author_name
@@ -202,6 +207,7 @@ class ChallengeEditable(TypedDict):
     title: str
     body: str
     category_id: int
+    accepts_submissions: bool
     
 class ChallengeNotFoundException(Exception):
     def __init__(self, challenge_id):
@@ -211,7 +217,7 @@ class ChallengeNotFoundException(Exception):
 sql_table = {
     "user_exists": "SELECT EXISTS (SELECT username FROM Users WHERE username = ?)",
     "create_user": "INSERT INTO Users (username, password_hash, require_new_password) VALUES (?, ?, False)",
-    "get_user": "SELECT id, username, password_hash, require_new_password FROM Users WHERE username = ?",
+    "get_user": "SELECT id, username, password_hash, require_new_password, is_admin FROM Users WHERE username = ?",
     "edit_user": "UPDATE Users SET name = ?, password_hash = ?, require_new_password = ? WHERE name = ?",
     "create_profile": "INSERT INTO Profiles (user_id, description, image_asset_id, banner_asset_id) VALUES (?, '', NULL, NULL)",
     "get_profile": "SELECT id, description, image_asset_id, banner_asset_id FROM Profiles WHERE user_id = ?",
@@ -226,7 +232,8 @@ sql_table = {
             C.id, 
             C.created, 
             C.title, 
-            C.body, 
+            C.body,
+            C.accepts_submissions,
             ChallengeCategories.id AS category_id, 
             ChallengeCategories.name AS category_name, 
             Users.username, 
@@ -257,7 +264,8 @@ sql_table = {
             C.id, 
             C.created, 
             C.title, 
-            C.body, 
+            C.body,
+            C.accepts_submissions,
             ChallengeCategories.id AS category_id, 
             ChallengeCategories.name AS category_name, 
             Users.username, 
@@ -282,9 +290,9 @@ sql_table = {
         WHERE C.id = ?
         LIMIT 1
     """,
-    "create_challenge": "INSERT INTO Challenges (created, title, body, category_id, author_id) VALUES (?, ?, ?, ?, ?)",
+    "create_challenge": "INSERT INTO Challenges (created, title, body, category_id, author_id, accepts_submissions) VALUES (?, ?, ?, ?, ?, ?)",
     "challenge_exists": "SELECT EXISTS (SELECT id FROM Challenges WHERE id = ?)",
-    "edit_challenge": "UPDATE Challenges SET title = ?, body = ?, category_id = ? WHERE id = ?",
+    "edit_challenge": "UPDATE Challenges SET title = ?, body = ?, category_id = ?, accepts_submissions = ? WHERE id = ?",
     "remove_challenge": "DELETE FROM Challenges WHERE id = ?",
     "create_vote_for_challenge": "INSERT INTO Votes (challenge_id, voter_id) VALUES (?, ?)",
     "create_vote_for_comment": "INSERT INTO Votes (comment_id, voter_id) VALUES (?, ?)" ,
@@ -345,6 +353,7 @@ class AbstractDatabase:
                     user_data[1],
                     user_data[2],
                     user_data[3] == 1,
+                    user_data[4] == 1,
                     user_profile)
     
     def edit_user(self, username: str, new_fields: UserEditable):
@@ -431,15 +440,15 @@ class AbstractDatabase:
         if not self.challenge_exists(challenge_id):
             raise ChallengeNotFoundException(challenge_id)
         
-        _, cursor = self.connection.execute(query=sql_table["edit_user"], parameters=(new_fields["title"], new_fields["body"], new_fields["category_id"], challenge_id))
+        _, cursor = self.connection.execute(query=sql_table["edit_challenge"], parameters=(new_fields["title"], new_fields["body"], new_fields["category_id"], 1 if new_fields["accepts_submissions"] else 0, challenge_id))
         cursor.close()
 
     def remove_challenge(self, challenge_id: int):
         _, cursor = self.connection.execute(query=sql_table["remove_challenge"], parameters=(challenge_id,))
         cursor.close()
 
-    def create_challenge(self, title: str, body: str, category_id: int, author_id: int) -> int:
-        _, cursor = self.connection.execute(query=sql_table["create_challenge"], parameters=(int(time()), title, body, category_id, author_id))
+    def create_challenge(self, title: str, body: str, category_id: int, author_id: int, accepts_submissions: bool) -> int:
+        _, cursor = self.connection.execute(query=sql_table["create_challenge"], parameters=(int(time()), title, body, category_id, author_id, 1 if accepts_submissions else 0))
         post_id = cursor.lastrowid
         cursor.close()
         return post_id

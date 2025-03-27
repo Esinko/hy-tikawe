@@ -13,7 +13,7 @@
             <p>Edit challenge "{{ challenge.title }}":</p>
             <form action="/api/post/challenge" method="POST">
                 <label for="category">Challenge Category</label>
-                <select name="category" style="width: 300px;" value="{{ challenge.id }}">
+                <select name="category" style="width: 300px; margin-bottom: 10px" value="{{ challenge.id }}">
                     {% for category in categories %}
                         <option value="{{ category.id }}">
                             {{ category.name }}
@@ -23,11 +23,22 @@
 
                 <input type="hidden" name="id" value="{{ challenge.id }}">
 
+                <label for="accepts_submissions">Accept Submissions *</label>
+                <select name="accepts_submissions" style="width: 300px;" value="1">
+                    <option value="1">
+                        Yes
+                    </option>
+                    <option value="0">
+                        No
+                    </option>
+                </select>
+                <i style="margin-bottom: 10px">* If this is not a "challenge" and more like a post, set to "no". Please also use the general category for this.</i>
+
                 <label for="title">Challenge Title</label>
                 <input
                     type="text"
                     name="title"
-                    style="width: 400px;"
+                    style="width: 400px; margin-bottom: 10px"
                     placeholder="Attention Grabbing Title"
                     required
                     value="{{ challenge.title }}"
@@ -36,7 +47,7 @@
                 <textarea
                     name="body"
                     placeholder="No description"
-                    style="padding: 8px;"
+                    style="padding: 8px; margin-bottom: 10px"
                 >{{ challenge.body }}</textarea>
 
                 <div class="row" style="justify-content: flex-end; gap: 15px; margin-top: 10px;">

@@ -17,6 +17,7 @@ CREATE TABLE Users (
     username TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     require_new_password INTEGER NOT NULL DEFAULT 0,
+    is_admin INTEGER NOT NULL DEFAULT 0,
     UNIQUE(username)
 );
 
@@ -41,7 +42,8 @@ CREATE TABLE Challenges (
     title TEXT NOT NULL,
     body TEXT NOT NULL,
     category_id INTEGER NOT NULL REFERENCES ChallengeCategories(id) ON DELETE CASCADE,
-    author_id INTEGER NOT NULL REFERENCES Users(id)
+    author_id INTEGER NOT NULL REFERENCES Users(id),
+    accepts_submissions INTEGER NOT NULL DEFAULT 1
 );
 
 CREATE TABLE Submissions (

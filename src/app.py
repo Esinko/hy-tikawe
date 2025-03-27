@@ -228,6 +228,7 @@ def api_post_challenge():
     title = request.form["title"]
     category_id = int(request.form["category"])
     body = request.form["body"]
+    accepts_submissions = int(request.form["accepts_submissions"]) == 1
 
     if not title or not category_id or not body:
         return "Some required field missing.", 400
@@ -242,7 +243,7 @@ def api_post_challenge():
             return "Invalid category.", 400
             
         # Create challenge post
-        post_id = database.create_challenge(title, body, category_id, user_id)
+        post_id = database.create_challenge(title, body, category_id, user_id, accepts_submissions)
         return redirect(f"/chall/{post_id}")
         
     except Exception as err:
@@ -255,6 +256,7 @@ def api_edit_challenge():
     category_id = int(request.form["category"])
     description = request.form["description"]
     challenge_id = request.form["id"]
+    accepts_submissions = int(request.form["accepts_submissions"]) == 1
 
     if not title or not category_id or not description:
         return "Some required field missing.", 400
@@ -277,7 +279,8 @@ def api_edit_challenge():
         database.edit_challenge(challenge_id, {
             "body": description,
             "category_id": category_id,
-            "title": title
+            "title": title,
+            "accepts_submissions": accepts_submissions
         })
         return redirect(f"/chall/{challenge_id}")
         
