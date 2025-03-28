@@ -18,6 +18,12 @@
                 {% for challenge in challenges %}
                     {% include "./components/challenge.html" %}
                 {% endfor %}
+                {% if challenges | length == 0 %}
+                    <img src="/public/emptiness.gif">
+                    <p>(You went too far back)</p>
+                {% endif %}
+
+                {% include "./components/page-selection.html" %}
             </div>
         </div>
     </main>

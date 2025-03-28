@@ -47,6 +47,14 @@ class ProfileEditable(TypedDict):
     image_asset_id: int | None
     banner_asset_id: int | None
 
+class UserDict(TypedDict):
+    id: str
+    username: str
+    password_hash: str
+    require_new_password: bool
+    profile: Profile
+    is_admin: bool
+
 class User:
     id: str
     username: str
@@ -104,10 +112,12 @@ class Challenge:
     accepts_submissions: bool
     category_id: str
     category_name: str
+    author_name: str
+    author_id: int
     author_image_id: int
     votes: int
     has_my_vote: bool
-    def __init__(self, id, created, title, body, accepts_submissions, category_id, category_name, author_name, author_image_id, votes, has_my_vote):
+    def __init__(self, id, created, title, body, accepts_submissions, category_id, category_name, author_name, author_id, author_image_id, votes, has_my_vote):
         self.id = id
         self.created = created
         self.title = title
@@ -116,6 +126,7 @@ class Challenge:
         self.category_id = category_id
         self.category_name = category_name
         self.author_name = author_name
+        self.author_id = author_id
         self.author_image_id = author_image_id
         self.votes = votes
         self.has_my_vote = has_my_vote == 1

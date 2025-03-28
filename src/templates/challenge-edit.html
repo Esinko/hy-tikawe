@@ -11,7 +11,7 @@
         {% include "./components/header.html" %}
         <div class="content">
             <p>Edit challenge "{{ challenge.title }}":</p>
-            <form action="/api/post/challenge" method="POST">
+            <form action="/api/edit/challenge" method="POST">
                 <label for="category">Challenge Category</label>
                 <select name="category" style="width: 300px; margin-bottom: 10px" value="{{ challenge.id }}">
                     {% for category in categories %}
@@ -43,7 +43,7 @@
                     required
                     value="{{ challenge.title }}"
                 >
-                <label for="description">Challenge Description</label>
+                <label for="body">Challenge Description</label>
                 <textarea
                     name="body"
                     placeholder="No description"

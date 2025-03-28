@@ -34,7 +34,7 @@
                     </div>
                     <div class="row" style="padding: 8px;">
                         {% if profile.image_asset %}
-                        <img width="80px" height="80px" class="profile-image" src="/a/{{ session.user.profile.image_asset.id }}"></img>
+                        <img width="80px" height="80px" class="profile-image" src="/a/{{ profile.image_asset.id }}"></img>
                         {% else %}
                         <p class="profile-text">{{ username[0].upper() + username[1] }}</p>
                         {% endif %}

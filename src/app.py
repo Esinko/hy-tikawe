@@ -27,21 +27,23 @@ def public(path):
 @app.route("/")
 @app.route("/c/<category_id>")
 def home(category_id=None):
+    page = int(request.args.get("page") if "page" in request.args.keys() else "0")
     database = AbstractDatabase(DatabaseConnection(*database_params).open())
     categories = database.get_categories()
-    challenges = database.get_challenges(session["user"]["id"] if "user" in session else -1 , category_id, 0)
+    challenges = database.get_challenges(session["user"]["id"] if "user" in session else -1 , category_id, page)
     database.connection.close()
-    return render_template("./home.html", categories=categories, challenges=challenges, category_id=category_id)
+    return render_template("./home.html", categories=categories, challenges=challenges, category_id=category_id, page=page)
 
 @app.route("/search")
 def search():
     search_string = request.args.get("s")
+    page = int(request.args.get("page") if "page" in request.args.keys() else "0")
     if not search_string:
         return "No search to perform.", 400
     database = AbstractDatabase(DatabaseConnection(*database_params).open())
     categories = database.get_categories()
-    challenges = database.search_challenge(search_string, session["user"]["id"] if "user" in session else -1 , None, 0)
-    return render_template("./search-results.html", categories=categories, challenges=challenges, search_string=search_string)
+    challenges = database.search_challenge(search_string, session["user"]["id"] if "user" in session else -1 , None, page)
+    return render_template("./search-results.html", categories=categories, challenges=challenges, search_string=search_string, page=page)
 
 @app.route("/login")
 def login():

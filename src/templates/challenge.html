@@ -11,7 +11,7 @@
         {% include "./components/header.html" %}
         <div class="content">
             <div class="stack">
-                {% if session.user %}
+                {% if session.user and session.user.id == challenge.author_id %}
                 <div class="row" style="justify-content: flex-end; gap: 15px;">
                     <p>Tools</p>
                     <a href="{{ request.path + '/edit' }}">Edit</a>
@@ -19,6 +19,7 @@
                 </div>
                 {% endif %}
                 {% include "./components/challenge.html" %}
+                <p>TODO: Comments and submissions here</p>
             </div>
         </div>
     </main>

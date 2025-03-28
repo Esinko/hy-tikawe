@@ -3,6 +3,8 @@ from database.params import database_params
 from database.abstract import AbstractDatabase, DatabaseConnection, ProfileEditable, UserNotFoundException
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from util.has_permission import has_permission
+
 # MARK: Login & Register
 def api_login():
     username = request.form["username"]
@@ -60,6 +62,9 @@ def api_register():
 
 # MARK: Profiles
 def api_profile_edit():
+    if "user" not in session:
+        return "Not logged in.", 401
+
     username = session["user"]["username"]
     user_id = session["user"]["id"]
     description = request.form["description"]
@@ -69,12 +74,10 @@ def api_profile_edit():
     # Check required fields
     if not description:
         return "Some required field missing.", 400
-    
+
     try:
         database = AbstractDatabase(DatabaseConnection(*database_params).open())
         user = database.get_user(username)
-
-        print("> GOT USER", user)
 
         # Delete existing assets, if necessary
         if user.profile.banner_asset and banner_file:
@@ -111,6 +114,9 @@ def api_profile_edit():
 
 # MARK: Post Challenge
 def api_post_challenge():
+    if "user" not in session:
+        return "Not logged in.", 401
+
     user_id = session["user"]["id"]
     title = request.form["title"]
     category_id = int(request.form["category"])
@@ -139,13 +145,16 @@ def api_post_challenge():
 
 # MARK: Edit Challenge
 def api_edit_challenge():
+    if "user" not in session:
+        return "Not logged in.", 401
+
     title = request.form["title"]
     category_id = int(request.form["category"])
-    description = request.form["description"]
+    body = request.form["body"]
     challenge_id = request.form["id"]
     accepts_submissions = int(request.form["accepts_submissions"]) == 1
 
-    if not title or not category_id or not description:
+    if not title or not category_id or not body:
         return "Some required field missing.", 400
 
     try:
@@ -160,11 +169,16 @@ def api_edit_challenge():
         # Check challenge already exists
         if not database.challenge_exists(challenge_id):
             return "Challenge does not exit.", 400
+        
+        # Check permission
+        challenge = database.get_challenge(session["user"]["id"], challenge_id)
+        if not has_permission(session["user"], "edit", "challenge", challenge.author_id):
+            return "Permission denied.", 401
             
         # Edit challenge post
         # TODO: Add edited date?
         database.edit_challenge(challenge_id, {
-            "body": description,
+            "body": body,
             "category_id": category_id,
             "title": title,
             "accepts_submissions": accepts_submissions
@@ -177,9 +191,12 @@ def api_edit_challenge():
     
 # MARK: Delete Challenge
 def api_delete_challenge():
+    if "user" not in session:
+        return "Not logged in.", 401
+    
     challenge_id = request.form["id"]
 
-    if not challenge_id:
+    if not challenge_id or "user":
         return "Some required field missing.", 400
 
     try:
@@ -189,9 +206,14 @@ def api_delete_challenge():
         # Check challenge already exists
         if not database.challenge_exists(challenge_id):
             return "Challenge does not exit.", 400
-            
-        # Edit challenge post
-        # TODO: Add edited date?
+        
+        challenge = database.get_challenge(session["user"]["id"], challenge_id)
+        
+        # Check permission
+        if not has_permission(session["user"], "delete", "challenge", challenge.author_id):
+            return "Permission denied.", 401
+
+        # Delete challenge
         database.remove_challenge(challenge_id)
         return redirect(f"/")
         
@@ -201,6 +223,9 @@ def api_delete_challenge():
 
 # MARK: Vote
 def api_vote(type, target_id):
+    if "user" not in session:
+        return "Not logged in.", 401
+
     user_id = session["user"]["id"]
     vote_action  = request.form["vote_action"]
     from_page = request.form["from_page"]

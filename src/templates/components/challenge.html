@@ -25,11 +25,11 @@
         <div class="row" style="align-items: center; gap: 5px; margin-bottom: 10px;">
             <div class="row" style="width: min-content">
                 {% if challenge.author_image_id is not none %}
-                <img width="20px" height="20px" class="profile-image" src="/a/{{ session.user.profile.image_asset.id }}"></img>
+                <img width="20px" height="20px" class="profile-image" src="/a/{{ challenge.author_image_id }}"></img>
                 {% else %}
                 <p class="profile-text">{{ challenge.author_name[0].upper() + challenge.author_name[1] }}</p>
                 {% endif %}
-                <a style="margin-left: 10px; font-size: 14px; max-width: 200px; overflow: hidden;" href="/user/{{ challenge.author_name }}">{{ challenge.author_name }}</a>
+                <a style="margin-left: 10px; font-size: 14px; max-width: 200px; overflow: hidden;" href="/u/{{ challenge.author_name }}">{{ challenge.author_name }}</a>
             </div>
             <p class="minimal">|</p>
             <p class="minimal">{{ challenge.created | epoch_to_date }}</p>

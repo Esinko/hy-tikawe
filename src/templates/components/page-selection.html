@@ -1,0 +1,8 @@
+<div class="row" style="width: 100%; justify-content: flex-end;">
+    {% if page != 0 %}
+        <a href="?page={{ page - 1 }}">Previous page</a>
+    {% endif %}
+    {% if challenges | length != 0 %}
+        <a href="?page={{ page + 1 }}">Next page</a>
+    {% endif %}
+</div>
