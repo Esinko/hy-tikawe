@@ -1,9 +1,11 @@
+from pathlib import Path
 from flask import Flask, Response, redirect, render_template, request, send_from_directory, session
 from api import api_delete_challenge, api_edit_challenge, api_login, api_post_challenge, api_profile_edit, api_register, api_vote
 from database.params import database_params
 from database.abstract import AbstractDatabase, AssetNotFoundException, ChallengeNotFoundException, DatabaseConnection, UserNotFoundException
 from datetime import datetime
 from util.filetype import filename_to_file_type
+from secrets import token_urlsafe
 
 # Initialize database
 database_connection = DatabaseConnection(*database_params).open()
@@ -11,7 +13,12 @@ database_connection.close()
 
 # Initialize Flask
 app = Flask(__name__)
-app.secret_key = "TOTALLY_SECRET_KEY"
+
+# Generate secret
+secret_key = Path("./.secret")
+if not secret_key.exists():
+    secret_key.write_text(token_urlsafe(32))
+app.secret_key = secret_key.read_text()
 
 # MARK: Filters
 @app.template_filter("epoch_to_date")
