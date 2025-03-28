@@ -14,7 +14,7 @@
                 class="stack"
                 style="width: 100%; padding-top: 12px; gap: 8px;"
             >
-                {% if username == session.user.username %}
+                {% if session.user and username == session.user.username %}
                 <div class="row" style="justify-content: flex-end;">
                     <a href="/me/edit">Edit Profile</a>
                 </div>

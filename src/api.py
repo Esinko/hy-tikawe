@@ -7,11 +7,11 @@ from util.has_permission import has_permission
 
 # MARK: Login & Register
 def api_login():
+    if "username" not in request.form.keys() or "password" not in request.form.keys():
+        return "Username or password missing.", 400
+
     username = request.form["username"]
     password = request.form["password"]
-    print(username, password)
-    if not username or not password:
-        return "Username or password missing.", 400
 
     # Attempt to get user
     try:
@@ -32,11 +32,12 @@ def api_login():
         return redirect("/login?fail")
     
 def api_register():
+    if "username" not in request.form.keys() or "password" not in request.form.keys() or "password-again" not in request.form.keys():
+        return "Username or password missing.", 400
+
     username = request.form["username"]
     password = request.form["password"]
     password_again = request.form["password-again"]
-    if not username or not password or not password_again:
-        return "Some required field missing.", 400
 
     # Make sure username is free
     try:
@@ -64,6 +65,9 @@ def api_register():
 def api_profile_edit():
     if "user" not in session:
         return "Not logged in.", 401
+    
+    if "description" not in request.form.keys() or "image" not in request.form.keys() or "banner" not in request.form.keys():
+        return "Incomplete data.", 400
 
     username = session["user"]["username"]
     user_id = session["user"]["id"]
@@ -71,31 +75,23 @@ def api_profile_edit():
     image_file = request.files["image"]
     banner_file = request.files["banner"]
 
-    # Check required fields
-    if not description:
-        return "Some required field missing.", 400
-
     try:
         database = AbstractDatabase(DatabaseConnection(*database_params).open())
         user = database.get_user(username)
 
         # Delete existing assets, if necessary
         if user.profile.banner_asset and banner_file:
-            print("> Remove banner")
             database.delete_asset(user.profile.banner_asset.id)
         if user.profile.image_asset and image_file:
-            print("> Remove image")
             database.delete_asset(user.profile.image_asset.id)
 
         # Create new assets, if necessary
         image_file_id = user.profile.image_asset.id if user.profile.image_asset else None
         banner_file_id = user.profile.banner_asset.id if user.profile.banner_asset else None
         if image_file:
-            print("> Create image")
             new_image = database.create_asset(image_file.filename, image_file.stream.read())
             image_file_id = new_image.id
         if banner_file:
-            print("> Create banner")
             new_banner = database.create_asset(banner_file.filename, banner_file.stream.read())
             banner_file_id = new_banner.id
 
@@ -105,7 +101,6 @@ def api_profile_edit():
             "banner_asset_id": banner_file_id,
             "description": description
         }
-        print("Sending:", new_profile)
         database.edit_profile(user_id, new_profile)
         return redirect("/me")
     except Exception as err:
@@ -116,15 +111,18 @@ def api_profile_edit():
 def api_post_challenge():
     if "user" not in session:
         return "Not logged in.", 401
+    
+    if "title" not in request.form.keys() or "category" not in request.form.keys() or "body" not in request.form.keys() or "accepts_submissions" not in request.form.keys():
+        return "Incomplete data.", 400
 
     user_id = session["user"]["id"]
     title = request.form["title"]
-    category_id = int(request.form["category"])
     body = request.form["body"]
-    accepts_submissions = int(request.form["accepts_submissions"]) == 1
-
-    if not title or not category_id or not body:
-        return "Some required field missing.", 400
+    try:
+        category_id = int(request.form["category"])
+        accepts_submissions = int(request.form["accepts_submissions"]) == 1
+    except:
+        return "Invalid data.", 400
 
     try:
         # Create database connection
@@ -147,15 +145,18 @@ def api_post_challenge():
 def api_edit_challenge():
     if "user" not in session:
         return "Not logged in.", 401
+    
+    if "title" not in request.form.keys() or "category" not in request.form.keys() or "id" not in request.form.keys() or "accepts_submissions" not in request.form.keys():
+        return "Incomplete data."
 
     title = request.form["title"]
-    category_id = int(request.form["category"])
     body = request.form["body"]
     challenge_id = request.form["id"]
-    accepts_submissions = int(request.form["accepts_submissions"]) == 1
-
-    if not title or not category_id or not body:
-        return "Some required field missing.", 400
+    try:
+        accepts_submissions = int(request.form["accepts_submissions"]) == 1
+        category_id = int(request.form["category"])
+    except:
+        return "Invalid data.", 400
 
     try:
         # Create database connection
@@ -194,10 +195,10 @@ def api_delete_challenge():
     if "user" not in session:
         return "Not logged in.", 401
     
+    if "id" not in request.form.keys():
+        return "Incomplete data."
+    
     challenge_id = request.form["id"]
-
-    if not challenge_id or "user":
-        return "Some required field missing.", 400
 
     try:
         # Create database connection
@@ -225,13 +226,13 @@ def api_delete_challenge():
 def api_vote(type, target_id):
     if "user" not in session:
         return "Not logged in.", 401
+    
+    if "vote_action" not in request.form.keys() or "from_page" not in request.form.keys():
+        return "Incomplete data.", 400
 
     user_id = session["user"]["id"]
     vote_action  = request.form["vote_action"]
     from_page = request.form["from_page"]
-
-    if user_id == None or vote_action == None or from_page == None:
-        return "Some required field missing.", 400
     
     try:
         # Create database connection
