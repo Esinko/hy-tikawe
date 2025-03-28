@@ -2,12 +2,16 @@
 > This repository contains University of Helsinki CS course work. Contents in Finnish.
 
 **Nykytilanne**
+
 Käyttäjä voi luoda tilin, kirjautua, luoda haasteita, muokata haasteita, poistaa haasteita ja äänestää haasteita.
-Lisäksi käyttäjä voi katsella toisten profiileja ja katsella sekä muokata omaa profiiliaa.
-Käyttäjä voi selata haasteita jostain tietystä tai kaikista kategoiroista ja etsiä haasteita hakusanalla.
+Lisäksi käyttäjä voi katsella toisten profiileja ja katsella sekä muokata omaa profiiliaan.
+Käyttäjä voi selata haasteita jostain tietystä tai kaikista kategorioista ja etsiä haasteita hakusanalla.
+Hakutulokset ja haastelistaukset on jaettu sivuihin.
+
+Projektirakenne on suht. locked-in ja komponentteja on jaettu eri tiedostoihin koodikannan kasvun seurauksena.
 
 ### Sovelluksen toiminnot
-- [X] Käyttäjä pystyy luomaan tunnukksen ja kirjautumaan sisään sovellukseen.
+- [X] Käyttäjä pystyy luomaan tunnuksen ja kirjautumaan sisään sovellukseen.
 - [X] Käyttäjä voi luoda ja muokata omaa profiiliaan (kuvaus, profiilikuva ja taustakuva)
 - Käyttäjä näkee äänestystilastoja profiilistaan
 - [X] Käyttäjä pystyy lisäämään, muokkaamaan ja poistamaan haasteita.
@@ -21,6 +25,8 @@ Käyttäjä voi selata haasteita jostain tietystä tai kaikista kategoiroista ja
 - Käyttäjä voi äänestää ratkaisuja ja kommentteja
 
 ### Sovelluksen käyttö
+Tietokanta alustuu automaattisesti.
+
 Suorita sovellus:
 ```bash
 $ python3 -m venv venv
