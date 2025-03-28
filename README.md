@@ -25,6 +25,8 @@ Projektirakenne on suht. locked-in ja komponentteja on jaettu eri tiedostoihin k
 - Käyttäjä voi äänestää ratkaisuja ja kommentteja
 
 ### Sovelluksen käyttö
+Projektin ainut riippuvuus on `flask`.
+
 Tietokanta alustuu automaattisesti.
 
 Suorita sovellus:
