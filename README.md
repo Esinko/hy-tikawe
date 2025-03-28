@@ -1,17 +1,24 @@
 # Code Golf Club - HY tikawe project
 > This repository contains University of Helsinki CS course work. Contents in Finnish.
 
+**Nykytilanne**
+Käyttäjä voi luoda tilin, kirjautua, luoda haasteita, muokata haasteita, poistaa haasteita ja äänestää haasteita.
+Lisäksi käyttäjä voi katsella toisten profiileja ja katsella sekä muokata omaa profiiliaa.
+Käyttäjä voi selata haasteita jostain tietystä tai kaikista kategoiroista ja etsiä haasteita hakusanalla.
+
 ### Sovelluksen toiminnot
-- Käyttäjä pystyy luomaan tunnukksen ja kirjautumaan sisään sovellukseen.
-- Käyttäjä voi luoda ja muokata omaa profiiliaan (lempinimi, kuvaus, profiilikuva ja taustakuva)
+- [X] Käyttäjä pystyy luomaan tunnukksen ja kirjautumaan sisään sovellukseen.
+- [X] Käyttäjä voi luoda ja muokata omaa profiiliaan (kuvaus, profiilikuva ja taustakuva)
 - Käyttäjä näkee äänestystilastoja profiilistaan
-- Käyttäjä pystyy lisäämään, muokkaamaan ja poistamaan haasteita.
+- [X] Käyttäjä pystyy lisäämään, muokkaamaan ja poistamaan haasteita.
 - Käyttäjä pystyy lisäämään liitteitä haasteisiin
-- Käyttäjä näkee sovellukseen itse ja toisten käyttäjien toimesta julkaistut haasteet, sekä niiden vastaukset, kommentit ja äänet.
+- [X] Käyttäjä näkee sovellukseen itse ja toisten käyttäjien toimesta julkaistut haasteet
 - Käyttäjä pystyy etsimään haasteita hakusanalla
 - Käyttäjä pystyy etsimään profiileja hakusanalla
-- Käyttäjä voi luoda uuden haasteen, antaa sille nimen, kuvaukset, liitteet ja kategorian.
-- Käyttäjä voi äänestää haasteita, niiden ratkaisuja ja kommentteja
+- [X] Käyttäjä voi äänestää haasteita
+- Käyttäjä voi luoda, muokata ja poistaa ratkaisuja
+- Käyttäjä voi luoda, muokata ja poistaa kommentteja
+- Käyttäjä voi äänestää ratkaisuja ja kommentteja
 
 ### Sovelluksen käyttö
 Suorita sovellus:
