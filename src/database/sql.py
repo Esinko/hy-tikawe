@@ -108,7 +108,8 @@ sql_table = {
             C.accepts_submissions,
             ChallengeCategories.id AS category_id, 
             ChallengeCategories.name AS category_name, 
-            Users.username, 
+            Users.username,
+            Users.id, 
             Profiles.image_asset_id AS profile_image,
             COALESCE(VoteCounts.vote_count, 0) AS vote_count,
             CASE WHEN UserVotes.voter_id IS NOT NULL THEN 1 ELSE 0 END AS has_voted

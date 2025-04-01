@@ -42,6 +42,9 @@ class DatabaseConnection:
         else:
             self.connection = connect(database_file)
 
+        # Enforce foreign keys
+        self.connection.execute("PRAGMA foreign_keys = ON")
+
         return self
     
     def close(self):
@@ -51,11 +54,15 @@ class DatabaseConnection:
     
     # Execute a command against the database
     def execute(self, query: str, parameters: Tuple[Any] | dict) -> Tuple[Connection, Cursor]:
-        if not self.connection:
-            raise Exception("Database not open!")
-        cursor = self.connection.cursor()
-        cursor.execute(query, parameters)
-        self.connection.commit()
+        try:
+            if not self.connection:
+                raise Exception("Database not open!")
+            cursor = self.connection.cursor()
+            cursor.execute(query, parameters)
+            self.connection.commit()
+        except Exception as err:
+            print("Database execution error:", err)
+            self.connection.rollback()
         return self.connection, cursor
     
     # Query the database
@@ -66,7 +73,8 @@ class DatabaseConnection:
         try:
             cursor.execute(query, parameters)
         except Exception as e:
-            print("ERR", e)
+            print("Database execution error:", e)
+            self.connection.rollback()
         results = cursor.fetchmany(limit)
         cursor.close()
         return results

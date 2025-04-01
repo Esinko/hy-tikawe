@@ -34,10 +34,11 @@ class AbstractDatabase:
     def get_user(self, username: str) -> User:
         # TODO: Use table joins to get all the user info at once?
         # Get user
-        [user_data] = self.connection.query(query=sql_table["get_user"], parameters=(username,), limit=1)
-        if not user_data:
+        result = self.connection.query(query=sql_table["get_user"], parameters=(username,), limit=1)
+        if len(result) == 0:
             raise UserNotFoundException(username)
         
+        user_data = result[0]
         user_profile = self.get_profile(user_data[0])
         
         return User(user_data[0],
