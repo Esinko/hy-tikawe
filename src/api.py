@@ -147,7 +147,7 @@ def api_edit_challenge():
         return "Not logged in.", 401
     
     if "title" not in request.form.keys() or "category" not in request.form.keys() or "id" not in request.form.keys() or "accepts_submissions" not in request.form.keys():
-        return "Incomplete data."
+        return "Incomplete data.", 400
 
     title = request.form["title"]
     body = request.form["body"]
@@ -196,7 +196,7 @@ def api_delete_challenge():
         return "Not logged in.", 401
     
     if "id" not in request.form.keys():
-        return "Incomplete data."
+        return "Incomplete data.", 400
     
     challenge_id = request.form["id"]
 
