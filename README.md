@@ -29,12 +29,26 @@ Projektin ainut riippuvuus on `flask`.
 
 Tietokanta alustuu automaattisesti.
 
-Suorita sovellus:
+Luo virtuaaliympäristö:
+
 ```bash
 $ python3 -m venv venv
 $ source venv/bin/activate
+```
+
+Asenna riippuvuudet:
+
+```bash
+$ pip install flask
+```
+
+Suorita sovellus:
+
+```
 $ flask --app ./src/app.py run --debug
 ```
+
+_Huom: debug tila käytössä, ota `--debug` pois tuotantoympäristössä_
 
 ### Suunnitelma
 Forum/kilpailu-sivusto, jossa käyttäjät voivat luoda ja osallistua code-golf haasteisiin.
