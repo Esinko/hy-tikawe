@@ -10,16 +10,18 @@
                 class="flex"
                 style="justify-content: flex-end; width: 100%; align-items: center;"
             >
-                {% if session.user and session.user.profile.image_asset %}
-                <img width="25px" height="25px" class="profile-image" href="/a/{{ session.user.profile.image_asset.id }}"></img>
-                {% endif %}
                 {% if session.user %}
                 <a href="/challenge-new">
                     New Challenge
                 </a>
-                <a href="/me">
-                    User: {{ session.user.username }}
-                </a>
+                <div class="user-box">
+                    {% if session.user and session.user.profile.image_asset %}
+                    <img width="25px" height="25px" class="profile-image" src="/a/{{ session.user.profile.image_asset.id }}"></img>
+                    {% endif %}
+                    <a href="/me">
+                        {{ session.user.username }}
+                    </a>
+                </div>
                 <a href="/logout">
                     Logout
                 </a>
