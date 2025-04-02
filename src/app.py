@@ -38,8 +38,9 @@ def home(category_id=None):
     database = AbstractDatabase(DatabaseConnection(*database_params).open())
     categories = database.get_categories()
     challenges = database.get_challenges(session["user"]["id"] if "user" in session else -1 , category_id, page)
+    category_name = categories[int(category_id) - 1].name if category_id else None
     database.connection.close()
-    return render_template("./home.html", categories=categories, challenges=challenges, category_id=category_id, page=page)
+    return render_template("./home.html", categories=categories, challenges=challenges, category_name=category_name, page=page)
 
 @app.route("/search")
 def search():

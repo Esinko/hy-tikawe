@@ -66,7 +66,7 @@ def api_profile_edit():
     if "user" not in session:
         return "Not logged in.", 401
     
-    if "description" not in request.form.keys() or "image" not in request.form.keys() or "banner" not in request.form.keys():
+    if "description" not in request.form.keys() or "image" not in request.files.keys() or "banner" not in request.files.keys():
         return "Incomplete data.", 400
 
     username = session["user"]["username"]
