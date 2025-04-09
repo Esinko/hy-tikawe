@@ -3,6 +3,8 @@
 
 **Nykytilanne**
 
+![preview](preview.png)
+
 Käyttäjä voi luoda tilin, kirjautua, luoda haasteita, muokata haasteita, poistaa haasteita ja äänestää haasteita.
 Käyttäjä voi kommentoida haasteita, sekä muokata ja poistaa omia kommenttejaan.
 Lisäksi käyttäjä voi katsella toisten profiileja ja katsella sekä muokata omaa profiiliaan.
