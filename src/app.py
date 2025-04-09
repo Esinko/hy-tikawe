@@ -37,7 +37,7 @@ def home(category_id=None):
     page = int(request.args.get("page") if "page" in request.args.keys() else "0")
     database = AbstractDatabase(DatabaseConnection(*database_params).open())
     categories = database.get_categories()
-    challenges = database.get_challenges(session["user"]["id"] if "user" in session else -1 , category_id, page)
+    challenges = database.get_challenges(session["user"]["id"] if "user" in session else -1, category_id, page)
     category_name = categories[int(category_id) - 1].name if category_id else None
     database.connection.close()
     return render_template("./home.html", categories=categories, challenges=challenges, category_name=category_name, page=page)
@@ -50,7 +50,7 @@ def search():
         return "No search to perform.", 400
     database = AbstractDatabase(DatabaseConnection(*database_params).open())
     categories = database.get_categories()
-    challenges = database.search_challenge(search_string, session["user"]["id"] if "user" in session else -1 , None, page)
+    challenges = database.search_challenge(search_string, session["user"]["id"] if "user" in session else -1, None, page)
     return render_template("./search-results.html", categories=categories, challenges=challenges, search_string=search_string, page=page)
 
 @app.route("/login")
@@ -118,7 +118,7 @@ def profile(username):
         database.connection.close()
     except UserNotFoundException:
         return redirect("/")
-    return render_template("./profile.html", profile=user.__dict__()["profile"], username=username, categories=categories)
+    return render_template("./profile.html", profile=user.profile.__dict__(), username=username, categories=categories)
 
 @app.get("/a/<id>")
 def asset(id):

@@ -1,6 +1,6 @@
 Developer's Notes to Self:
 - Sessions need to timeout
-- Make sure database connections are always closed
+- Make database lib require less boilerplate
 - Require new password logic (forced reset too)
 - Look into using named params to optimize large queries
 - Feature posts and comments from user in profile
