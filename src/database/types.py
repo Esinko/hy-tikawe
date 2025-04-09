@@ -117,6 +117,7 @@ class Category:
 
 class ChallengeHusk:
     id: int
+    type = "challenge"
     created: int
     title: str
     body: str
@@ -185,7 +186,7 @@ class CommentHusk:
     votes: int
     has_my_vote: bool
 
-    def __init__(self, _, id, created, body, author_id, author_name, author_image_id, votes, has_my_vote, challenge_id):
+    def __init__(self, id, created, body, author_id, author_name, author_image_id, votes, has_my_vote, challenge_id):
         self.id = id
         self.created = created
         self.body = body
@@ -208,7 +209,7 @@ class SubmissionHusk:
     votes: int
     has_my_vote: bool
 
-    def __init__(self, _, id, created, body, author_id, author_name, author_image_id, votes, has_my_vote, challenge_id, title, asset_id, asset_name):
+    def __init__(self, id, created, body, author_id, author_name, author_image_id, votes, has_my_vote, challenge_id, title, asset_id, asset_name):
         self.id = id
         self.created = created
         self.body = body

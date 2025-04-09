@@ -4,7 +4,9 @@
         <input name="from_page" type="hidden" value="{{ request.path }}">
         <button
             type="submit"
-            disabled="{{ 'true' if no_edit_buttons else 'false'}}"
+            {% if no_edit_buttons %}
+                disabled="true"
+            {% endif %}
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -12,7 +14,11 @@
                 height="24"
                 viewBox="0 0 24 24"
                 fill="none"
-                style="stroke: {{ 'var(--very-yellow)' if comment.has_my_vote else 'black' }}"
+                {% if comment.has_my_vote %}
+                    style="stroke: var(--very-yellow); transform: rotate(180deg);"
+                {% else %}
+                    style="stroke: black"
+                {% endif %}
                 stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -34,6 +40,8 @@
             </div>
             <p class="minimal">|</p>
             <p class="minimal">{{ comment.created | epoch_to_date }}</p>
+            <p class="minimal">|</p>
+            <a href="{{ '/chall/' + comment.challenge_id|string + '/#com-' + comment.id|string }}" >Permalink</a>
         </div>
         <pre class="text minimal">{{ comment.body }}</pre>
 

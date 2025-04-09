@@ -34,7 +34,7 @@ app.secret_key = secret_key.read_text()
 # MARK: Filters
 @app.template_filter("epoch_to_date")
 def epoch_to_date_filter(epoch):
-    return datetime.fromtimestamp(epoch).strftime("%H:%M %d.%m.%Y")
+    return datetime.fromtimestamp(epoch).strftime("%d.%m.%Y @ %H:%M ")
 
 # Public dir route
 @app.route("/public/<path>")
@@ -142,10 +142,11 @@ def profile(username):
     categories = database.get_categories()
     try:
         user = database.get_user(username)
+        content = database.get_user_content(user.id)
         database.connection.close()
     except UserNotFoundException:
         return redirect("/")
-    return render_template("./profile.html", profile=user.profile.__dict__(), username=username, categories=categories)
+    return render_template("./profile.html", profile=user.profile.__dict__(), username=username, categories=categories, content=content)
 
 @app.get("/a/<id>")
 def asset(id):

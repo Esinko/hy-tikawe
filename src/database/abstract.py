@@ -147,8 +147,8 @@ class AbstractDatabase:
         results = self.connection.query(query=sql_table["get_comments_and_submissions"], parameters=(current_user_id, challenge_id, current_user_id, challenge_id), limit=100)
         
         all_replies = []
-        for result in results:
-            if result[0] == "comment":
+        for entry_type, *result in results:
+            if entry_type == "comment":
                 all_replies.append(CommentHusk(*result[0:-3]))
             else:
                 all_replies.append(SubmissionHusk(*result))
@@ -251,3 +251,33 @@ class AbstractDatabase:
     def remove_submission(self, submission_id: int):
         _, cursor = self.connection.execute(query=sql_table["remove_submission"], parameters=(submission_id,))
         cursor.close()
+
+    # MARK: Get all user content
+
+    def _transform_to_reply(self, result):
+        return (
+            result[1],      # id
+            result[2],      # created
+            result[4],      # body
+            result[9],      # author_id
+            result[8],      # username
+            result[10],     # image_asset_id
+            result[11],     # vote_count
+            result[12],     # has_my_vote
+            result[0],      # challenge_id (target_challenge_id)
+            result[3],      # title
+            None,           # solution_asset_id
+            None            # solution_filename
+        )
+
+    def get_user_content(self, user_id: int) -> List[ChallengeHusk | CommentHusk | SubmissionHusk]:
+        results = self.connection.query(query=sql_table["get_user_content"], parameters=(user_id, user_id, user_id, user_id, user_id, user_id))
+        content = []
+        for entry_type, *result in results:
+            if entry_type == "challenge":
+                content.append(ChallengeHusk(*result[1:]))
+            elif entry_type == "comment":
+                content.append(CommentHusk(*self._transform_to_reply(result)[:9]))
+            else:
+                content.append(SubmissionHusk(*self._transform_to_reply(result)))
+        return content

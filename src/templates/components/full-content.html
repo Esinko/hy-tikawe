@@ -1,0 +1,23 @@
+{% if content|length == 0 %}
+    <p style="text-align: center;">No challenges, comments or submissions yet.</p>
+{% endif %}
+
+<div class="row" style="padding-bottom: 18px;">
+    <div class="stack comment-tree" style="padding-right: 50px; padding-left: 50px; gap: 20px;">
+        {% for entry in content %}
+            <div class="stack">
+                {% if entry.type == "challenge" %}
+                    <p class="content-label">Posted a challenge</p>
+                    {% with challenge=entry, spacer=0 %}
+                        {% include "./components/challenge.html" %}
+                    {% endwith %}
+                {% elif entry.type == "comment" %}
+                    <p class="content-label">Commented<a></a></p>
+                    {% with comment=entry %}
+                        {% include "./components/comment.html" %}
+                    {% endwith %}
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</div>

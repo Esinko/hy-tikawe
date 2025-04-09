@@ -6,19 +6,47 @@ sql_table = {
 
     "create_user": "INSERT INTO Users (username, password_hash, require_new_password) VALUES (?, ?, False)",
 
-    "get_user": "SELECT id, username, password_hash, require_new_password, is_admin FROM Users WHERE username = ?",
+    "get_user": """
+        SELECT
+            id,
+            username,
+            password_hash,
+            require_new_password,
+            is_admin 
+        FROM Users WHERE username = ?
+    """,
 
     "edit_user": "UPDATE Users SET name = ?, password_hash = ?, require_new_password = ? WHERE name = ?",
 
     # MARK: Profile
 
-    "create_profile": "INSERT INTO Profiles (user_id, description, image_asset_id, banner_asset_id) VALUES (?, '', NULL, NULL)",
+    "create_profile": """
+        INSERT INTO Profiles (
+            user_id,
+            description,
+            image_asset_id,
+            banner_asset_id
+        ) VALUES (?, '', NULL, NULL)""",
 
-    "get_profile": "SELECT id, description, image_asset_id, banner_asset_id FROM Profiles WHERE user_id = ?",
+    "get_profile": """
+        SELECT
+            id,
+            description,
+            image_asset_id,
+            banner_asset_id
+        FROM Profiles
+        WHERE user_id = ?
+    """,
 
     "profile_exists": "SELECT EXISTS (SELECT user_id FROM Profiles WHERE user_id = ?)",
 
-    "edit_profile": "UPDATE Profiles SET description = ?, image_asset_id = ?, banner_asset_id = ? WHERE user_id = ?",
+    "edit_profile": """
+        UPDATE Profiles SET
+            description = ?,
+            image_asset_id = ?,
+            banner_asset_id = ?
+        WHERE user_id = ?
+    """,
 
     # MARK: Asset
 
@@ -101,11 +129,27 @@ sql_table = {
         LIMIT 1
     """,
 
-    "create_challenge": "INSERT INTO Challenges (created, title, body, category_id, author_id, accepts_submissions) VALUES (?, ?, ?, ?, ?, ?)",
+    "create_challenge": """
+        INSERT INTO Challenges (
+            created,
+            title,
+            body,
+            category_id,
+            author_id,
+            accepts_submissions
+        ) VALUES (?, ?, ?, ?, ?, ?)
+    """,
 
     "challenge_exists": "SELECT EXISTS (SELECT id FROM Challenges WHERE id = ?)",
 
-    "edit_challenge": "UPDATE Challenges SET title = ?, body = ?, category_id = ?, accepts_submissions = ? WHERE id = ?",
+    "edit_challenge": """
+        UPDATE Challenges SET
+            title = ?,
+            body = ?,
+            category_id = ?,
+            accepts_submissions = ?
+        WHERE id = ?
+    """,
 
     "remove_challenge": "DELETE FROM Challenges WHERE id = ?",
 
@@ -247,8 +291,96 @@ sql_table = {
 
     # MARK: Submission
 
-    "create_submission": "INSERT INTO Submissions (created, challenge_id, title, body, solution_asset_id, author_id) VALUES (?, ?, ?, ?, ?, ?)",
+    "create_submission": """
+        INSERT INTO Submissions (
+            created,
+            challenge_id,
+            title,
+            body,
+            solution_asset_id,
+            author_id
+        ) VALUES (?, ?, ?, ?, ?, ?)
+    """,
 
     "remove_submission": "DELETE FROM Submissions WHERE id = ?",
-}
 
+    # MARK: Get all user content
+    
+    "get_user_content": """
+        SELECT
+            'challenge' AS type,
+            Challenges.id AS target_challenge_id,
+            Challenges.id AS id,
+            Challenges.created,
+            Challenges.title,
+            Challenges.body,
+            Challenges.accepts_submissions,
+            Challenges.category_id,
+            ChallengeCategories.name AS category_name,
+            Users.username AS author_name,
+            Users.id AS author_id,
+            Profiles.image_asset_id AS author_image_id,
+            (SELECT COUNT(*) FROM Votes WHERE challenge_id = Challenges.id) AS votes,
+            EXISTS (
+                SELECT 1 FROM Votes
+                WHERE challenge_id = Challenges.id AND voter_id = ?
+            ) AS has_my_vote
+        FROM Challenges
+        JOIN ChallengeCategories ON Challenges.category_id = ChallengeCategories.id
+        JOIN Users ON Challenges.author_id = Users.id
+        LEFT JOIN Profiles ON Users.id = Profiles.user_id
+        WHERE Challenges.author_id = ?
+
+        UNION ALL
+
+        SELECT
+            'comment' AS type,
+            Comments.challenge_id AS target_challenge_id,
+            Comments.id,
+            Comments.created,
+            NULL AS title,
+            Comments.body,
+            NULL AS accepts_submissions,
+            NULL AS category_id,
+            NULL AS category_name,
+            Users.username AS author_name,
+            Users.id AS author_id,
+            Profiles.image_asset_id AS author_image_id,
+            (SELECT COUNT(*) FROM Votes WHERE comment_id = Comments.id) AS votes,
+            EXISTS (
+                SELECT 1 FROM Votes
+                WHERE comment_id = Comments.id AND voter_id = ?
+            ) AS has_my_vote
+        FROM Comments
+        JOIN Users ON Comments.author_id = Users.id
+        LEFT JOIN Profiles ON Users.id = Profiles.user_id
+        WHERE Comments.author_id = ?
+
+        UNION ALL
+
+        SELECT
+            'submission' AS type,
+            Submissions.challenge_id AS target_challenge_id,
+            Submissions.id,
+            Submissions.created,
+            Submissions.title,
+            Submissions.body,
+            NULL AS accepts_submissions,
+            NULL AS category_id,
+            NULL AS category_name,
+            Users.username AS author_name,
+            Users.id AS author_id,
+            Profiles.image_asset_id AS author_image_id,
+            (SELECT COUNT(*) FROM Votes WHERE submission_id = Submissions.id) AS votes,
+            EXISTS (
+                SELECT 1 FROM Votes
+                WHERE submission_id = Submissions.id AND voter_id = ?
+            ) AS has_my_vote
+        FROM Submissions
+        JOIN Users ON Submissions.author_id = Users.id
+        LEFT JOIN Profiles ON Users.id = Profiles.user_id
+        WHERE Submissions.author_id = ?
+
+        ORDER BY created DESC
+    """
+}

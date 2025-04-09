@@ -7,3 +7,4 @@ Developer's Notes to Self:
 - User settings (mainly password change)
 - Edited timestamps on all user created content
 - Add challenge locks (admin_only and regular user enforced)
+- Sort by most votes
