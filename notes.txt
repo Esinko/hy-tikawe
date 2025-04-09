@@ -3,8 +3,8 @@ Developer's Notes to Self:
 - Make database lib require less boilerplate
 - Require new password logic (forced reset too)
 - Look into using named params to optimize large queries
-- Feature posts and comments from user in profile
 - User settings (mainly password change)
 - Edited timestamps on all user created content
 - Add challenge locks (admin_only and regular user enforced)
 - Sort by most votes
+- Total number of posts to profile stats

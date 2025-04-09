@@ -16,7 +16,7 @@ Projektirakenne on suht. locked-in ja komponentteja on jaettu eri tiedostoihin k
 ### Sovelluksen toiminnot
 - [X] Käyttäjä pystyy luomaan tunnuksen ja kirjautumaan sisään sovellukseen.
 - [X] Käyttäjä voi luoda ja muokata omaa profiiliaan (kuvaus, profiilikuva ja taustakuva)
-- Käyttäjä näkee äänestystilastoja profiilistaan
+- [X] Käyttäjä näkee äänestystilastoja profiilistaan
 - [X] Käyttäjä pystyy lisäämään, muokkaamaan ja poistamaan haasteita.
 - Käyttäjä pystyy lisäämään liitteitä haasteisiin
 - [X] Käyttäjä näkee sovellukseen itse ja toisten käyttäjien toimesta julkaistut haasteet

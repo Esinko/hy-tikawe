@@ -92,3 +92,20 @@ WHERE submission_id IS NOT NULL;
 -- Count votes per comment
 CREATE INDEX votes_comment_id ON Votes(comment_id)
 WHERE comment_id IS NOT NULL;
+
+-- Count votes per challenge from specific voter
+CREATE INDEX votes_challenge_voter ON Votes(challenge_id, voter_id)
+WHERE challenge_id IS NOT NULL;
+
+-- Count votes per comment from specific voter
+CREATE INDEX votes_comment_voter ON Votes(comment_id, voter_id)
+WHERE comment_id IS NOT NULL;
+
+-- Count votes per submission from specific voter
+CREATE INDEX votes_submission_voter ON Votes(submission_id, voter_id)
+WHERE submission_id IS NOT NULL;
+
+-- Optimize matching thing id to author id (important for counting total votes for a user)
+CREATE INDEX challenge_id_to_author_id ON Challenges(id, author_id);
+CREATE INDEX comment_id_to_author_id ON Comments(id, author_id);
+CREATE INDEX submission_id_to_author_id ON Submissions(id, author_id);

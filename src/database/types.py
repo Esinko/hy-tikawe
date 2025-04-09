@@ -218,3 +218,12 @@ class SubmissionHusk:
         self.author_image_id = author_image_id
         self.votes = votes
         self.has_my_vote = has_my_vote == 1
+
+class StatsDict(TypedDict):
+    challenge: int
+    comment: int
+    submission: int
+
+class StatsException(Exception):
+    def __init__(self, message):
+        super().__init__(message)

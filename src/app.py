@@ -134,7 +134,7 @@ def profile_edit():
     categories = database.get_categories()
     user = database.get_user(session["user"]["username"])
     database.connection.close()
-    return render_template("./forms/profile-edit.html", profile=user.__dict__()["profile"], username=user.username, categories=categories)
+    return render_template("./forms/profile-edit.html", profile=user.profile.__dict__(), username=user.username, categories=categories)
 
 @app.get("/u/<username>")
 def profile(username):
@@ -142,11 +142,13 @@ def profile(username):
     categories = database.get_categories()
     try:
         user = database.get_user(username)
-        content = database.get_user_content(user.id)
+        content = database.get_user_content(session["user"]["id"] if "user" in session else -1, user.id)
+        received_votes = database.get_received_votes(user.id)
+        given_votes = database.get_given_votes(user.id)
         database.connection.close()
     except UserNotFoundException:
         return redirect("/")
-    return render_template("./profile.html", profile=user.profile.__dict__(), username=username, categories=categories, content=content)
+    return render_template("./profile.html", profile=user.profile.__dict__(), username=username, categories=categories, content=content, received_votes=received_votes, given_votes=given_votes)
 
 @app.get("/a/<id>")
 def asset(id):

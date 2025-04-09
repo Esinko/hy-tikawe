@@ -33,9 +33,40 @@
                     <h2 style="margin-left: 20px;">{{ username }}</h2>
                 </div>
                 <pre class="profile-description">{{ profile.description if profile.description != "" else "No description."}}</pre>
+
+                <h3 class="minimal align-center profile-intermediary">Received Votes</h3>
+                <div class="row" style="justify-content: center; gap: 15px;">
+                    <div class="stat">
+                        <h4>For Challenges</h4>
+                        <p>{{ received_votes.challenge }}</p>
+                    </div>
+                    <div class="stat">
+                        <h4>For Comments</h4>
+                        <p>{{ received_votes.comment }}</p>
+                    </div>
+                    <div class="stat">
+                        <h4>For Submissions</h4>
+                        <p>{{ received_votes.submission }}</p>
+                    </div>
+                </div>
+
+                <h3 class="minimal align-center profile-intermediary">Given Votes</h3>
+                <div class="row" style="justify-content: center; gap: 15px;">
+                    <div class="stat">
+                        <h4>To Challenges</h4>
+                        <p>{{ given_votes.challenge }}</p>
+                    </div>
+                    <div class="stat">
+                        <h4>To Comments</h4>
+                        <p>{{ given_votes.comment }}</p>
+                    </div>
+                    <div class="stat">
+                        <h4>To Submissions</h4>
+                        <p>{{ given_votes.submission }}</p>
+                    </div>
+                </div>
                 
-                <span class="divider" style="margin-top: 30px;"></span>
-                <h3 style="text-align: center;">Content by {{ username }}</h3>
+                <h3 class="minimal align-center profile-intermediary">Content by {{ username }}</h3>
                 {% include "./components/full-content.html" %}
             </div>
         </div>

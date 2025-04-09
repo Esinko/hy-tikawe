@@ -101,6 +101,9 @@ def api_profile_edit():
             "description": description
         }
         database.edit_profile(user_id, new_profile)
+
+        # Refresh session
+        session["user"] = database.get_user(username).__dict__() 
         return redirect("/me")
     except Exception as err:
         print("Profile Edit Error:", err)

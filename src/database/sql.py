@@ -206,6 +206,36 @@ sql_table = {
 
     "remove_vote_from_submission": "DELETE FROM Votes WHERE submission_id = ? AND voter_id = ?",
 
+    # MARK: Vote stats
+
+    "get_received_votes": """
+        SELECT
+            (SELECT COUNT(*) FROM Votes
+            JOIN Challenges ON Votes.challenge_id = Challenges.id
+            WHERE Challenges.author_id = ?) AS challenge_votes,
+
+            (SELECT COUNT(*) FROM Votes
+            JOIN Comments ON Votes.comment_id = Comments.id
+            WHERE Comments.author_id = ?) AS comment_votes,
+
+            (SELECT COUNT(*) FROM Votes
+            JOIN Submissions ON Votes.submission_id = Submissions.id
+            WHERE Submissions.author_id = ?) AS submission_votes;
+    """,
+
+    "get_given_votes": """
+        SELECT
+            (
+            SELECT COUNT(*) FROM Votes
+            WHERE voter_id = ? AND challenge_id IS NOT NULL) AS challenge_votes,
+
+            (SELECT COUNT(*) FROM Votes
+            WHERE voter_id = ? AND comment_id IS NOT NULL) AS comment_votes,
+
+            (SELECT COUNT(*) FROM Votes
+            WHERE voter_id = ? AND submission_id IS NOT NULL) AS submission_votes;
+    """,
+
     # MARK: Comment
 
     "create_comment": "INSERT INTO Comments (created, challenge_id, body, author_id) VALUES (?, ?, ?, ?)",
@@ -324,7 +354,7 @@ sql_table = {
             EXISTS (
                 SELECT 1 FROM Votes
                 WHERE challenge_id = Challenges.id AND voter_id = ?
-            ) AS has_my_vote
+            ) AS has_voted
         FROM Challenges
         JOIN ChallengeCategories ON Challenges.category_id = ChallengeCategories.id
         JOIN Users ON Challenges.author_id = Users.id
@@ -350,7 +380,7 @@ sql_table = {
             EXISTS (
                 SELECT 1 FROM Votes
                 WHERE comment_id = Comments.id AND voter_id = ?
-            ) AS has_my_vote
+            ) AS has_votes
         FROM Comments
         JOIN Users ON Comments.author_id = Users.id
         LEFT JOIN Profiles ON Users.id = Profiles.user_id
@@ -375,7 +405,7 @@ sql_table = {
             EXISTS (
                 SELECT 1 FROM Votes
                 WHERE submission_id = Submissions.id AND voter_id = ?
-            ) AS has_my_vote
+            ) AS has_voted
         FROM Submissions
         JOIN Users ON Submissions.author_id = Users.id
         LEFT JOIN Profiles ON Users.id = Profiles.user_id

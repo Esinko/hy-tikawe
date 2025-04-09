@@ -22,7 +22,9 @@ from database.types import (
     CommentEditable,
     CommentNotFoundException,
     CommentHusk,
-    SubmissionHusk
+    SubmissionHusk,
+    StatsDict,
+    StatsException
 )
 
 class AbstractDatabase:
@@ -270,8 +272,8 @@ class AbstractDatabase:
             None            # solution_filename
         )
 
-    def get_user_content(self, user_id: int) -> List[ChallengeHusk | CommentHusk | SubmissionHusk]:
-        results = self.connection.query(query=sql_table["get_user_content"], parameters=(user_id, user_id, user_id, user_id, user_id, user_id))
+    def get_user_content(self, as_user_id: int, for_user_id: int) -> List[ChallengeHusk | CommentHusk | SubmissionHusk]:
+        results = self.connection.query(query=sql_table["get_user_content"], parameters=(as_user_id, for_user_id, as_user_id, for_user_id, as_user_id, for_user_id))
         content = []
         for entry_type, *result in results:
             if entry_type == "challenge":
@@ -281,3 +283,26 @@ class AbstractDatabase:
             else:
                 content.append(SubmissionHusk(*self._transform_to_reply(result)))
         return content
+
+    # MARK: Vote statistics
+
+    def get_received_votes(self, user_id: int) -> StatsDict:
+        [result] = self.connection.query(query=sql_table["get_received_votes"], parameters=(user_id, user_id, user_id))
+        if not result:
+            raise StatsException("Unexpected stats (recv) query error.")
+        return {
+            "challenge": result[0],
+            "comment": result[1],
+            "submission": result[2]
+        }
+    
+    def get_given_votes(self, user_id: int) -> StatsDict:
+        [result] = self.connection.query(query=sql_table["get_given_votes"], parameters=(user_id, user_id, user_id))
+        if not result:
+            raise StatsException("Unexpected stats (give) query error.")
+        return {
+            "challenge": result[0],
+            "comment": result[1],
+            "submission": result[2]
+        }
+    
