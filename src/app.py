@@ -1,6 +1,17 @@
 from pathlib import Path
 from flask import Flask, Response, redirect, render_template, request, send_from_directory, session
-from api import api_delete_challenge, api_edit_challenge, api_login, api_post_challenge, api_profile_edit, api_register, api_vote
+from api import (
+    api_delete_challenge,
+    api_edit_challenge,
+    api_login,
+    api_post_challenge,
+    api_profile_edit,
+    api_register,
+    api_vote,
+    api_delete_comment,
+    api_edit_comment,
+    api_post_comment
+)
 from database.params import database_params
 from database.abstract import AbstractDatabase, AssetNotFoundException, ChallengeNotFoundException, DatabaseConnection, UserNotFoundException
 from datetime import datetime
@@ -71,30 +82,46 @@ def new_post():
     database = AbstractDatabase(DatabaseConnection(*database_params).open())
     categories = database.get_categories()
     database.connection.close()
-    return render_template("./challenge-new.html", categories=categories)
+    return render_template("./forms/challenge-new.html", categories=categories)
 
-@app.route("/chall/<challenge_id>", defaults={"subpath": ""})
-@app.route("/chall/<challenge_id>/<path:subpath>")
-def challenge(challenge_id, subpath):
+@app.route("/chall/<challenge_id>", defaults={"subpath": "", "subaction": "", "reply_id": ""})
+@app.route("/chall/<challenge_id>/", defaults={"subpath": "", "subaction": "", "reply_id": ""})
+@app.route("/chall/<string:challenge_id>/<path:subpath>/", defaults={"subaction": "", "reply_id": ""})
+@app.route("/chall/<string:challenge_id>/<path:subpath>/<string:reply_id>/<path:subaction>")
+def challenge(challenge_id, subpath, reply_id, subaction):
     database = AbstractDatabase(DatabaseConnection(*database_params).open())
     categories = database.get_categories()
     try:
-        challenge = database.get_challenge(session["user"]["id"] if "user" in session else -1, challenge_id)
+        # Get data
+        user_id = session["user"]["id"] if "user" in session else -1
+        challenge = database.get_challenge(user_id, challenge_id)
+        comments_and_submissions, comment_to_edit = ([], None)
+        if not reply_id:
+            comments_and_submissions = database.get_challenge_replies(user_id, challenge_id)
+        else:
+            comment_to_edit = database.get_comment(user_id, reply_id)
+        
         database.connection.close()
         
         # Select template based on subpath
         template = "./challenge.html"
         if subpath == "edit":
-            template = "./challenge-edit.html"
+            template = "./forms/challenge-edit.html"
         elif subpath == "delete":
-            template = "./challenge-delete.html"
-        return render_template(template, categories=categories, challenge=challenge)
+            template = "./forms/challenge-delete.html"
+        elif subpath == "com" and subaction == "edit":
+            template = "./forms/comment-edit.html"
+        elif subpath == "com" and subaction == "delete":
+            template = "./forms/comment-delete.html"
+        elif subpath == "com":
+            template = "./forms/comment-new.html"
+        return render_template(template, categories=categories, challenge=challenge, replies=comments_and_submissions, comment_to_edit=comment_to_edit)
     except ChallengeNotFoundException:
         database.connection.close()
         return redirect("/")
     except Exception as err:
         database.connection.close()
-        print("ERR", err)
+        print("Challenge Page Error:", err)
         return "Internal Server Error.", 500
 
 @app.get("/me")
@@ -107,7 +134,7 @@ def profile_edit():
     categories = database.get_categories()
     user = database.get_user(session["user"]["username"])
     database.connection.close()
-    return render_template("./profile-edit.html", profile=user.__dict__()["profile"], username=user.username, categories=categories)
+    return render_template("./forms/profile-edit.html", profile=user.__dict__()["profile"], username=user.username, categories=categories)
 
 @app.get("/u/<username>")
 def profile(username):
@@ -141,3 +168,6 @@ app.add_url_rule("/api/post/challenge", view_func=api_post_challenge, methods=["
 app.add_url_rule("/api/edit/challenge", view_func=api_edit_challenge, methods=["POST"])
 app.add_url_rule("/api/delete/challenge", view_func=api_delete_challenge, methods=["POST"])
 app.add_url_rule("/api/vote/<type>/<target_id>", view_func=api_vote, methods=["POST"])
+app.add_url_rule("/api/post/comment", view_func=api_post_comment, methods=["POST"])
+app.add_url_rule("/api/edit/comment", view_func=api_edit_comment, methods=["POST"])
+app.add_url_rule("/api/delete/comment", view_func=api_delete_comment, methods=["POST"])

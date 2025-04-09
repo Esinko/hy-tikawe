@@ -10,6 +10,7 @@ class Asset:
         self.id = id
         self.filename = filename
         self.value = value
+
     def __dict__(self):
         return {
             "id": self.id,
@@ -26,6 +27,7 @@ class Profile:
     description: str
     image_asset: Asset | None
     banner_asset: Asset | None
+
     def __init__(self, id, user_id, description, image_asset, banner_asset):
         self.id = id
         self.user_id = user_id
@@ -62,6 +64,7 @@ class User:
     require_new_password: bool
     profile: Profile
     is_admin: bool
+
     def __init__(self, id, username, password_hash, require_new_password, is_admin, profile):
         self.id = id
         self.username = username
@@ -100,11 +103,19 @@ class ProfileNotFoundException(Exception):
 class Category:
     id: int
     name: str
+
     def __init__(self, id, name):
         self.id = id
         self.name = name
 
-class Challenge:
+# FIXME: The types for challenges, comments and submissions are incomplete,
+#        when it comes to giving the developer as much information to work with,
+#        in favor of performance. We could build full User, Profile, Asset etc.
+#        classes with little effort, but I think the choice I made here is the right one.
+#        However, it may not be final.
+#        Classes effected by this are named "Husks"
+
+class ChallengeHusk:
     id: int
     created: int
     title: str
@@ -117,6 +128,7 @@ class Challenge:
     author_image_id: int
     votes: int
     has_my_vote: bool
+
     def __init__(self, id, created, title, body, accepts_submissions, category_id, category_name, author_name, author_id, author_image_id, votes, has_my_vote):
         self.id = id
         self.created = created
@@ -152,4 +164,56 @@ class ChallengeEditable(TypedDict):
     
 class ChallengeNotFoundException(Exception):
     def __init__(self, challenge_id):
-        super().__init__(f"Challenge'{challenge_id}' not found.")
+        super().__init__(f"Challenge '{challenge_id}' not found.")
+
+class CommentNotFoundException(Exception):
+    def __init__(self, comment_id):
+        super().__init__(f"Comment '{comment_id}' not found.")
+
+class CommentEditable(TypedDict):
+    body: str
+
+class CommentHusk:
+    id: int
+    type = "comment"
+    created: int
+    body: str
+    author_id: int
+    author_image_id: int
+    author_name: str
+    challenge_id: int
+    votes: int
+    has_my_vote: bool
+
+    def __init__(self, _, id, created, body, author_id, author_name, author_image_id, votes, has_my_vote, challenge_id):
+        self.id = id
+        self.created = created
+        self.body = body
+        self.author_id = author_id
+        self.author_name = author_name
+        self.author_image_id = author_image_id
+        self.votes = votes
+        self.has_my_vote = has_my_vote == 1
+        self.challenge_id = challenge_id
+
+class SubmissionHusk:
+    id: int
+    type = "submission"
+    created: int
+    body: str
+    author_id: int
+    author_image_id: int
+    author_name: str
+    challenge_id: int
+    votes: int
+    has_my_vote: bool
+
+    def __init__(self, _, id, created, body, author_id, author_name, author_image_id, votes, has_my_vote, challenge_id, title, asset_id, asset_name):
+        self.id = id
+        self.created = created
+        self.body = body
+        self.author_id = author_id
+        self.author_name = author_name
+        self.author_image_id = author_image_id
+        self.votes = votes
+        self.has_my_vote = has_my_vote == 1

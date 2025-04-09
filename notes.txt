@@ -5,3 +5,5 @@ Developer's Notes to Self:
 - Look into using named params to optimize large queries
 - Feature posts and comments from user in profile
 - User settings (mainly password change)
+- Edited timestamps on all user created content
+- Add challenge locks (admin_only and regular user enforced)

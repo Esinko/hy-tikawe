@@ -1,0 +1,19 @@
+<div class="row" style="padding-bottom: 18px;">
+    <div class="stack comment-tree" style="padding-right: 50px; gap: 12px;">
+        {% for comment in replies %}
+           <div class="row" style="padding-left: 9px;">
+                <div class="stack comment-trunk" style="width: 20px;">
+                    <span class="vertical-line"></span>
+                </div>
+                <div class="stack comment-branch" style="justify-content: center; width: 40px;">
+                    <span class="horizontal-line"></span>
+                </div>
+                {% include "./components/comment.html" %}
+           </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% if replies|length == 0 %}
+    <p style="text-align: center;">No comments or submissions yet.</p>
+{% endif %}

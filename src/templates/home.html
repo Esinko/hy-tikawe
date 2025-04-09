@@ -16,7 +16,9 @@
             </div>
             <div class="stack">
                 {% for challenge in challenges %}
-                    {% include "./components/challenge.html" %}
+                    {% with spacer=15 %}
+                        {% include "./components/challenge.html" %}
+                    {% endwith %}
                 {% endfor %}
                 {% if challenges | length == 0 %}
                     <img src="/public/emptiness.gif">

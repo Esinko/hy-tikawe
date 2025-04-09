@@ -11,15 +11,26 @@
         {% include "./components/header.html" %}
         <div class="content">
             <div class="stack">
-                {% if session.user and session.user.id == challenge.author_id %}
+                {% if session.user and (session.user.id == challenge.author_id or session.user.is_admin) %}
                 <div class="row" style="justify-content: flex-end; gap: 15px;">
-                    <p>Tools</p>
-                    <a href="{{ request.path + '/edit' }}">Edit</a>
-                    <a href="{{ request.path + '/delete'}}">Delete</a>
+                    <p style="font-weight: bold;" class="no-select">Tools:</p>
+                    <a href="{{ request.path + '/edit' }}" class="no-select">Edit</a>
+                    <a href="{{ request.path + '/delete'}}" class="no-select">Delete</a>
                 </div>
                 {% endif %}
                 {% include "./components/challenge.html" %}
-                <p>TODO: Comments and submissions here</p>
+                
+                <div class="row">
+                    <span class="vertical-line" style="margin-left: 23px; visibility: {{ 'hidden' if replies|length == 0 else '' }}"></span>
+                    <div class="row" style="justify-content: flex-end; gap: 5px; margin-bottom: 20px; margin-top: 10px;">
+                        {% if session.user %}
+                            <a href="{{ request.path + '/com' }}" class="no-select">Post Comment</a>
+                            <a href="{{ request.path + '/sub' }}" class="no-select">Post Submission</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% include "./components/challenge-replies.html" %}
             </div>
         </div>
     </main>

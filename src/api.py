@@ -2,7 +2,6 @@ from flask import redirect, request, session
 from database.params import database_params
 from database.abstract import AbstractDatabase, DatabaseConnection, ProfileEditable, UserNotFoundException
 from werkzeug.security import check_password_hash, generate_password_hash
-
 from util.has_permission import has_permission
 
 # MARK: Login & Register
@@ -17,11 +16,10 @@ def api_login():
     try:
         database = AbstractDatabase(DatabaseConnection(*database_params).open())
         user = database.get_user(username)
-        database.connection.close()
     except UserNotFoundException:
         return redirect("/login?fail")
     except Exception as err:
-        print("ERR", err)
+        print("Login Error:", err)
         return "Internal Server Error.", 500
 
     # Check password
@@ -76,6 +74,7 @@ def api_profile_edit():
     banner_file = request.files["banner"]
 
     try:
+        # Get user
         database = AbstractDatabase(DatabaseConnection(*database_params).open())
         user = database.get_user(username)
 
@@ -104,7 +103,7 @@ def api_profile_edit():
         database.edit_profile(user_id, new_profile)
         return redirect("/me")
     except Exception as err:
-        print("ERR", err)
+        print("Profile Edit Error:", err)
         return "Internal Server Error.", 500
 
 # MARK: Post Challenge
@@ -125,10 +124,8 @@ def api_post_challenge():
         return "Invalid data.", 400
 
     try:
-        # Create database connection
-        database = AbstractDatabase(DatabaseConnection(*database_params).open())
-
         # Check challenge category is valid
+        database = AbstractDatabase(DatabaseConnection(*database_params).open())
         categories = database.get_categories()
         if not any(category.id == category_id for category in categories):
             return "Invalid category.", 400
@@ -138,7 +135,7 @@ def api_post_challenge():
         return redirect(f"/chall/{post_id}")
         
     except Exception as err:
-        print("ERR", err)
+        print("Challenge Post Error:", err)
         return "Internal Server Error.", 500
 
 # MARK: Edit Challenge
@@ -159,10 +156,8 @@ def api_edit_challenge():
         return "Invalid data.", 400
 
     try:
-        # Create database connection
-        database = AbstractDatabase(DatabaseConnection(*database_params).open())
-
         # Check challenge category is valid
+        database = AbstractDatabase(DatabaseConnection(*database_params).open())
         categories = database.get_categories()
         if not any(category.id == category_id for category in categories):
             return "Invalid category.", 400
@@ -187,7 +182,7 @@ def api_edit_challenge():
         return redirect(f"/chall/{challenge_id}")
         
     except Exception as err:
-        print("ERR", err)
+        print("Challenge Edit Error", err)
         return "Internal Server Error.", 500
     
 # MARK: Delete Challenge
@@ -201,10 +196,8 @@ def api_delete_challenge():
     challenge_id = request.form["id"]
 
     try:
-        # Create database connection
-        database = AbstractDatabase(DatabaseConnection(*database_params).open())
-        
         # Check challenge already exists
+        database = AbstractDatabase(DatabaseConnection(*database_params).open())
         if not database.challenge_exists(challenge_id):
             return "Challenge does not exit.", 400
         
@@ -219,7 +212,7 @@ def api_delete_challenge():
         return redirect(f"/")
         
     except Exception as err:
-        print("ERR", err)
+        print("Challenge Delete Error:", err)
         return "Internal Server Error.", 500
 
 # MARK: Vote
@@ -235,10 +228,8 @@ def api_vote(type, target_id):
     from_page = request.form["from_page"]
     
     try:
-        # Create database connection
-        database = AbstractDatabase(DatabaseConnection(*database_params).open())
-
         # Vote for or remove
+        database = AbstractDatabase(DatabaseConnection(*database_params).open())
         if vote_action == "1":
             database.vote_for(type, target_id, user_id)
         else:
@@ -247,6 +238,9 @@ def api_vote(type, target_id):
         # Redirect back
         # Needs separate rules for each place the request can be from to properly focus/go to the right place back
         if from_page.startswith("/chall/"):
+            if type == "comment":
+                return redirect(from_page + "#com-" + target_id)
+            
             return redirect("/chall/" + target_id)
         elif from_page == "/":
             return redirect("/#chall-" + target_id)
@@ -254,5 +248,94 @@ def api_vote(type, target_id):
             return redirect(from_page + "#chall-" + target_id)
         
     except Exception as err:
-        print("ERR", err)
+        print("Vote Error:", err)
         return "Internal Server Error.", 500 
+
+# MARK: Comment
+def api_post_comment():
+    if "user" not in session:
+        return "Not logged in.", 401
+    
+    if "body" not in request.form.keys() or "challenge_id" not in request.form.keys():
+        return "Incomplete data.", 400
+
+    user_id = session["user"]["id"]
+    challenge_id = request.form["challenge_id"]
+    body = request.form["body"]
+
+    try:
+        # Check that challenge exists
+        database = AbstractDatabase(DatabaseConnection(*database_params).open())
+        if not database.challenge_exists(challenge_id):
+            return "Challenge does not exit.", 400
+            
+        # Create challenge comment
+        comment_id = database.create_comment(challenge_id, body, user_id)
+        return redirect(f"/chall/{challenge_id}/#c-{comment_id}")
+        
+    except Exception as err:
+        print("Comment Post Error:", err)
+        return "Internal Server Error.", 500
+
+def api_edit_comment():
+    if "user" not in session:
+        return "Not logged in.", 401
+    
+    if "body" not in request.form.keys() or "id" not in request.form.keys():
+        return "Incomplete data.", 400
+
+    body = request.form["body"]
+    comment_id = request.form["id"]
+
+    try:
+        # Check that comment exists
+        database = AbstractDatabase(DatabaseConnection(*database_params).open())
+        if not database.comment_exists(comment_id):
+            return "Comment does not exit.", 400
+        
+        # Check permission
+        comment = database.get_comment(session["user"]["id"], comment_id)
+        if not has_permission(session["user"], "edit", "comment", comment.author_id):
+            return "Permission denied.", 401
+            
+        # Edit challenge post
+        # TODO: Add edited date?
+        database.edit_comment(comment_id, {
+            "body": body
+        })
+        return redirect(f"/chall/{comment.challenge_id}/#com-{comment_id}")
+        
+    except Exception as err:
+        print("Comment Edit Error", err)
+        return "Internal Server Error.", 500
+    
+def api_delete_comment():
+    if "user" not in session:
+        return "Not logged in.", 401
+    
+    if "id" not in request.form.keys():
+        return "Incomplete data.", 400
+    
+    comment_id = request.form["id"]
+
+    try:
+        # Check challenge already exists
+        database = AbstractDatabase(DatabaseConnection(*database_params).open())
+        if not database.comment_exists(comment_id):
+            return "Challenge does not exit.", 400
+        
+        comment = database.get_comment(session["user"]["id"], comment_id)
+        
+        # Check permission
+        if not has_permission(session["user"], "delete", "challenge", comment.author_id):
+            return "Permission denied.", 401
+
+        # Delete challenge
+        database.remove_comment(comment_id)
+        return redirect(f"/chall/{comment.challenge_id}")
+        
+    except Exception as err:
+        print("Comment Delete Error", err)
+        return "Internal Server Error.", 500
+    
+# MARK: Submissions

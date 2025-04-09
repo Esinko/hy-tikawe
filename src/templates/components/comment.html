@@ -1,0 +1,47 @@
+<div class="comment" id="com-{{ comment.id }}">
+    <form class="vote stack" action="{{ '/api/vote/comment/' + (comment.id | string) if 'user' in session else '/login' }}" method="{{ 'GET' if 'user' not in session else 'POST' }}">
+        <input name="vote_action" type="hidden" value="{{ 0 if comment.has_my_vote else 1 }}">
+        <input name="from_page" type="hidden" value="{{ request.path }}">
+        <button
+            type="submit"
+            disabled="{{ 'true' if no_edit_buttons else 'false'}}"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                style="stroke: {{ 'var(--very-yellow)' if comment.has_my_vote else 'black' }}"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+                <path d="M6 15l6 -6l6 6" />
+            </svg>
+        </button>
+        <p class="minimal">{{ comment.votes }}</p>
+    </form>
+    <div class="stack" style="width: 100%">
+        <div class="row" style="align-items: center; gap: 5px; margin-bottom: 10px;">
+            <div class="row" style="width: min-content">
+                {% if comment.author_image_id is not none %}
+                <img width="20px" height="20px" class="profile-image" src="/a/{{ comment.author_image_id }}"></img>
+                {% else %}
+                <p class="profile-text">{{ comment.author_name[0].upper() + comment.author_name[1] }}</p>
+                {% endif %}
+                <a style="margin-left: 10px; font-size: 14px; max-width: 200px; overflow: hidden;" href="/u/{{ comment.author_name }}">{{ comment.author_name }}</a>
+            </div>
+            <p class="minimal">|</p>
+            <p class="minimal">{{ comment.created | epoch_to_date }}</p>
+        </div>
+        <pre class="text minimal">{{ comment.body }}</pre>
+
+        {% if session.user and (session.user.id == comment.author_id or session.user.is_admin) and not no_edit_buttons %}
+        <div class="row" style="justify-content: flex-end; gap: 15px;">
+            <a href="{{ '/chall/' + comment.challenge_id|string + '/com/' + comment.id|string + '/edit' }}">Edit</a>
+            <a href="{{ '/chall/' + comment.challenge_id|string + '/com/' + comment.id|string + '/delete' }}">Delete</a>
+        </div>
+        {% endif %}
+    </div>
+</div>

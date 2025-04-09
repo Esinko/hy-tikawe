@@ -68,7 +68,7 @@ button, select {
     padding: 2px 5px 2px 5px;
 }
 
-p {
+p, pre {
     font-size: 14px;
 }
 
@@ -230,7 +230,6 @@ nav a, .user-box {
     min-height: 180px;
     overflow: hidden;
     padding-bottom: 18px;
-    margin-bottom: 15px;
 }
 .challenge a {
     padding-left: 0px;
@@ -253,6 +252,9 @@ nav a, .user-box {
     padding: 0px;
     stroke: black;
 }
+.vote button[disabled=true] {
+    cursor: not-allowed;
+}
 .vote button > svg {
     width: 40px;
     stroke: inherit;
@@ -264,7 +266,8 @@ nav a, .user-box {
 .vote > p {
     font-size: 20px;
 }
-.challenge .profile-text {
+
+.challenge .profile-text, .comment .profile-text {
     width: 26px;
     height: 26px;
     line-height: 26px;
@@ -275,4 +278,64 @@ nav a, .user-box {
     overflow: hidden; 
     white-space: nowrap; 
     text-overflow: ellipsis;
+}
+
+.comment {
+    display: flex;
+    width: 100%;
+    padding: 8px;
+    background-color: rgba(255, 255, 255, 0.123);
+    gap: 15px;
+    min-height: 120px;
+    overflow: hidden;
+    padding-bottom: 10px;
+    clip-path: polygon(20px 0%, 100% 0%, 100% 100%, 0% 100%, 0% 20px);
+}
+.comment a {
+    padding-left: 0px;
+    margin-bottom: 0px;
+    margin-top: 0px;
+    font-size: 12px;
+    color: white;
+}
+.comment .text {
+    width: 100%;
+    word-break: break-all;
+    max-height: 200px;
+    padding-bottom: 5px;
+    overflow-y: auto;
+} 
+.comment-tree > :last-child .vertical-line {
+    height: calc(50% + 14px);
+}
+.comment-tree > :last-child .comment-trunk {
+    justify-content: flex-start;
+}
+.comment-trunk > .vertical-line {
+    height: calc(100% + 12px);
+    margin-top: -12px;
+}
+.comment-branch, .comment-trunk {
+    height: 100%;
+    width: 100%;
+    justify-content: flex-end;
+    align-items: flex-end;
+}
+
+.horizontal-line {
+    display: block;
+    width: 100%;
+    min-height: 4px;
+    background-color: black;
+}
+.vertical-line {
+    display: block;
+    min-width: 4px;
+    max-width: 4px;
+    height: 100%;
+    background-color: black;
+}
+
+.no-select {
+    user-select: none;
 }

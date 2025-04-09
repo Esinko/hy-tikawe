@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Code Golf Club</title>
+    <link rel="stylesheet" href="/public/main.css">
+</head>
+<body>
+    <main>
+        {% include "./components/header.html" %}
+        <div class="content">
+            <div class="stack">
+                {% if session.user and session.user.id == challenge.author_id %}
+                <div class="row" style="justify-content: flex-end; gap: 15px;">
+                    <p>Tools</p>
+                    <a href="{{ request.path + '/edit' }}">Edit</a>
+                    <a href="{{ request.path + '/delete'}}">Delete</a>
+                </div>
+                {% endif %}
+                {% include "./components/challenge.html" %}
+
+                <form action="/api/post/comment" method="POST" style="margin-bottom: 20px; padding-left: 50px; padding-right: 50px; margin-top: 20px;">
+                    <label for="body">Your Comment</label>
+                    <textarea
+                        name="body"
+                        placeholder="Uhm, actually ..."
+                        style="padding: 8px; margin-bottom: 10px;"
+                    ></textarea>
+
+                    <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
+
+                    <div class="flex" style="justify-content: flex-end; align-items: center; gap: 5px;">
+                        <button type="submit" style="margin: 0px;">Post</button>
+                        <a href="/chall/{{ challenge.id }}">Cancel</a>
+                    </div>
+                </form>
+
+                {% include "./components/challenge-replies.html" %}
+            </div>
+        </div>
+    </main>
+</body>
+</html>

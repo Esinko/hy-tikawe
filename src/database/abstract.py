@@ -5,7 +5,25 @@ from time import time
 from typing import List, Literal
 from database.sql import sql_table
 from database.connection import DatabaseConnection
-from database.types import Asset, AssetNotFoundException, Category, Challenge, ChallengeEditable, ChallengeNotFoundException, Profile, ProfileEditable, ProfileNotFoundException, User, UserEditable, UserExistsException, UserNotFoundException
+from database.types import (
+    Asset,
+    AssetNotFoundException,
+    Category,
+    ChallengeHusk,
+    ChallengeEditable,
+    ChallengeNotFoundException,
+    Profile,
+    ProfileEditable,
+    ProfileNotFoundException,
+    User,
+    UserEditable,
+    UserExistsException,
+    UserNotFoundException,
+    CommentEditable,
+    CommentNotFoundException,
+    CommentHusk,
+    SubmissionHusk
+)
 
 class AbstractDatabase:
     def __init__(self, connection=DatabaseConnection):
@@ -110,19 +128,32 @@ class AbstractDatabase:
         return categories
     
     # MARK: Chall. abstractions
-    def get_challenges(self, current_user_id: int, category_id: int | None, page: int) -> List[Challenge]:
+    def get_challenges(self, current_user_id: int, category_id: int | None, page: int) -> List[ChallengeHusk]:
         page_size = 10
         results = self.connection.query(query=sql_table["get_full_challenges"], parameters=(current_user_id, category_id, category_id, page_size, page * page_size))
         challenges = []
         for result in results:
-            challenges.append(Challenge(*result))
+            challenges.append(ChallengeHusk(*result))
         return challenges
     
-    def get_challenge(self, current_user_id: int, challenge_id: int) -> Challenge:
+    def get_challenge(self, current_user_id: int, challenge_id: int) -> ChallengeHusk:
         [result] = self.connection.query(query=sql_table["get_full_challenge"], parameters=(current_user_id, challenge_id))
         if not result:
             raise ChallengeNotFoundException(challenge_id)
-        return Challenge(*result)
+        return ChallengeHusk(*result)
+    
+    def get_challenge_replies(self, current_user_id: int, challenge_id: int) -> List[CommentHusk | SubmissionHusk]:
+        # TODO: Pagination
+        results = self.connection.query(query=sql_table["get_comments_and_submissions"], parameters=(current_user_id, challenge_id, current_user_id, challenge_id), limit=100)
+        
+        all_replies = []
+        for result in results:
+            if result[0] == "comment":
+                all_replies.append(CommentHusk(*result[0:-3]))
+            else:
+                all_replies.append(SubmissionHusk(*result))
+
+        return all_replies
     
     def challenge_exists(self, challenge_id: int) -> bool:
         return self.connection.query(query=sql_table["challenge_exists"], parameters=(challenge_id,), limit=1)[0][0] == 1
@@ -150,7 +181,7 @@ class AbstractDatabase:
         results = self.connection.query(query=sql_table["search_challenges"], parameters=(current_user_id, category_id, category_id, search_string, search_string, page_size, page * page_size))
         challenges = []
         for result in results:
-            challenges.append(Challenge(*result))
+            challenges.append(ChallengeHusk(*result))
         return challenges
 
     # MARK: Voting abstractions
@@ -180,4 +211,43 @@ class AbstractDatabase:
             raise Exception("Unknown target type!")
 
         _, cursor = self.connection.execute(query=statement, parameters=(target_id, user_id))
+        cursor.close()
+
+    # MARK: Comment abstractions
+    def create_comment(self, challenge_id: int, body: str, author_id: int) -> int:
+        _, cursor = self.connection.execute(query=sql_table["create_comment"], parameters=(int(time()), challenge_id, body, author_id))
+        comment_id = cursor.lastrowid
+        cursor.close()
+        return comment_id
+    
+    def remove_comment(self, comment_id: int):
+        _, cursor = self.connection.execute(query=sql_table["remove_comment"], parameters=(comment_id,))
+        cursor.close()
+
+    def get_comment(self, current_user_id: int,comment_id: int) -> CommentHusk:
+        [result] = self.connection.query(query=sql_table["get_comment"], parameters=(current_user_id, comment_id))
+        if not result:
+            raise CommentNotFoundException(comment_id)
+        return CommentHusk(*result)
+
+    def comment_exists(self, comment_id: int) -> bool:
+        return self.connection.query(query=sql_table["comment_exists"], parameters=(comment_id,), limit=1)[0][0] == 1
+
+    def edit_comment(self, comment_id: int, new_fields: CommentEditable):
+        # Check if challenge exists
+        if not self.comment_exists(comment_id):
+            raise CommentNotFoundException(comment_id)
+        
+        _, cursor = self.connection.execute(query=sql_table["edit_comment"], parameters=(new_fields["body"], comment_id))
+        cursor.close()
+
+    # MARK: Submissions abstractions
+    def create_submission(self, challenge_id: int, title: str, body: str, author_id: int) -> int:
+        _, cursor = self.connection.execute(query=sql_table["create_submission"], parameters=(int(time()), challenge_id, title, body, None, author_id))
+        submission_id = cursor.lastrowid
+        cursor.close()
+        return submission_id
+    
+    def remove_submission(self, submission_id: int):
+        _, cursor = self.connection.execute(query=sql_table["remove_submission"], parameters=(submission_id,))
         cursor.close()

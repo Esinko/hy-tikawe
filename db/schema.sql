@@ -49,7 +49,7 @@ CREATE TABLE Challenges (
 CREATE TABLE Submissions (
     id INTEGER PRIMARY KEY,
     created INTEGER NOT NULL,
-    challenge_id INTEGER NOT NULL REFERENCES Challenges(id) ON DELETE CASCADE,
+    challenge_id INTEGER NOT NULL REFERENCES Challenges(id),
     title TEXT NOT NULL,
     body TEXT NOT NULL,
     solution_asset_id INTEGER NOT NULL REFERENCES Assets(id),
@@ -59,7 +59,7 @@ CREATE TABLE Submissions (
 CREATE TABLE Comments (
     id INTEGER PRIMARY KEY,
     created INTEGER NOT NULL,
-    challenge_id INTEGER NOT NULL REFERENCES Challenges(id) ON DELETE CASCADE,
+    challenge_id INTEGER NOT NULL REFERENCES Challenges(id),
     body TEXT NOT NULL,
     author_id INTEGER NOT NULL REFERENCES Users(id)
 );

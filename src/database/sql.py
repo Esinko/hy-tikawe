@@ -1,5 +1,7 @@
 # All SQL commands used by the database library
 sql_table = {
+    # MARK: User
+
     "user_exists": "SELECT EXISTS (SELECT username FROM Users WHERE username = ?)",
 
     "create_user": "INSERT INTO Users (username, password_hash, require_new_password) VALUES (?, ?, False)",
@@ -7,6 +9,8 @@ sql_table = {
     "get_user": "SELECT id, username, password_hash, require_new_password, is_admin FROM Users WHERE username = ?",
 
     "edit_user": "UPDATE Users SET name = ?, password_hash = ?, require_new_password = ? WHERE name = ?",
+
+    # MARK: Profile
 
     "create_profile": "INSERT INTO Profiles (user_id, description, image_asset_id, banner_asset_id) VALUES (?, '', NULL, NULL)",
 
@@ -16,13 +20,19 @@ sql_table = {
 
     "edit_profile": "UPDATE Profiles SET description = ?, image_asset_id = ?, banner_asset_id = ? WHERE user_id = ?",
 
+    # MARK: Asset
+
     "create_asset": "INSERT INTO Assets (filename, value) VALUES (?, ?)",
 
     "get_asset": "SELECT filename, value FROM Assets WHERE id = ?",
 
     "delete_asset": "DELETE FROM Assets WHERE id = ?",
 
+    # MARK: Category
+
     "get_categories": "SELECT id, name FROM ChallengeCategories",
+
+    # MARK: Challenge
 
     "get_full_challenges": """
         SELECT 
@@ -138,6 +148,8 @@ sql_table = {
         LIMIT ? OFFSET ?;
     """,
 
+    # MARK: Vote
+
     "create_vote_for_challenge": "INSERT INTO Votes (challenge_id, voter_id) VALUES (?, ?)",
     
     "create_vote_for_comment": "INSERT INTO Votes (comment_id, voter_id) VALUES (?, ?)" ,
@@ -150,20 +162,93 @@ sql_table = {
 
     "remove_vote_from_submission": "DELETE FROM Votes WHERE submission_id = ? AND voter_id = ?",
 
+    # MARK: Comment
+
     "create_comment": "INSERT INTO Comments (created, challenge_id, body, author_id) VALUES (?, ?, ?, ?)",
 
-    "get_comments": """ 
+    "get_comment":"""
         SELECT
+            'comment' AS type,
             Comments.id,
             Comments.created,
             Comments.body,
+            Comments.author_id,
             Users.username,
-            Profiles.image_asset_id
+            Profiles.image_asset_id,
+            (SELECT COUNT(*) FROM Votes WHERE comment_id = Comments.id) AS vote_count,
+            EXISTS (
+                SELECT 1 FROM Votes
+                WHERE comment_id = Comments.id AND voter_id = ?
+            ) AS has_voted,
+            Comments.challenge_id
+        FROM Comments
+        JOIN Users ON Comments.author_id = Users.id
+        LEFT JOIN Profiles ON Users.id = Profiles.user_id
+        WHERE Comments.id = ?
+    """,
+
+    # MARK: Get Challenge replies
+    "get_comments_and_submissions": """
+        SELECT
+            'comment' AS type,
+            Comments.id,
+            Comments.created,
+            Comments.body,
+            Comments.author_id,
+            Users.username,
+            Profiles.image_asset_id,
+            (SELECT COUNT(*) FROM Votes WHERE comment_id = Comments.id) AS vote_count,
+            EXISTS (
+                SELECT 1 FROM Votes
+                WHERE comment_id = Comments.id AND voter_id = ?
+            ) AS has_voted,
+            Comments.challenge_id,
+            NULL AS solution_title,
+            NULL AS solution_asset_id,
+            NULL AS solution_filename
         FROM Comments
         JOIN Users ON Comments.author_id = Users.id
         LEFT JOIN Profiles ON Users.id = Profiles.user_id
         WHERE Comments.challenge_id = ?
-        ORDER BY Comments.created ASC
-    """ 
+
+        UNION ALL
+
+        SELECT
+            'submission' AS type,
+            Submissions.id,
+            Submissions.created,
+            Submissions.body,
+            Submissions.author_id,
+            Users.username,
+            Profiles.image_asset_id,
+            (SELECT COUNT(*) FROM Votes WHERE submission_id = Submissions.id) AS vote_count,
+            EXISTS (
+                SELECT 1 FROM Votes
+                WHERE submission_id = Submissions.id AND voter_id = ?
+            ) AS has_voted,
+            Submissions.challenge_id,
+            Submissions.title,
+            Submissions.solution_asset_id,
+            Assets.filename AS solution_filename
+        FROM Submissions
+        JOIN Users ON Submissions.author_id = Users.id
+        LEFT JOIN Profiles ON Users.id = Profiles.user_id
+        JOIN Assets ON Submissions.solution_asset_id = Assets.id
+        WHERE Submissions.challenge_id = ?
+
+        ORDER BY created DESC
+    """,
+
+    "remove_comment": "DELETE FROM Comments WHERE id = ?",
+
+    "comment_exists": "SELECT EXISTS (SELECT id FROM Comments WHERE id = ?)",
+
+    "edit_comment": "UPDATE Comments SET body = ? WHERE id = ?",
+
+    # MARK: Submission
+
+    "create_submission": "INSERT INTO Submissions (created, challenge_id, title, body, solution_asset_id, author_id) VALUES (?, ?, ?, ?, ?, ?)",
+
+    "remove_submission": "DELETE FROM Submissions WHERE id = ?",
 }
 

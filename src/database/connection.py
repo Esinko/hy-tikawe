@@ -76,5 +76,4 @@ class DatabaseConnection:
             print("Database execution error:", e)
             self.connection.rollback()
         results = cursor.fetchmany(limit)
-        cursor.close()
         return results

@@ -1,4 +1,4 @@
-<div class="challenge" id="chall-{{ challenge.id }}">
+<div class="challenge" id="chall-{{ challenge.id }}" style="margin-bottom: {{ spacer or 0 }}px">
     <form class="vote stack" action="{{ '/api/vote/challenge/' + (challenge.id | string) if 'user' in session else '/login' }}" method="{{ 'GET' if 'user' not in session else 'POST' }}">
         <input name="vote_action" type="hidden" value="{{ 0 if challenge.has_my_vote else 1 }}">
         <input name="from_page" type="hidden" value="{{ request.path }}">
@@ -11,7 +11,7 @@
                 height="24"
                 viewBox="0 0 24 24"
                 fill="none"
-                style="stroke: {{ 'var(--very-yellow)' if challenge.has_my_vote else 'black' }}"
+                style="stroke: {{ 'var(--very-yellow)' if challenge.has_my_vote else 'black' }}; transform: {{ 'rotate(180deg)' if challenge.has_my_vote else 'rotate(0deg)' }}"
                 stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
