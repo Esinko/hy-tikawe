@@ -10,6 +10,21 @@
     <main>
         {% include "./components/header.html" %}
         <div class="content">
+            {% if at_home %}
+                <p>
+                    <b>Welcome to the JavaScript Code Golf Club!</b><br>
+                    Here you can post, comment and submit everything that's insane and JavaScript ;)<br>
+                    Vote for your favorite stuff with an account!
+                </p>
+                <p>
+                    <b>House Rules:</b><br>
+                    1. Absolute no <a style="padding: 0px;" href="https://jsfuck.com/">JSFuck</a><br>
+                    2. We don't know what's ESLint<br>
+                    3. TypeScript is bloat<br>
+                    4. Yes you can use Python, but we don't<br>
+                    5. Rust is not viable, no Array prototypes<br>
+                </p>
+            {% endif %}
             <div class="row" style="justify-content: space-between; margin-bottom: 10px;">
                 <p><i>Challenges from {{ 'all categories' if not category_name else category_name }}</i></p>
                 {% include "./components/search-box.html" %}

@@ -16,6 +16,7 @@ from database.params import database_params
 from database.abstract import AbstractDatabase, AssetNotFoundException, ChallengeNotFoundException, DatabaseConnection, UserNotFoundException
 from datetime import datetime
 from util.filetype import filename_to_file_type
+from util.random_text import get_random_top_text
 from secrets import token_urlsafe
 
 # Initialize database
@@ -51,7 +52,7 @@ def home(category_id=None):
     challenges = database.get_challenges(session["user"]["id"] if "user" in session else -1, category_id, page)
     category_name = categories[int(category_id) - 1].name if category_id else None
     database.connection.close()
-    return render_template("./home.html", categories=categories, challenges=challenges, category_name=category_name, page=page)
+    return render_template("./home.html", at_home=request.path == "/", categories=categories, challenges=challenges, category_name=category_name, page=page, top_text=get_random_top_text())
 
 @app.route("/search")
 def search():
@@ -62,15 +63,15 @@ def search():
     database = AbstractDatabase(DatabaseConnection(*database_params).open())
     categories = database.get_categories()
     challenges = database.search_challenge(search_string, session["user"]["id"] if "user" in session else -1, None, page)
-    return render_template("./search-results.html", categories=categories, challenges=challenges, search_string=search_string, page=page)
+    return render_template("./search-results.html", categories=categories, challenges=challenges, search_string=search_string, page=page, top_text=get_random_top_text())
 
 @app.route("/login")
 def login():
-    return render_template("./login.html")
+    return render_template("./login.html", top_text=get_random_top_text())
 
 @app.route("/register")
 def register():
-    return render_template("./register.html")
+    return render_template("./register.html", top_text=get_random_top_text())
 
 @app.get("/logout")
 def logout():
@@ -82,7 +83,7 @@ def new_post():
     database = AbstractDatabase(DatabaseConnection(*database_params).open())
     categories = database.get_categories()
     database.connection.close()
-    return render_template("./forms/challenge-new.html", categories=categories)
+    return render_template("./forms/challenge-new.html", categories=categories, top_text=get_random_top_text())
 
 @app.route("/chall/<challenge_id>", defaults={"subpath": "", "subaction": "", "reply_id": ""})
 @app.route("/chall/<challenge_id>/", defaults={"subpath": "", "subaction": "", "reply_id": ""})
@@ -115,7 +116,7 @@ def challenge(challenge_id, subpath, reply_id, subaction):
             template = "./forms/comment-delete.html"
         elif subpath == "com":
             template = "./forms/comment-new.html"
-        return render_template(template, categories=categories, challenge=challenge, replies=comments_and_submissions, comment_to_edit=comment_to_edit)
+        return render_template(template, categories=categories, challenge=challenge, replies=comments_and_submissions, comment_to_edit=comment_to_edit, top_text=get_random_top_text())
     except ChallengeNotFoundException:
         database.connection.close()
         return redirect("/")
@@ -134,7 +135,7 @@ def profile_edit():
     categories = database.get_categories()
     user = database.get_user(session["user"]["username"])
     database.connection.close()
-    return render_template("./forms/profile-edit.html", profile=user.profile.__dict__(), username=user.username, categories=categories)
+    return render_template("./forms/profile-edit.html", profile=user.profile.__dict__(), username=user.username, categories=categories, top_text=get_random_top_text())
 
 @app.get("/u/<username>")
 def profile(username):
@@ -148,7 +149,7 @@ def profile(username):
         database.connection.close()
     except UserNotFoundException:
         return redirect("/")
-    return render_template("./profile.html", profile=user.profile.__dict__(), username=username, categories=categories, content=content, received_votes=received_votes, given_votes=given_votes)
+    return render_template("./profile.html", profile=user.profile.__dict__(), username=username, categories=categories, content=content, received_votes=received_votes, given_votes=given_votes, top_text=get_random_top_text())
 
 @app.get("/a/<id>")
 def asset(id):

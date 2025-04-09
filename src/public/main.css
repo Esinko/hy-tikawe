@@ -143,6 +143,30 @@ nav a, .user-box {
     background-color: var(--very-yellow);
     color: black;
 }
+.with-jumping-text {
+    overflow: visible;
+}
+.with-jumping-text::after {
+    display: inline-block;
+    animation: jump 0.7s linear infinite;
+    content: attr(data-text);
+    color: var(--very-yellow);
+    background-color: black;
+    font-size: 12px;
+    position: relative;
+    left: -20px;
+    transform: rotate(-20deg);
+    margin: 0px;
+    padding: 1px;
+    z-index: 1000;
+}
+
+@keyframes jump {
+    0%   { transform: scale(1) rotate(-20deg); }
+    30%  { transform: scale(1.2) rotate(-20deg); }
+    60%  { transform: scale(1) rotate(-20deg); }
+    100% { transform: scale(1) rotate(-20deg); }
+}
 
 .flex {
     display: flex;
@@ -390,7 +414,7 @@ nav a, .user-box {
         transform: translateX(0);
     }
     100% {
-        transform: translateX(-375px);
+        transform: translateX(-670px);
     }
 }
 
