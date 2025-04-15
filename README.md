@@ -32,10 +32,11 @@ Projektirakenne on suht. locked-in ja komponentteja on jaettu eri tiedostoihin k
 
 
 ### Sovelluksen käyttö
-Projektin ainut riippuvuus on `flask`.
+- Sovelluksen ainut riippuvuus on `flask`.
+- Sovellus edellyttää Python version `3.10` tai uudemman!
+- Tietokanta alustuu automaattisesti.
 
-Tietokanta alustuu automaattisesti.
-
+#### Projektiympäristö (Vaihtoehtoinen)
 Luo virtuaaliympäristö:
 
 ```bash
@@ -43,19 +44,16 @@ $ python3 -m venv venv
 $ source venv/bin/activate
 ```
 
-Asenna riippuvuudet:
+#### Asenna riippuvuudet
 
 ```bash
 $ pip install flask
 ```
 
-Suorita sovellus:
-
+#### Suorita sovellus
+```bash
+$ flask run
 ```
-$ flask --app ./src/app.py run --debug
-```
-
-_Huom: debug tila käytössä, ota `--debug` pois tuotantoympäristössä_
 
 ### Suunnitelma
 Forum/kilpailu-sivusto, jossa käyttäjät voivat luoda ja osallistua code-golf haasteisiin.
@@ -83,3 +81,4 @@ Perinteisen code golfin sijaan sivulla on kategoriat:
     - Muokattavia tietoja ovat lempinimi, kuvaus, profiilikuva ja profiilibanner
     - Profiilista näkyy kaikki käyttäjän haasteet, vastaukset ja kommentit
     - Profiilista näkyy käyttäjän saamien äänien summa
+    
