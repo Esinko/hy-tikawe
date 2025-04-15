@@ -34,7 +34,9 @@ class AbstractDatabase:
     # MARK: User Abstractions
     def user_exists(self, username: str) -> bool:
         # Check if user exists
-        return self.connection.query(query=sql_table["user_exists"], parameters=(username,), limit=1)[0][0] == 1
+        return self.connection.query(query=sql_table["user_exists"],
+                                     parameters=(username,),
+                                     limit=1)[0][0] == 1
 
     def create_user(self, username: str, password_hash: str) -> User:
         # Check if user exists
@@ -42,19 +44,22 @@ class AbstractDatabase:
             raise UserExistsException(username)
         
         # Create user
-        _, cursor = self.connection.execute(query=sql_table["create_user"], parameters=(username, password_hash))
+        _, cursor = self.connection.execute(query=sql_table["create_user"],
+                                                      parameters=(username, password_hash))
         user_id = cursor.lastrowid
         cursor.close()
 
         # Crete profile
-        _, cursor = self.connection.execute(query=sql_table["create_profile"], parameters=(user_id,))
+        _, cursor = self.connection.execute(query=sql_table["create_profile"],
+                                                      parameters=(user_id,))
         cursor.close()
         return self.get_user(username)
     
     def get_user(self, username: str) -> User:
         # TODO: Use table joins to get all the user info at once?
         # Get user
-        result = self.connection.query(query=sql_table["get_user"], parameters=(username,), limit=1)
+        result = self.connection.query(query=sql_table["get_user"],
+                                       parameters=(username,), limit=1)
         if len(result) == 0:
             raise UserNotFoundException(username)
         
@@ -73,7 +78,12 @@ class AbstractDatabase:
         if not self.user_exists(username):
             raise UserNotFoundException(username)
         
-        _, cursor = self.connection.execute(query=sql_table["edit_user"], parameters=(new_fields["username"], new_fields["password_hash"], new_fields["require_new_password"], username))
+        _, cursor = self.connection.execute(query=sql_table["edit_user"],
+                                                      parameters=(
+                                                            new_fields["username"],
+                                                            new_fields["password_hash"],
+                                                            new_fields["require_new_password"],
+                                                            username))
         cursor.close()
 
     # MARK: Profile Abstractions
@@ -94,18 +104,25 @@ class AbstractDatabase:
                        banner_asset)
 
     def profile_exists(self, user_id: int):
-        return self.connection.query(query=sql_table["profile_exists"], parameters=(user_id,), limit=1)[0][0] == 1
+        return self.connection.query(query=sql_table["profile_exists"],
+                                     parameters=(user_id,), limit=1)[0][0] == 1
 
     def edit_profile(self, user_id: int, new_fields: ProfileEditable):
         if not self.profile_exists(user_id):
             raise ProfileNotFoundException(user_id)
         
-        _, cursor = self.connection.execute(query=sql_table["edit_profile"], parameters=(new_fields["description"], new_fields["image_asset_id"], new_fields["banner_asset_id"], user_id))
+        _, cursor = self.connection.execute(query=sql_table["edit_profile"],
+                                                      parameters=(
+                                                          new_fields["description"],
+                                                          new_fields["image_asset_id"],
+                                                          new_fields["banner_asset_id"],
+                                                          user_id))
         cursor.close()
         
     # MARK: Asset abstractions
     def create_asset(self, filename: str, value: bytes) -> Asset:
-        _, cursor = self.connection.execute(query=sql_table["create_asset"], parameters=(filename, value))
+        _, cursor = self.connection.execute(query=sql_table["create_asset"],
+                                                      parameters=(filename, value))
         asset_id = cursor.lastrowid
         cursor.close()
 
@@ -132,21 +149,34 @@ class AbstractDatabase:
     # MARK: Chall. abstractions
     def get_challenges(self, current_user_id: int, category_id: int | None, page: int) -> List[ChallengeHusk]:
         page_size = 10
-        results = self.connection.query(query=sql_table["get_full_challenges"], parameters=(current_user_id, category_id, category_id, page_size, page * page_size))
+        results = self.connection.query(query=sql_table["get_full_challenges"],
+                                             parameters=(
+                                                 current_user_id,
+                                                 category_id,
+                                                 category_id,
+                                                 page_size,
+                                                 page * page_size))
         challenges = []
         for result in results:
             challenges.append(ChallengeHusk(*result))
         return challenges
     
     def get_challenge(self, current_user_id: int, challenge_id: int) -> ChallengeHusk:
-        [result] = self.connection.query(query=sql_table["get_full_challenge"], parameters=(current_user_id, challenge_id))
+        [result] = self.connection.query(query=sql_table["get_full_challenge"],
+                                         parameters=(current_user_id, challenge_id))
         if not result:
             raise ChallengeNotFoundException(challenge_id)
         return ChallengeHusk(*result)
     
     def get_challenge_replies(self, current_user_id: int, challenge_id: int) -> List[CommentHusk | SubmissionHusk]:
         # TODO: Pagination
-        results = self.connection.query(query=sql_table["get_comments_and_submissions"], parameters=(current_user_id, challenge_id, current_user_id, challenge_id), limit=100)
+        results = self.connection.query(query=sql_table["get_comments_and_submissions"],
+                                             parameters=(
+                                                 current_user_id,
+                                                 challenge_id,
+                                                 current_user_id,
+                                                 challenge_id),
+                                             limit=100)
         
         all_replies = []
         for entry_type, *result in results:
@@ -158,29 +188,52 @@ class AbstractDatabase:
         return all_replies
     
     def challenge_exists(self, challenge_id: int) -> bool:
-        return self.connection.query(query=sql_table["challenge_exists"], parameters=(challenge_id,), limit=1)[0][0] == 1
+        return self.connection.query(query=sql_table["challenge_exists"],
+                                     parameters=(challenge_id,), limit=1)[0][0] == 1
 
     def edit_challenge(self, challenge_id: int, new_fields: ChallengeEditable):
         # Check if challenge exists
         if not self.challenge_exists(challenge_id):
             raise ChallengeNotFoundException(challenge_id)
         
-        _, cursor = self.connection.execute(query=sql_table["edit_challenge"], parameters=(new_fields["title"], new_fields["body"], new_fields["category_id"], 1 if new_fields["accepts_submissions"] else 0, challenge_id))
+        _, cursor = self.connection.execute(query=sql_table["edit_challenge"],
+                                                      parameters=(
+                                                          new_fields["title"],
+                                                          new_fields["body"],
+                                                          new_fields["category_id"],
+                                                          1 if new_fields["accepts_submissions"] else 0,
+                                                          challenge_id))
         cursor.close()
 
     def remove_challenge(self, challenge_id: int):
-        _, cursor = self.connection.execute(query=sql_table["remove_challenge"], parameters=(challenge_id,))
+        _, cursor = self.connection.execute(query=sql_table["remove_challenge"],
+                                                      parameters=(challenge_id,))
         cursor.close()
 
     def create_challenge(self, title: str, body: str, category_id: int, author_id: int, accepts_submissions: bool) -> int:
-        _, cursor = self.connection.execute(query=sql_table["create_challenge"], parameters=(int(time()), title, body, category_id, author_id, 1 if accepts_submissions else 0))
+        _, cursor = self.connection.execute(query=sql_table["create_challenge"],
+                                                      parameters=(
+                                                          int(time()),
+                                                          title,
+                                                          body,
+                                                          category_id,
+                                                          author_id,
+                                                          1 if accepts_submissions else 0))
         post_id = cursor.lastrowid
         cursor.close()
         return post_id
     
     def search_challenge(self, search_string: str, current_user_id: int, category_id: int | None, page: int):
         page_size = 10
-        results = self.connection.query(query=sql_table["search_challenges"], parameters=(current_user_id, category_id, category_id, search_string, search_string, page_size, page * page_size))
+        results = self.connection.query(query=sql_table["search_challenges"],
+                                             parameters=(
+                                                 current_user_id,
+                                                 category_id,
+                                                 category_id,
+                                                 search_string,
+                                                 search_string,
+                                                 page_size,
+                                                 page * page_size))
         challenges = []
         for result in results:
             challenges.append(ChallengeHusk(*result))
@@ -217,41 +270,58 @@ class AbstractDatabase:
 
     # MARK: Comment abstractions
     def create_comment(self, challenge_id: int, body: str, author_id: int) -> int:
-        _, cursor = self.connection.execute(query=sql_table["create_comment"], parameters=(int(time()), challenge_id, body, author_id))
+        _, cursor = self.connection.execute(query=sql_table["create_comment"],
+                                                      parameters=(
+                                                          int(time()),
+                                                          challenge_id,
+                                                          body,
+                                                          author_id))
         comment_id = cursor.lastrowid
         cursor.close()
         return comment_id
     
     def remove_comment(self, comment_id: int):
-        _, cursor = self.connection.execute(query=sql_table["remove_comment"], parameters=(comment_id,))
+        _, cursor = self.connection.execute(query=sql_table["remove_comment"],
+                                                      parameters=(comment_id,))
         cursor.close()
 
     def get_comment(self, current_user_id: int,comment_id: int) -> CommentHusk:
-        [result] = self.connection.query(query=sql_table["get_comment"], parameters=(current_user_id, comment_id))
+        [result] = self.connection.query(query=sql_table["get_comment"],
+                                         parameters=(current_user_id, comment_id))
         if not result:
             raise CommentNotFoundException(comment_id)
         return CommentHusk(*result)
 
     def comment_exists(self, comment_id: int) -> bool:
-        return self.connection.query(query=sql_table["comment_exists"], parameters=(comment_id,), limit=1)[0][0] == 1
+        return self.connection.query(query=sql_table["comment_exists"],
+                                     parameters=(comment_id,), limit=1)[0][0] == 1
 
     def edit_comment(self, comment_id: int, new_fields: CommentEditable):
         # Check if challenge exists
         if not self.comment_exists(comment_id):
             raise CommentNotFoundException(comment_id)
         
-        _, cursor = self.connection.execute(query=sql_table["edit_comment"], parameters=(new_fields["body"], comment_id))
+        _, cursor = self.connection.execute(query=sql_table["edit_comment"],
+                                                      parameters=(new_fields["body"], comment_id))
         cursor.close()
 
     # MARK: Submissions abstractions
     def create_submission(self, challenge_id: int, title: str, body: str, author_id: int) -> int:
-        _, cursor = self.connection.execute(query=sql_table["create_submission"], parameters=(int(time()), challenge_id, title, body, None, author_id))
+        _, cursor = self.connection.execute(query=sql_table["create_submission"],
+                                                      parameters=(
+                                                          int(time()),
+                                                          challenge_id,
+                                                          title,
+                                                          body,
+                                                          None,
+                                                          author_id))
         submission_id = cursor.lastrowid
         cursor.close()
         return submission_id
     
     def remove_submission(self, submission_id: int):
-        _, cursor = self.connection.execute(query=sql_table["remove_submission"], parameters=(submission_id,))
+        _, cursor = self.connection.execute(query=sql_table["remove_submission"],
+                                                      parameters=(submission_id,))
         cursor.close()
 
     # MARK: Get all user content
@@ -273,7 +343,14 @@ class AbstractDatabase:
         )
 
     def get_user_content(self, as_user_id: int, for_user_id: int) -> List[ChallengeHusk | CommentHusk | SubmissionHusk]:
-        results = self.connection.query(query=sql_table["get_user_content"], parameters=(as_user_id, for_user_id, as_user_id, for_user_id, as_user_id, for_user_id))
+        results = self.connection.query(query=sql_table["get_user_content"],
+                                             parameters=(
+                                                 as_user_id,
+                                                 for_user_id,
+                                                 as_user_id,
+                                                 for_user_id,
+                                                 as_user_id,
+                                                 for_user_id))
         content = []
         for entry_type, *result in results:
             if entry_type == "challenge":
@@ -287,7 +364,8 @@ class AbstractDatabase:
     # MARK: Vote statistics
 
     def get_received_votes(self, user_id: int) -> StatsDict:
-        [result] = self.connection.query(query=sql_table["get_received_votes"], parameters=(user_id, user_id, user_id))
+        [result] = self.connection.query(query=sql_table["get_received_votes"],
+                                         parameters=(user_id, user_id, user_id))
         if not result:
             raise StatsException("Unexpected stats (recv) query error.")
         return {
@@ -297,7 +375,8 @@ class AbstractDatabase:
         }
     
     def get_given_votes(self, user_id: int) -> StatsDict:
-        [result] = self.connection.query(query=sql_table["get_given_votes"], parameters=(user_id, user_id, user_id))
+        [result] = self.connection.query(query=sql_table["get_given_votes"],
+                                         parameters=(user_id, user_id, user_id))
         if not result:
             raise StatsException("Unexpected stats (give) query error.")
         return {

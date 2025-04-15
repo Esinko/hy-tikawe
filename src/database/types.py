@@ -11,7 +11,7 @@ class Asset:
         self.filename = filename
         self.value = value
 
-    def __dict__(self):
+    def to_dict(self):
         return {
             "id": self.id,
             "filename": self.filename
@@ -35,13 +35,13 @@ class Profile:
         self.image_asset = image_asset
         self.banner_asset = banner_asset
     
-    def __dict__ (self):
+    def to_dict (self):
         return {
             "id": self.id,
             "user_id": self.user_id,
             "description": self.description,
-            "image_asset": self.image_asset.__dict__() if self.image_asset else None,
-            "banner_asset": self.banner_asset.__dict__() if self.banner_asset else None
+            "image_asset": self.image_asset.to_dict() if self.image_asset else None,
+            "banner_asset": self.banner_asset.to_dict() if self.banner_asset else None
         }
 
 class ProfileEditable(TypedDict):
@@ -73,14 +73,14 @@ class User:
         self.is_admin = is_admin == 1
         self.profile = profile
 
-    def __dict__(self):
+    def to_dict(self):
         return {
             "id": self.id,
             "username": self.username,
             "password_hash": self.password_hash,
             "require_new_password": self.require_new_password,
             "is_admin": self.is_admin,
-            "profile": self.profile.__dict__()
+            "profile": self.profile.to_dict()
         }
 
 class UserEditable(TypedDict):
@@ -144,7 +144,7 @@ class ChallengeHusk:
         self.votes = votes
         self.has_my_vote = has_my_vote == 1
 
-    def __dict__(self):
+    def to_dict(self):
         return {
             "id": self.id,
             "created": self.created,

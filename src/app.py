@@ -1,5 +1,14 @@
 from pathlib import Path
-from flask import Flask, Response, redirect, render_template, request, send_from_directory, session
+from flask import (
+    Flask,
+    Response,
+    redirect,
+    render_template,
+    request,
+    send_from_directory,
+    session,
+    g
+)
 from api import (
     api_delete_challenge,
     api_edit_challenge,
@@ -12,16 +21,16 @@ from api import (
     api_edit_comment,
     api_post_comment
 )
-from database.params import database_params
-from database.abstract import AbstractDatabase, AssetNotFoundException, ChallengeNotFoundException, DatabaseConnection, UserNotFoundException
+from database.abstract import (
+    AssetNotFoundException,
+    ChallengeNotFoundException,
+    UserNotFoundException
+)
 from datetime import datetime
+from util.get_db import get_db
 from util.filetype import filename_to_file_type
 from util.random_text import get_random_top_text
 from secrets import token_urlsafe
-
-# Initialize database
-database_connection = DatabaseConnection(*database_params).open()
-database_connection.close()
 
 # Initialize Flask
 app = Flask(__name__)
@@ -37,6 +46,13 @@ app.secret_key = secret_key.read_text()
 def epoch_to_date_filter(epoch):
     return datetime.fromtimestamp(epoch).strftime("%d.%m.%Y @ %H:%M ")
 
+# MARK: DB teardown
+@app.teardown_appcontext # Auto-closes the database connection
+def close_connection(_):
+    db = getattr(g, "_database", None)
+    if db is not None:
+        db.close()
+
 # Public dir route
 @app.route("/public/<path>")
 def public(path):
@@ -47,12 +63,19 @@ def public(path):
 @app.route("/c/<category_id>")
 def home(category_id=None):
     page = int(request.args.get("page") if "page" in request.args.keys() else "0")
-    database = AbstractDatabase(DatabaseConnection(*database_params).open())
-    categories = database.get_categories()
-    challenges = database.get_challenges(session["user"]["id"] if "user" in session else -1, category_id, page)
+    categories = get_db().get_categories()
+    challenges = get_db().get_challenges(
+        session["user"]["id"] if "user" in session else -1,
+        category_id,
+        page)
     category_name = categories[int(category_id) - 1].name if category_id else None
-    database.connection.close()
-    return render_template("./home.html", at_home=request.path == "/", categories=categories, challenges=challenges, category_name=category_name, page=page, top_text=get_random_top_text())
+    return render_template("./home.html",
+                           at_home=request.path == "/",
+                           categories=categories,
+                           challenges=challenges,
+                           category_name=category_name,
+                           page=page,
+                           top_text=get_random_top_text())
 
 @app.route("/search")
 def search():
@@ -60,10 +83,17 @@ def search():
     page = int(request.args.get("page") if "page" in request.args.keys() else "0")
     if not search_string:
         return "No search to perform.", 400
-    database = AbstractDatabase(DatabaseConnection(*database_params).open())
-    categories = database.get_categories()
-    challenges = database.search_challenge(search_string, session["user"]["id"] if "user" in session else -1, None, page)
-    return render_template("./search-results.html", categories=categories, challenges=challenges, search_string=search_string, page=page, top_text=get_random_top_text())
+    categories = get_db().get_categories()
+    challenges = get_db().search_challenge(search_string,
+                                                       session["user"]["id"] if "user" in session else -1,
+                                                       None,
+                                                       page)
+    return render_template("./search-results.html",
+                           categories=categories,
+                           challenges=challenges,
+                           search_string=search_string,
+                           page=page,
+                           top_text=get_random_top_text())
 
 @app.route("/login")
 def login():
@@ -80,50 +110,49 @@ def logout():
 
 @app.get("/challenge-new")
 def new_post():
-    database = AbstractDatabase(DatabaseConnection(*database_params).open())
-    categories = database.get_categories()
-    database.connection.close()
-    return render_template("./forms/challenge-new.html", categories=categories, top_text=get_random_top_text())
+    categories = get_db().get_categories()
+    return render_template("./forms/challenge-new.html",
+                           categories=categories,
+                           top_text=get_random_top_text())
 
 @app.route("/chall/<challenge_id>", defaults={"subpath": "", "subaction": "", "reply_id": ""})
 @app.route("/chall/<challenge_id>/", defaults={"subpath": "", "subaction": "", "reply_id": ""})
 @app.route("/chall/<string:challenge_id>/<path:subpath>/", defaults={"subaction": "", "reply_id": ""})
 @app.route("/chall/<string:challenge_id>/<path:subpath>/<string:reply_id>/<path:subaction>")
 def challenge(challenge_id, subpath, reply_id, subaction):
-    database = AbstractDatabase(DatabaseConnection(*database_params).open())
-    categories = database.get_categories()
+    categories = get_db().get_categories()
+    user_id = session["user"]["id"] if "user" in session else -1
     try:
-        # Get data
-        user_id = session["user"]["id"] if "user" in session else -1
-        challenge = database.get_challenge(user_id, challenge_id)
-        comments_and_submissions, comment_to_edit = ([], None)
-        if not reply_id:
-            comments_and_submissions = database.get_challenge_replies(user_id, challenge_id)
-        else:
-            comment_to_edit = database.get_comment(user_id, reply_id)
-        
-        database.connection.close()
-        
-        # Select template based on subpath
-        template = "./challenge.html"
-        if subpath == "edit":
-            template = "./forms/challenge-edit.html"
-        elif subpath == "delete":
-            template = "./forms/challenge-delete.html"
-        elif subpath == "com" and subaction == "edit":
-            template = "./forms/comment-edit.html"
-        elif subpath == "com" and subaction == "delete":
-            template = "./forms/comment-delete.html"
-        elif subpath == "com":
-            template = "./forms/comment-new.html"
-        return render_template(template, categories=categories, challenge=challenge, replies=comments_and_submissions, comment_to_edit=comment_to_edit, top_text=get_random_top_text())
+        # Get challenge data
+        challenge = get_db().get_challenge(user_id, challenge_id)
     except ChallengeNotFoundException:
-        database.connection.close()
         return redirect("/")
-    except Exception as err:
-        database.connection.close()
-        print("Challenge Page Error:", err)
-        return "Internal Server Error.", 500
+    
+    # Get comments and submissions
+    comments_and_submissions, comment_to_edit = ([], None)
+    if not reply_id:
+        comments_and_submissions = get_db().get_challenge_replies(user_id, challenge_id)
+    else:
+        comment_to_edit = get_db().get_comment(user_id, reply_id)
+
+    # Select template based on subpath
+    template = "./challenge.html"
+    if subpath == "edit":
+        template = "./forms/challenge-edit.html"
+    elif subpath == "delete":
+        template = "./forms/challenge-delete.html"
+    elif subpath == "com" and subaction == "edit":
+        template = "./forms/comment-edit.html"
+    elif subpath == "com" and subaction == "delete":
+        template = "./forms/comment-delete.html"
+    elif subpath == "com":
+        template = "./forms/comment-new.html"
+    return render_template(template,
+                           categories=categories,
+                           challenge=challenge,
+                           replies=comments_and_submissions,
+                           comment_to_edit=comment_to_edit,
+                           top_text=get_random_top_text())
 
 @app.get("/me")
 def profile_me():
@@ -131,32 +160,41 @@ def profile_me():
 
 @app.get("/me/edit")
 def profile_edit():
-    database = AbstractDatabase(DatabaseConnection(*database_params).open())
-    categories = database.get_categories()
-    user = database.get_user(session["user"]["username"])
-    database.connection.close()
-    return render_template("./forms/profile-edit.html", profile=user.profile.__dict__(), username=user.username, categories=categories, top_text=get_random_top_text())
+    categories = get_db().get_categories()
+    user = get_db().get_user(session["user"]["username"])
+    return render_template("./forms/profile-edit.html",
+                           profile=user.profile.to_dict(),
+                           username=user.username,
+                           categories=categories,
+                           top_text=get_random_top_text())
 
 @app.get("/u/<username>")
 def profile(username):
-    database = AbstractDatabase(DatabaseConnection(*database_params).open())
-    categories = database.get_categories()
+    categories = get_db().get_categories()
     try:
-        user = database.get_user(username)
-        content = database.get_user_content(session["user"]["id"] if "user" in session else -1, user.id)
-        received_votes = database.get_received_votes(user.id)
-        given_votes = database.get_given_votes(user.id)
-        database.connection.close()
+        # Get user data
+        user = get_db().get_user(username)
     except UserNotFoundException:
         return redirect("/")
-    return render_template("./profile.html", profile=user.profile.__dict__(), username=username, categories=categories, content=content, received_votes=received_votes, given_votes=given_votes, top_text=get_random_top_text())
+    
+    content = get_db().get_user_content(session["user"]["id"] if "user" in session else -1,
+                                                                        user.id)
+    received_votes = get_db().get_received_votes(user.id)
+    given_votes = get_db().get_given_votes(user.id)
+
+    return render_template("./profile.html",
+                           profile=user.profile.to_dict(),
+                           username=username,
+                           categories=categories,
+                           content=content,
+                           received_votes=received_votes,
+                           given_votes=given_votes,
+                           top_text=get_random_top_text())
 
 @app.get("/a/<id>")
 def asset(id):
-    database = AbstractDatabase(DatabaseConnection(*database_params).open())
     try:
-        asset = database.get_asset(id)
-        database.connection.close()
+        asset = get_db().get_asset(id)
     except AssetNotFoundException:
         return redirect("/")
 
