@@ -3,7 +3,7 @@
 from sqlite3 import connect, Connection, Cursor
 from pathlib import Path
 from time import time
-from typing import Any, Tuple
+from typing import Any, List, Optional, Tuple, Union
 
 class DatabaseConnection:
     def __init__(self, database="./main.db", schema="./schema.sql", init="./init.sql"):
@@ -53,7 +53,7 @@ class DatabaseConnection:
         self.connection.close()
     
     # Execute a command against the database
-    def execute(self, query: str, parameters: Tuple[Any] | dict) -> Tuple[Connection, Cursor]:
+    def execute(self, query: str, parameters: Union[Tuple[Any], dict]) -> Tuple[Connection, Cursor]:
         try:
             if not self.connection:
                 raise Exception("Database not open!")
@@ -66,7 +66,7 @@ class DatabaseConnection:
         return self.connection, cursor
     
     # Query the database
-    def query(self, query = str, parameters: Tuple[Any] | dict = {}, limit: int = -1) -> list[Any]:
+    def query(self, query = str, parameters: Optional[Union[Tuple[Any], dict]] = None, limit: int = -1) -> List[Any]:
         if not self.connection:
             raise Exception("Database not open!")
         cursor = self.connection.cursor()

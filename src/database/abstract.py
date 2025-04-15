@@ -2,7 +2,7 @@
 # Implements complex functions to perform tasks (not just "commands") against the database
 
 from time import time
-from typing import List, Literal
+from typing import List, Literal, Optional, Union
 from database.sql import sql_table
 from database.connection import DatabaseConnection
 from database.types import (
@@ -147,7 +147,7 @@ class AbstractDatabase:
         return categories
     
     # MARK: Chall. abstractions
-    def get_challenges(self, current_user_id: int, category_id: int | None, page: int) -> List[ChallengeHusk]:
+    def get_challenges(self, current_user_id: int, category_id: Optional[int], page: int) -> List[ChallengeHusk]:
         page_size = 10
         results = self.connection.query(query=sql_table["get_full_challenges"],
                                              parameters=(
@@ -168,7 +168,7 @@ class AbstractDatabase:
             raise ChallengeNotFoundException(challenge_id)
         return ChallengeHusk(*result)
     
-    def get_challenge_replies(self, current_user_id: int, challenge_id: int) -> List[CommentHusk | SubmissionHusk]:
+    def get_challenge_replies(self, current_user_id: int, challenge_id: int) -> List[Union[CommentHusk, SubmissionHusk]]:
         # TODO: Pagination
         results = self.connection.query(query=sql_table["get_comments_and_submissions"],
                                              parameters=(
@@ -223,7 +223,7 @@ class AbstractDatabase:
         cursor.close()
         return post_id
     
-    def search_challenge(self, search_string: str, current_user_id: int, category_id: int | None, page: int):
+    def search_challenge(self, search_string: str, current_user_id: int, category_id: Optional[int], page: int):
         page_size = 10
         results = self.connection.query(query=sql_table["search_challenges"],
                                              parameters=(
@@ -342,7 +342,7 @@ class AbstractDatabase:
             None            # solution_filename
         )
 
-    def get_user_content(self, as_user_id: int, for_user_id: int) -> List[ChallengeHusk | CommentHusk | SubmissionHusk]:
+    def get_user_content(self, as_user_id: int, for_user_id: int) -> List[Union[ChallengeHusk, CommentHusk, SubmissionHusk]]:
         results = self.connection.query(query=sql_table["get_user_content"],
                                              parameters=(
                                                  as_user_id,

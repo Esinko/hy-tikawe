@@ -1,6 +1,6 @@
 # Typings for database abstractions and some related exceptions
 
-from typing import TypedDict
+from typing import Optional, TypedDict
 
 class Asset:
     id: str
@@ -25,8 +25,8 @@ class Profile:
     id: str
     user_id: str
     description: str
-    image_asset: Asset | None
-    banner_asset: Asset | None
+    image_asset: Optional[Asset]
+    banner_asset: Optional[Asset]
 
     def __init__(self, id, user_id, description, image_asset, banner_asset):
         self.id = id
@@ -46,8 +46,8 @@ class Profile:
 
 class ProfileEditable(TypedDict):
     description: str
-    image_asset_id: int | None
-    banner_asset_id: int | None
+    image_asset_id: Optional[int]
+    banner_asset_id: Optional[int]
 
 class UserDict(TypedDict):
     id: str
