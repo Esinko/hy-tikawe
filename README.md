@@ -33,10 +33,10 @@ Projektirakenne on suht. locked-in ja komponentteja on jaettu eri tiedostoihin k
 
 ### Sovelluksen käyttö
 - Sovelluksen ainut riippuvuus on `flask`.
-- Sovellus edellyttää Python version `3.10` tai uudemman!
+- Sovellus edellyttää Python version `>=3.8`.
 - Tietokanta alustuu automaattisesti.
 
-#### Projektiympäristö (Vaihtoehtoinen)
+#### Projektiympäristö (vaihtoehtoinen)
 Luo virtuaaliympäristö:
 
 ```bash
@@ -45,14 +45,24 @@ $ source venv/bin/activate
 ```
 
 #### Asenna riippuvuudet
+`requirements.txt` sisältää `flask`-kirjaston lisäksi `python-dotnev`-kirjaston, joka mahdollistaa `flask run` komennon toimivuuden repositorion juuressa.
+
 
 ```bash
-$ pip install flask
+$ pip install -r requirements.txt
 ```
 
 #### Suorita sovellus
+Mikäli `python-dotenv` saatavilla:
+
 ```bash
 $ flask run
+```
+
+Muussa tapauksessa:
+
+```bash
+$ flask --app ./src/app.py run --debug
 ```
 
 ### Suunnitelma
@@ -81,4 +91,3 @@ Perinteisen code golfin sijaan sivulla on kategoriat:
     - Muokattavia tietoja ovat lempinimi, kuvaus, profiilikuva ja profiilibanner
     - Profiilista näkyy kaikki käyttäjän haasteet, vastaukset ja kommentit
     - Profiilista näkyy käyttäjän saamien äänien summa
-    
