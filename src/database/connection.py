@@ -61,19 +61,19 @@ class DatabaseConnection:
             cursor.execute(query, parameters)
             self.connection.commit()
         except Exception as err:
-            print("Database execution error:", err)
+            print("Database execution error:", err, "For:", query, "With params:", parameters)
             self.connection.rollback()
         return self.connection, cursor
     
     # Query the database
-    def query(self, query = str, parameters: Optional[Union[Tuple[Any], dict]] = None, limit: int = -1) -> List[Any]:
+    def query(self, query = str, parameters: Optional[Union[Tuple[Any], dict]] = (), limit: int = -1) -> List[Any]:
         if not self.connection:
             raise Exception("Database not open!")
         cursor = self.connection.cursor()
         try:
             cursor.execute(query, parameters)
         except Exception as e:
-            print("Database execution error:", e)
+            print("Database execution error:", e, "For:", query, "With params:", parameters)
             self.connection.rollback()
         results = cursor.fetchmany(limit)
         return results
