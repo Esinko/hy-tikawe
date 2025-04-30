@@ -16,12 +16,12 @@
             </div>
             <div class="stack">
                 {% for challenge in challenges %}
-                    {% with spacer=15 %}
+                    {% with spacer=15, no_edit_buttons=true %}
                         {% include "./components/challenge.html" %}
                     {% endwith %}
                 {% endfor %}
                 {% if challenges | length == 0 %}
-                    <img src="/public/emptiness.gif">
+                    <img src="/public/emptiness.gif" alt="futurama-emptiness-meme">
                     <p>(No search results)</p>
                 {% endif %}
                 

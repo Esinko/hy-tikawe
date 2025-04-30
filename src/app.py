@@ -186,6 +186,7 @@ def profile_edit():
 @app.get("/u/<username>")
 def profile(username):
     categories = get_db().get_categories()
+    page = int(request.args.get("page") if "page" in request.args.keys() else "0")
     try:
         # Get user data
         user = get_db().get_user(username)
@@ -193,7 +194,7 @@ def profile(username):
         return redirect("/")
     
     content = get_db().get_user_content(session["user"]["id"] if "user" in session else -1,
-                                                                        user.id)
+                                                                        user.id, page)
     received_votes = get_db().get_received_votes(user.id)
     given_votes = get_db().get_given_votes(user.id)
 
@@ -204,7 +205,8 @@ def profile(username):
                            content=content,
                            received_votes=received_votes,
                            given_votes=given_votes,
-                           top_text=get_random_top_text())
+                           top_text=get_random_top_text(),
+                           page=page)
 
 @app.get("/a/<id>")
 def asset(id):

@@ -23,7 +23,7 @@
                 </a>
                 <div class="user-box">
                     {% if session.user and session.user.profile.image_asset %}
-                    <img width="25px" height="25px" class="profile-image" src="/a/{{ session.user.profile.image_asset.id }}"></img>
+                    <img width="25px" height="25px" class="profile-image" src="/a/{{ session.user.profile.image_asset.id }}" alt="profile image"></img>
                     {% endif %}
                     <a href="/me">
                         {{ session.user.username }}

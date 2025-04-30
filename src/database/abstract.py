@@ -378,11 +378,12 @@ class AbstractDatabase:
             result[12],     # has_my_vote
             result[0],      # challenge_id (target_challenge_id)
             result[3],      # title
-            None,           # solution_asset_id
-            None            # solution_filename
+            result[13],     # solution_asset_id
+            result[14]      # solution_filename
         )
 
-    def get_user_content(self, as_user_id: int, for_user_id: int) -> List[Union[ChallengeHusk, CommentHusk, SubmissionHusk]]:
+    def get_user_content(self, as_user_id: int, for_user_id: int, page: int) -> List[Union[ChallengeHusk, CommentHusk, SubmissionHusk]]:
+        page_size = 10
         results = self.connection.query(query=sql_table["get_user_content"],
                                              parameters=(
                                                  as_user_id,
@@ -390,11 +391,13 @@ class AbstractDatabase:
                                                  as_user_id,
                                                  for_user_id,
                                                  as_user_id,
-                                                 for_user_id))
+                                                 for_user_id,
+                                                 page_size,
+                                                 page * page_size))
         content = []
         for entry_type, *result in results:
             if entry_type == "challenge":
-                content.append(ChallengeHusk(*result[1:]))
+                content.append(ChallengeHusk(*result[1:13]))
             elif entry_type == "comment":
                 content.append(CommentHusk(*self._transform_to_reply(result)[:9]))
             else:

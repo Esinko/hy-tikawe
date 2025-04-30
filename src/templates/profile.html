@@ -20,7 +20,7 @@
                 </div>
                 {% endif %}
                 {% if profile.banner_asset %}
-                <img class="profile-banner" src="/a/{{ profile.banner_asset.id }}">
+                <img class="profile-banner" src="/a/{{ profile.banner_asset.id }}" alt="profile banner">
                 {% else %}
                 <span class="profile-banner profile-banner-placeholder"></span>
                 {% endif %}
@@ -68,6 +68,7 @@
                 
                 <h3 class="minimal align-center profile-intermediary">Content by {{ username }}</h3>
                 {% include "./components/full-content.html" %}
+                {% include "./components/page-selection.html" %}
             </div>
         </div>
     </main>

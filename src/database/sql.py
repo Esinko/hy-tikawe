@@ -394,7 +394,9 @@ sql_table = {
             EXISTS (
                 SELECT 1 FROM Votes
                 WHERE challenge_id = Challenges.id AND voter_id = ?
-            ) AS has_voted
+            ) AS has_voted,
+            NULL AS solution_asset_id,
+            NULL AS solution_filename
         FROM Challenges
         JOIN ChallengeCategories ON Challenges.category_id = ChallengeCategories.id
         JOIN Users ON Challenges.author_id = Users.id
@@ -420,7 +422,9 @@ sql_table = {
             EXISTS (
                 SELECT 1 FROM Votes
                 WHERE comment_id = Comments.id AND voter_id = ?
-            ) AS has_votes
+            ) AS has_votes,
+            NULL AS solution_asset_id,
+            NULL AS solution_filename
         FROM Comments
         JOIN Users ON Comments.author_id = Users.id
         LEFT JOIN Profiles ON Users.id = Profiles.user_id
@@ -445,12 +449,15 @@ sql_table = {
             EXISTS (
                 SELECT 1 FROM Votes
                 WHERE submission_id = Submissions.id AND voter_id = ?
-            ) AS has_voted
+            ) AS has_voted,
+            Submissions.solution_asset_id,
+            (SELECT filename FROM Assets WHERE id = Submissions.solution_asset_id) AS solution_filename
         FROM Submissions
         JOIN Users ON Submissions.author_id = Users.id
         LEFT JOIN Profiles ON Users.id = Profiles.user_id
         WHERE Submissions.author_id = ?
 
         ORDER BY created DESC
+        LIMIT ? OFFSET ?;
     """
 }

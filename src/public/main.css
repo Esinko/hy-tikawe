@@ -343,7 +343,7 @@ nav a, .user-box {
     font-size: 20px;
     color: white;
 }
-.comment a, .submission a {
+.comment a, .submission a, .challenge-mini-tools a {
     padding-left: 0px;
     margin-bottom: 0px;
     margin-top: 0px;

@@ -40,7 +40,7 @@
         <div class="row" style="align-items: center; gap: 5px; margin-bottom: 10px;">
             <div class="row" style="width: min-content">
                 {% if challenge.author_image_id is not none %}
-                <img width="20px" height="20px" class="profile-image" src="/a/{{ challenge.author_image_id }}"></img>
+                <img width="20px" height="20px" class="profile-image" src="/a/{{ challenge.author_image_id }}" alt="profile image"></img>
                 {% else %}
                 <p class="profile-text">{{ challenge.author_name[0].upper() + challenge.author_name[1] }}</p>
                 {% endif %}
@@ -52,5 +52,11 @@
         </div>
         <a href="/chall/{{ challenge.id }}">{{ challenge.title }}</a>
         <p>{{ challenge.body }}</p>
+        {% if session.user and (session.user.id == challenge.author_id or session.user.is_admin) and not no_edit_buttons %}
+        <div class="challenge-mini-tools row" style="justify-content: flex-end; gap: 15px;">
+            <a href="/chall/{{ challenge.id }}/edit">Edit</a>
+            <a href="/chall/{{ challenge.id }}/delete">Delete</a>
+        </div>
+        {% endif %}
     </div>
 </div>

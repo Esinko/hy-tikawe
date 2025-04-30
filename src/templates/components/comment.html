@@ -32,7 +32,7 @@
         <div class="row" style="align-items: center; gap: 5px; margin-bottom: 10px;">
             <div class="row" style="width: min-content">
                 {% if comment.author_image_id is not none %}
-                <img width="20px" height="20px" class="profile-image" src="/a/{{ comment.author_image_id }}"></img>
+                <img width="20px" height="20px" class="profile-image" src="/a/{{ comment.author_image_id }}" alt="profile image"></img>
                 {% else %}
                 <p class="profile-text">{{ comment.author_name[0].upper() + comment.author_name[1] }}</p>
                 {% endif %}

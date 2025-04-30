@@ -18,7 +18,10 @@
                     <a href="{{ request.path + 'delete'}}" class="no-select">Delete</a>
                 </div>
                 {% endif %}
-                {% include "./components/challenge.html" %}
+
+                {% with no_edit_buttons=true %}
+                    {% include "./components/challenge.html" %}
+                {% endwith %}
                 
                 <div class="row">
                     <span class="vertical-line" style="margin-left: 23px; visibility: {{ 'hidden' if replies|length == 0 else '' }}"></span>

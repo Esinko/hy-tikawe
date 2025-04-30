@@ -1,8 +1,8 @@
-<div class="row" style="width: 100%; justify-content: flex-end;">
+<div class="row" style="width: 100%; justify-content: flex-end; padding-bottom: 10px;">
     {% if page != 0 %}
         <a href="?page={{ page - 1 }}{{ '&s=' + search_string if search_string else '' }}">Previous page</a>
     {% endif %}
-    {% if challenges | length != 0 %}
+    {% if challenges | length != 0 or content | length != 0 %}
         <a href="?page={{ page + 1 }}{{ '&s=' + search_string if search_string else '' }}">Next page</a>
     {% endif %}
 </div>
