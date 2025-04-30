@@ -1,6 +1,5 @@
 Developer's Notes to Self:
 - Sessions need to timeout
-- Make database lib require less boilerplate
 - Require new password logic (forced reset too)
 - Look into using named params to optimize large queries
 - User settings (mainly password change)
@@ -8,3 +7,15 @@ Developer's Notes to Self:
 - Add challenge locks (admin_only and regular user enforced)
 - Sort by most votes
 - Total number of posts to profile stats
+- Hide my profile option
+- Post visibility (pub/hid/admin only)
+- Consider unifying delete forms
+
+Required:
+- Submissions
+- Check if can submit submission
+- User password change
+- Paginate profile page results
+- Search users
+- Pylint
+- prettify many keys checks

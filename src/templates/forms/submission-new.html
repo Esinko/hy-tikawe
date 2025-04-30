@@ -18,18 +18,40 @@
                     <a href="{{ request.path + '/delete'}}">Delete</a>
                 </div>
                 {% endif %}
-                
                 {% with no_vote=true %}
                     {% include "./components/challenge.html" %}
                 {% endwith %}
 
-                <form action="/api/post/comment" method="POST" style="margin-bottom: 20px; padding-left: 50px; padding-right: 50px; margin-top: 20px;">
-                    <label for="body">Your Comment</label>
+                <form
+                    action="/api/post/submission"
+                    method="POST"
+                    style="margin-bottom: 20px; padding-left: 50px; padding-right: 50px; margin-top: 20px;"
+                    enctype="multipart/form-data"
+                >
+                    <label for="title">Submission Title</label>
+                    <input
+                        type="text"
+                        name="title"
+                        style="width: 400px; margin-bottom: 10px"
+                        placeholder="Attention Grabbing Title"
+                        required
+                    >
+
+                    <label for="body">Submission Body</label>
                     <textarea
                         name="body"
                         placeholder="Uhm, actually ..."
                         style="padding: 8px; margin-bottom: 10px;"
                     ></textarea>
+
+                    <label for="script">Submission Script (.js only)</label>
+                    <input
+                        type="file"
+                        name="script"
+                        accept=".js"
+                        style="padding: 8px; margin-bottom: 10px; width: 280px;"
+                        required
+                    >
 
                     <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
 

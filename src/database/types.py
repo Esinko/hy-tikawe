@@ -201,6 +201,7 @@ class SubmissionHusk:
     id: int
     type = "submission"
     created: int
+    title: str
     body: str
     author_id: int
     author_image_id: int
@@ -208,6 +209,8 @@ class SubmissionHusk:
     challenge_id: int
     votes: int
     has_my_vote: bool
+    script_id: int
+    script_name: str
 
     def __init__(self, id, created, body, author_id, author_name, author_image_id, votes, has_my_vote, challenge_id, title, asset_id, asset_name):
         self.id = id
@@ -218,6 +221,21 @@ class SubmissionHusk:
         self.author_image_id = author_image_id
         self.votes = votes
         self.has_my_vote = has_my_vote == 1
+        self.challenge_id = challenge_id
+        self.title = title
+        self.script_name = asset_name
+        self.script_id = asset_id
+
+class SubmissionNotFoundException(Exception):
+    def __init__(self, submission_id):
+        super().__init__(f"Submission '{submission_id}' not found.")
+
+class SubmissionEditable(TypedDict):
+    title: str
+    body: str
+    script_id: int | None
+    script_name: str
+    script_bytes: str
 
 class StatsDict(TypedDict):
     challenge: int

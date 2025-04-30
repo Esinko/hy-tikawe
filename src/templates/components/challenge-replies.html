@@ -1,6 +1,6 @@
 <div class="row" style="padding-bottom: 18px;">
     <div class="stack comment-tree" style="padding-right: 50px; gap: 12px;">
-        {% for comment in replies %}
+        {% for reply in replies %}
            <div class="row" style="padding-left: 9px;">
                 <div class="stack comment-trunk" style="width: 20px;">
                     <span class="vertical-line"></span>
@@ -8,7 +8,17 @@
                 <div class="stack comment-branch" style="justify-content: center; width: 40px;">
                     <span class="horizontal-line"></span>
                 </div>
-                {% include "./components/comment.html" %}
+                {% if reply.type == "comment" %}
+                    {% with comment=reply %}
+                        {% include "./components/comment.html" %}
+                    {% endwith %}
+                {% elif reply.type == "submission" %}
+                    {% with submission=reply %}
+                        {% include "./components/submission.html" %}
+                    {% endwith %}
+                {% else %}
+                    <p>Unsupported reply type.</p>
+                {% endif %}
            </div>
         {% endfor %}
     </div>

@@ -1,9 +1,20 @@
-<div class="challenge" id="chall-{{ challenge.id }}" style="margin-bottom: {{ spacer or 0 }}px">
-    <form class="vote stack" action="{{ '/api/vote/challenge/' + (challenge.id | string) if 'user' in session else '/login' }}" method="{{ 'GET' if 'user' not in session else 'POST' }}">
+<div
+    class="challenge"
+    id="chall-{{ challenge.id }}"
+    style="margin-bottom: {{ spacer or 0 }}px"
+>
+    <form
+        class="vote stack"
+        action="{{ '/api/vote/challenge/' + (challenge.id | string) if 'user' in session else '/login' }}"
+        method="{{ 'GET' if 'user' not in session else 'POST' }}"
+    >
         <input name="vote_action" type="hidden" value="{{ 0 if challenge.has_my_vote else 1 }}">
         <input name="from_page" type="hidden" value="{{ request.path }}">
         <button
             type="submit"
+            {% if no_vote %}
+                disabled="true"
+            {% endif %}
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -35,7 +46,6 @@
                 {% endif %}
                 <a style="margin-left: 10px; font-size: 14px; max-width: 200px; overflow: hidden;" href="/u/{{ challenge.author_name }}">{{ challenge.author_name }}</a>
             </div>
-            <p class="minimal">|</p>
             <p class="minimal">{{ challenge.created | epoch_to_date }}</p>
             <p class="minimal">|</p>
             <a class="minimal truncate" href="/c/{{ challenge.category_id }}" style="font-size: 14px; max-width: 200px;"><i>{{ challenge.category_name }}</i></a>

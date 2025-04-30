@@ -15,6 +15,8 @@ from database.types import (
     Profile,
     ProfileEditable,
     ProfileNotFoundException,
+    SubmissionEditable,
+    SubmissionNotFoundException,
     User,
     UserEditable,
     UserExistsException,
@@ -134,8 +136,15 @@ class AbstractDatabase:
             raise AssetNotFoundException(asset_id)
         return Asset(asset_id, asset[0], asset[1])
     
-    def delete_asset(self, asset_id: int):
-        self.connection.execute(query=sql_table["delete_asset"], parameters=(asset_id,))
+    def get_asset_with_submission_id(self, submission_id: int) -> Asset:
+        # Handy shortcut used in processing edits to submissions
+        [asset] = self.connection.query(query=sql_table["get_asset_with_submission_id"], parameters=(submission_id,), limit=1)
+        if not asset:
+            raise AssetNotFoundException("unknown")
+        return Asset(asset[0], asset[1], asset[2])
+    
+    def remove_asset(self, asset_id: int):
+        self.connection.execute(query=sql_table["remove_asset"], parameters=(asset_id,))
     
     # MARK: Categ. abstractions
     def get_categories(self) -> List[Category]:
@@ -285,12 +294,12 @@ class AbstractDatabase:
                                                       parameters=(comment_id,))
         cursor.close()
 
-    def get_comment(self, current_user_id: int,comment_id: int) -> CommentHusk:
+    def get_comment(self, current_user_id: int, comment_id: int) -> CommentHusk:
         [result] = self.connection.query(query=sql_table["get_comment"],
                                          parameters=(current_user_id, comment_id))
         if not result:
             raise CommentNotFoundException(comment_id)
-        return CommentHusk(*result)
+        return CommentHusk(*result[1:])
 
     def comment_exists(self, comment_id: int) -> bool:
         return self.connection.query(query=sql_table["comment_exists"],
@@ -306,14 +315,14 @@ class AbstractDatabase:
         cursor.close()
 
     # MARK: Submissions abstractions
-    def create_submission(self, challenge_id: int, title: str, body: str, author_id: int) -> int:
+    def create_submission(self, challenge_id: int, title: str, body: str, author_id: int, asset_id: int | None) -> int:
         _, cursor = self.connection.execute(query=sql_table["create_submission"],
                                                       parameters=(
                                                           int(time()),
                                                           challenge_id,
                                                           title,
                                                           body,
-                                                          None,
+                                                          asset_id,
                                                           author_id))
         submission_id = cursor.lastrowid
         cursor.close()
@@ -322,6 +331,37 @@ class AbstractDatabase:
     def remove_submission(self, submission_id: int):
         _, cursor = self.connection.execute(query=sql_table["remove_submission"],
                                                       parameters=(submission_id,))
+        cursor.close()
+
+    def get_submission(self, current_user_id: int, submission_id: int) -> SubmissionHusk:
+        [result] = self.connection.query(query=sql_table["get_submission"],
+                                         parameters=(current_user_id, submission_id))
+        if not result:
+            raise SubmissionNotFoundException(submission_id)
+        return SubmissionHusk(*result[1:])
+    
+    def submission_exists(self, comment_id: int) -> bool:
+        return self.connection.query(query=sql_table["submission_exists"],
+                                     parameters=(comment_id,), limit=1)[0][0] == 1
+    
+    def edit_submission(self, submission_id: int, new_fields: SubmissionEditable):
+        # Check if challenge exists
+        if not self.submission_exists(submission_id):
+            raise SubmissionNotFoundException(submission_id)
+        
+        # If script_id is not provided, delete original and create new asset
+        script_asset_id = new_fields["script_id"]
+        if not new_fields["script_id"]:
+            current_asset = self.get_asset_with_submission_id(submission_id)
+            self.remove_asset(current_asset.id)
+            new_script_asset = self.create_asset(new_fields["script_name"], new_fields["script_bytes"])
+            script_asset_id = new_script_asset.id
+        
+        _, cursor = self.connection.execute(query=sql_table["edit_submission"],
+                                                      parameters=(new_fields["title"],
+                                                                  new_fields["body"],
+                                                                  script_asset_id,
+                                                                  submission_id))
         cursor.close()
 
     # MARK: Get all user content

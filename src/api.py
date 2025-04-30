@@ -1,3 +1,5 @@
+from re import S
+from traceback import print_exception
 from flask import redirect, request, session
 from database.abstract import ProfileEditable, UserNotFoundException
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -84,9 +86,9 @@ def api_profile_edit():
 
         # Delete existing assets, if necessary
         if user.profile.banner_asset and banner_file:
-            get_db().delete_asset(user.profile.banner_asset.id)
+            get_db().remove_asset(user.profile.banner_asset.id)
         if user.profile.image_asset and image_file:
-            get_db().delete_asset(user.profile.image_asset.id)
+            get_db().remove_asset(user.profile.image_asset.id)
 
         # Create new assets, if necessary
         image_file_id = user.profile.image_asset.id if user.profile.image_asset else None
@@ -112,7 +114,8 @@ def api_profile_edit():
         session["user"] = get_db().get_user(username).to_dict() 
         return redirect("/me")
     except Exception as err:
-        print("Profile Edit Error:", err)
+        print("Profile Edit Error")
+        print_exception(err)
         return "Internal Server Error.", 500
 
 # MARK: Post Challenge
@@ -152,7 +155,8 @@ def api_post_challenge():
         return redirect(f"/chall/{post_id}")
         
     except Exception as err:
-        print("Challenge Post Error:", err)
+        print("Challenge Post Error")
+        print_exception(err)
         return "Internal Server Error.", 500
 
 # MARK: Edit Challenge
@@ -203,7 +207,8 @@ def api_edit_challenge():
         return redirect(f"/chall/{challenge_id}")
         
     except Exception as err:
-        print("Challenge Edit Error", err)
+        print("Challenge Edit Error")
+        print_exception(err)
         return "Internal Server Error.", 500
     
 # MARK: Delete Challenge
@@ -232,7 +237,8 @@ def api_delete_challenge():
         return redirect(f"/")
         
     except Exception as err:
-        print("Challenge Delete Error:", err)
+        print("Challenge Delete Error:")
+        print_exception(err)
         return "Internal Server Error.", 500
 
 # MARK: Vote
@@ -267,7 +273,8 @@ def api_vote(type, target_id):
             return redirect(from_page + "#chall-" + target_id)
         
     except Exception as err:
-        print("Vote Error:", err)
+        print("Vote Error")
+        print_exception(err)
         return "Internal Server Error.", 500 
 
 # MARK: Comment
@@ -292,7 +299,8 @@ def api_post_comment():
         return redirect(f"/chall/{challenge_id}/#c-{comment_id}")
         
     except Exception as err:
-        print("Comment Post Error:", err)
+        print("Comment Post Error")
+        print_exception(err)
         return "Internal Server Error.", 500
 
 def api_edit_comment():
@@ -315,7 +323,6 @@ def api_edit_comment():
         if not has_permission(session["user"], "edit", "comment", comment.author_id):
             return "Permission denied.", 401
             
-        # Edit challenge post
         # TODO: Add edited date?
         get_db().edit_comment(comment_id, {
             "body": body
@@ -323,7 +330,8 @@ def api_edit_comment():
         return redirect(f"/chall/{comment.challenge_id}/#com-{comment_id}")
         
     except Exception as err:
-        print("Comment Edit Error", err)
+        print("Comment Edit Error")
+        print_exception(err)
         return "Internal Server Error.", 500
     
 def api_delete_comment():
@@ -347,11 +355,129 @@ def api_delete_comment():
             return "Permission denied.", 401
 
         # Delete challenge
-        get_db().remove_comment(comment_id)
+        get_db().remove_comment(comment.id)
         return redirect(f"/chall/{comment.challenge_id}")
         
     except Exception as err:
-        print("Comment Delete Error", err)
+        print("Comment Delete Error")
+        print_exception(err)
         return "Internal Server Error.", 500
     
 # MARK: Submissions
+def api_post_submission():
+    if "user" not in session:
+        return "Not logged in.", 401
+    
+    if (
+        "title" not in request.form.keys() or
+        "body" not in request.form.keys() or
+        "script" not in request.files.keys() or 
+        "challenge_id" not in request.form.keys()
+    ):
+        return "Incomplete data.", 400
+
+    user_id = session["user"]["id"]
+    challenge_id = request.form["challenge_id"]
+    title = request.form["title"]
+    body = request.form["body"]
+    script = request.files["script"]
+    script_name = script.filename + ".js" if not script.filename.endswith(".js") else script.filename
+
+    try:
+        # Check that challenge exists
+        if not get_db().challenge_exists(challenge_id):
+            return "Challenge does not exit.", 400
+        
+        # Verify challenge accepts submissions
+        if not get_db().get_challenge(user_id, challenge_id).accepts_submissions:
+            return "Challenge does not accept submissions.", 401
+            
+        # Create asset for submission
+        script_asset = get_db().create_asset(script_name,
+                                                    script.stream.read())
+        
+        # Create submission
+        submission_id = get_db().create_submission(challenge_id, title, body, user_id, script_asset.id if script_asset else None)
+ 
+        return redirect(f"/chall/{challenge_id}/#s-{submission_id}")
+        
+    except Exception as err:
+        print("Comment Post Error")
+        print_exception(err)
+        return "Internal Server Error.", 500
+    
+def api_edit_submission():
+    if "user" not in session:
+        return "Not logged in.", 401
+    
+    if (
+        "body" not in request.form.keys() or
+        "id" not in request.form.keys() or
+        "title" not in request.form.keys()
+    ):
+        return "Incomplete data.", 400
+
+    submission_id = request.form["id"]
+    title = request.form["title"]
+    body = request.form["body"]
+
+    # Script replacement is optional, maintain original if not present
+    script, script_name = None, None
+    if "script" in request.form.keys():
+        script = request.files["script"]
+        script_name = script.filename + ".js" if not script.filename.endswith(".js") else script.filename
+
+    try:
+        # Check that submission exists
+        if not get_db().submission_exists(submission_id):
+            return "Submission does not exit.", 400
+        
+        # Check permission
+        submission = get_db().get_submission(session["user"]["id"], submission_id)
+        if not has_permission(session["user"], "edit", "submission", submission.author_id):
+            return "Permission denied.", 401
+            
+        # TODO: Add edited date?
+        get_db().edit_submission(submission.id, {
+            "title": title,
+            "body": body,
+            "script_id": submission.script_id if not script else None,
+            "script_name": script_name,
+            "script_bytes": script.stream.read() if script else None
+        })
+
+        return redirect(f"/chall/{submission.challenge_id}/#sub-{submission.id}")
+        
+    except Exception as err:
+        print("Submission Edit Error")
+        print_exception(err)
+        return "Internal Server Error.", 500
+
+def api_delete_submission():
+    if "user" not in session:
+        return "Not logged in.", 401
+    
+    if "id" not in request.form.keys():
+        return "Incomplete data.", 400
+    
+    submission_id = request.form["id"]
+
+    try:
+        # Check submissions already exists
+        if not get_db().comment_exists(submission_id):
+            return "Challenge does not exit.", 400
+        
+        submission = get_db().get_comment(session["user"]["id"], submission_id)
+        
+        # Check permission
+        if not has_permission(session["user"], "delete", "submission", submission.author_id):
+            return "Permission denied.", 401
+
+        # Delete challenge
+        get_db().remove_submission(submission.id)
+        return redirect(f"/chall/{submission.challenge_id}")
+        
+    except Exception as err:
+        print("Submission Delete Error")
+        print_exception(err)
+        return "Internal Server Error.", 500

@@ -10,18 +10,18 @@
     <main>
         {% include "./components/header.html" %}
         <div class="content">
-            <p>Edit comment from {{ comment_to_edit.created | epoch_to_date }} in "{{ challenge.title }}":</p>
+            <p>Edit comment from {{ reply_to_edit.created | epoch_to_date }} in "{{ challenge.title }}":</p>
             <form action="/api/edit/comment" method="POST">
-                <input type="hidden" name="id" value="{{ comment_to_edit.id }}">
+                <input type="hidden" name="id" value="{{ reply_to_edit.id }}">
                 <label for="body">Your Comment</label>
                 <textarea
                     name="body"
                     placeholder="Uhm actually"
                     style="padding: 8px; margin-bottom: 10px"
-                >{{ comment_to_edit.body }}</textarea>
+                >{{ reply_to_edit.body }}</textarea>
 
                 <div class="row" style="justify-content: flex-end; gap: 15px; margin-top: 10px;">
-                    <a href="/chall/{{ challenge.id }}/#com-{{ comment_to_edit.id }}">Cancel</a>
+                    <a href="/chall/{{ challenge.id }}/#com-{{ reply_to_edit.id }}">Cancel</a>
                     <button type="submit" style="margin-top: 0px;">Save</button>
                 </div>
             </form>

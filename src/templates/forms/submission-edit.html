@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Code Golf Club</title>
+    <link rel="stylesheet" href="/public/main.css">
+</head>
+<body>
+    <main>
+        {% include "./components/header.html" %}
+        <div class="content">
+            <p>Edit submission from {{ reply_to_edit.created | epoch_to_date }} in "{{ challenge.title }}":</p>
+            <form action="/api/edit/submission" method="POST" enctype="multipart/form-data">
+                <label for="title">Submission Title</label>
+                <input
+                    type="text"
+                    name="title"
+                    style="width: 400px; margin-bottom: 10px"
+                    placeholder="Attention Grabbing Title"
+                    required
+                    value="{{ reply_to_edit.title }}"
+                >
+
+                <label for="body">Submission Body</label>
+                <textarea
+                    name="body"
+                    placeholder="Uhm, actually ..."
+                    style="padding: 8px; margin-bottom: 10px;"
+                >{{ reply_to_edit.body }}</textarea>
+
+                <label for="script">Replace Submission Script (leave empty to keep original, .js only)</label>
+                <input
+                    type="file"
+                    name="script"
+                    accept=".js"
+                    style="padding: 8px; margin-bottom: 10px; width: 280px;"
+                    value="{{ reply_to_edit.script_name }}"
+                >
+
+                <input type="hidden" name="id" value="{{ reply_to_edit.id }}">
+
+                <div class="row" style="justify-content: flex-end; gap: 15px; margin-top: 10px;">
+                    <a href="/chall/{{ challenge.id }}/#sub-{{ reply_to_edit.id }}">Cancel</a>
+                    <button type="submit" style="margin-top: 0px;">Save</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

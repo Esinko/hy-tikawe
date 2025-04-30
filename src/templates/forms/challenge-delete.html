@@ -13,7 +13,9 @@
             <p>Are you sure you want to delete challenge "{{ challenge.title }}"?</p>
 
             <p style="margin-bottom: 20px">Here's a preview of what you will delete:</p>
-            {% include "./components/challenge.html" %}
+            {% with no_vote=true %}
+                {% include "./components/challenge.html" %}
+            {% endwith %}
 
             <p style="margin-top: 20px;">Are you sure you want to delete the challenge?</p>
 

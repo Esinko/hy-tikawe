@@ -11,9 +11,12 @@ from flask import (
 )
 from api import (
     api_delete_challenge,
+    api_delete_submission,
     api_edit_challenge,
+    api_edit_submission,
     api_login,
     api_post_challenge,
+    api_post_submission,
     api_profile_edit,
     api_register,
     api_vote,
@@ -115,11 +118,11 @@ def new_post():
                            categories=categories,
                            top_text=get_random_top_text())
 
-@app.route("/chall/<challenge_id>", defaults={"subpath": "", "subaction": "", "reply_id": ""})
-@app.route("/chall/<challenge_id>/", defaults={"subpath": "", "subaction": "", "reply_id": ""})
-@app.route("/chall/<string:challenge_id>/<path:subpath>/", defaults={"subaction": "", "reply_id": ""})
-@app.route("/chall/<string:challenge_id>/<path:subpath>/<string:reply_id>/<path:subaction>")
-def challenge(challenge_id, subpath, reply_id, subaction):
+@app.route("/chall/<challenge_id>", defaults={"sub_path": "", "sub_action": "", "reply_id": ""})
+@app.route("/chall/<challenge_id>/", defaults={"sub_path": "", "sub_action": "", "reply_id": ""})
+@app.route("/chall/<string:challenge_id>/<path:sub_path>/", defaults={"sub_action": "", "reply_id": ""})
+@app.route("/chall/<string:challenge_id>/<path:sub_path>/<string:reply_id>/<path:sub_action>")
+def challenge(challenge_id, sub_path, reply_id, sub_action):
     categories = get_db().get_categories()
     user_id = session["user"]["id"] if "user" in session else -1
     try:
@@ -128,30 +131,42 @@ def challenge(challenge_id, subpath, reply_id, subaction):
     except ChallengeNotFoundException:
         return redirect("/")
     
-    # Get comments and submissions
-    comments_and_submissions, comment_to_edit = ([], None)
+    # Get comments and submissions or comment/submission to edit
+    comments_and_submissions, reply_to_edit = ([], None)
     if not reply_id:
         comments_and_submissions = get_db().get_challenge_replies(user_id, challenge_id)
+    elif sub_path == "com":
+        reply_to_edit = get_db().get_comment(user_id, reply_id)
+    elif sub_path == "sub":
+        reply_to_edit = get_db().get_submission(user_id, reply_id)
     else:
-        comment_to_edit = get_db().get_comment(user_id, reply_id)
+        return "Unknown reply type.", 404
 
-    # Select template based on subpath
+    # Default challenge template
     template = "./challenge.html"
-    if subpath == "edit":
-        template = "./forms/challenge-edit.html"
-    elif subpath == "delete":
-        template = "./forms/challenge-delete.html"
-    elif subpath == "com" and subaction == "edit":
-        template = "./forms/comment-edit.html"
-    elif subpath == "com" and subaction == "delete":
-        template = "./forms/comment-delete.html"
-    elif subpath == "com":
-        template = "./forms/comment-new.html"
+
+    # If sub_path (and possibly sub_action), pick the proper form template
+    if sub_path:
+        form_key = sub_path + ("-" + sub_action if sub_action else "")
+        forms = {
+            "edit": "./forms/challenge-edit.html",
+            "delete": "./forms/challenge-delete.html",
+            "com-edit": "./forms/comment-edit.html",
+            "com-delete": "./forms/comment-delete.html",
+            "com": "./forms/comment-new.html",
+            "sub-edit": "./forms/submission-edit.html",
+            "sub-delete": "./forms/submission-delete.html",
+            "sub": "./forms/submission-new.html"
+        }
+        if form_key not in forms:
+            return "Not found.", 404
+        template = forms[form_key]
+    
     return render_template(template,
                            categories=categories,
                            challenge=challenge,
                            replies=comments_and_submissions,
-                           comment_to_edit=comment_to_edit,
+                           reply_to_edit=reply_to_edit,
                            top_text=get_random_top_text())
 
 @app.get("/me")
@@ -213,3 +228,6 @@ app.add_url_rule("/api/vote/<type>/<target_id>", view_func=api_vote, methods=["P
 app.add_url_rule("/api/post/comment", view_func=api_post_comment, methods=["POST"])
 app.add_url_rule("/api/edit/comment", view_func=api_edit_comment, methods=["POST"])
 app.add_url_rule("/api/delete/comment", view_func=api_delete_comment, methods=["POST"])
+app.add_url_rule("/api/post/submission", view_func=api_post_submission, methods=["POST"])
+app.add_url_rule("/api/edit/submission", view_func=api_edit_submission, methods=["POST"])
+app.add_url_rule("/api/delete/submission", view_func=api_delete_submission, methods=["POST"])

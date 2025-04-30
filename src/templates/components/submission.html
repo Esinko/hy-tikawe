@@ -1,0 +1,83 @@
+<div class="submission" id="sub-{{ submission.id }}">
+    <form class="vote stack" action="{{ '/api/vote/submission/' + (submission.id | string) if 'user' in session else '/login' }}" method="{{ 'GET' if 'user' not in session else 'POST' }}">
+        <input name="vote_action" type="hidden" value="{{ 0 if submission.has_my_vote else 1 }}">
+        <input name="from_page" type="hidden" value="{{ request.path }}">
+        <button
+            type="submit"
+            {% if no_edit_buttons %}
+                disabled="true"
+            {% endif %}
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                {% if submission.has_my_vote %}
+                    style="stroke: var(--very-yellow); transform: rotate(180deg);"
+                {% else %}
+                    style="stroke: black"
+                {% endif %}
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+                <path d="M6 15l6 -6l6 6" />
+            </svg>
+        </button>
+        <p class="minimal">{{ submission.votes }}</p>
+    </form>
+    <div class="stack" style="width: 100%">
+        <div class="row" style="align-items: center; gap: 5px; margin-bottom: 10px;">
+            <div class="row" style="width: min-content">
+                {% if submission.author_image_id is not none %}
+                <img width="20px" height="20px" class="profile-image" src="/a/{{ submission.author_image_id }}"></img>
+                {% else %}
+                <p class="profile-text">{{ submission.author_name[0].upper() + submission.author_name[1] }}</p>
+                {% endif %}
+                <a style="margin-left: 10px; font-size: 14px; max-width: 200px; overflow: hidden;" href="/u/{{ submission.author_name }}">{{ submission.author_name }}</a>
+            </div>
+            <p class="minimal">Solution</p>
+            <p class="minimal">|</p>
+            <p class="minimal">{{ submission.created | epoch_to_date }}</p>
+            <p class="minimal">|</p>
+            <a href="{{ '/chall/' + submission.challenge_id|string + '/#sub-' + submission.id|string }}" >Permalink</a>
+        </div>
+
+        <div class="row">
+            <a class="title">{{ submission.title }}</a>
+        </div>
+        <pre class="text minimal">{{ submission.body }}</pre>
+
+        <div class="row">
+            <div class="row asset">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                    <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
+                    <path d="M9 17h6" />
+                    <path d="M9 13h6" />
+                </svg>
+                <a href="/a/{{ submission.script_id }}">{{ submission.script_name }}</a>
+            </div>
+            <i style="margin-left: 8px;">Always handle unknown scripts with caution!</i>
+        </div>
+
+        {% if session.user and (session.user.id == submission.author_id or session.user.is_admin) and not no_edit_buttons %}
+        <div class="row" style="justify-content: flex-end; gap: 15px;">
+            <a href="{{ '/chall/' + submission.challenge_id|string + '/sub/' + submission.id|string + '/edit' }}">Edit</a>
+            <a href="{{ '/chall/' + submission.challenge_id|string + '/sub/' + submission.id|string + '/delete' }}">Delete</a>
+        </div>
+        {% endif %}
+    </div>
+</div>

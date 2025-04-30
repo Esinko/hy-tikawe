@@ -54,7 +54,18 @@ sql_table = {
 
     "get_asset": "SELECT filename, value FROM Assets WHERE id = ?",
 
-    "delete_asset": "DELETE FROM Assets WHERE id = ?",
+    "get_asset_with_submission_id": """
+        SELECT
+            id,
+            filename,
+            value
+        FROM Assets
+        WHERE id = (
+            SELECT solution_asset_id FROM Submissions WHERE id = ?
+        )
+    """,
+
+    "remove_asset": "DELETE FROM Assets WHERE id = ?",
 
     # MARK: Category
 
@@ -333,6 +344,35 @@ sql_table = {
     """,
 
     "remove_submission": "DELETE FROM Submissions WHERE id = ?",
+
+    "get_submission":"""
+        SELECT
+            'submission' AS type,
+            Submissions.id,
+            Submissions.created,
+            Submissions.body,
+            Submissions.author_id,
+            Users.username,
+            Profiles.image_asset_id,
+            (SELECT COUNT(*) FROM Votes WHERE submission_id = Submissions.id) AS vote_count,
+            EXISTS (
+                SELECT 1 FROM Votes
+                WHERE submission_id = Submissions.id AND voter_id = ?
+            ) AS has_voted,
+            Submissions.challenge_id,
+            Submissions.title,
+            Submissions.solution_asset_id,
+            Assets.filename AS solution_filename
+        FROM Submissions
+        JOIN Users ON Submissions.author_id = Users.id
+        LEFT JOIN Profiles ON Users.id = Profiles.user_id
+        JOIN Assets ON Submissions.solution_asset_id = Assets.id
+        WHERE Submissions.id = ?
+    """,
+
+    "submission_exists": "SELECT EXISTS (SELECT id FROM Submissions WHERE id = ?)",
+
+    "edit_submission": "UPDATE Submissions SET title = ?, body = ?, solution_asset_id = ? WHERE id = ?",
 
     # MARK: Get all user content
     

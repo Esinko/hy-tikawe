@@ -10,23 +10,23 @@
     <main>
         {% include "./components/header.html" %}
         <div class="content">
-            <p>Are you sure you want to delete a comment from  {{ reply_to_edit.created | epoch_to_date }} in "{{ challenge.title }}"?</p>
+            <p>Are you sure you want to delete a submission from  {{ reply_to_edit.created | epoch_to_date }} in "{{ challenge.title }}"?</p>
 
             <p style="margin-bottom: 20px">Here's a preview of what you will delete:</p>
-            {% with comment=reply_to_edit, no_edit_buttons=true %}
-                {% include "./components/comment.html" %}
+            {% with submission=reply_to_edit, no_edit_buttons=true %}
+                {% include "./components/submission.html" %}
             {% endwith %}
 
-            <p style="margin-top: 20px;">Are you sure you want to delete the comment?</p>
+            <p style="margin-top: 20px;">Are you sure you want to delete the submission?</p>
 
-            <form action="/api/delete/comment" method="POST">
+            <form action="/api/delete/submission" method="POST">
                 <input
                     type="hidden"
                     name="id"
                     value="{{ reply_to_edit.id }}"
                 >
                 <div class="row" style="justify-content: flex-end; gap: 15px; margin-top: 10px;">
-                    <a href="/chall/{{ reply_to_edit.challenge_id }}/#com-{{ reply_to_edit.id }}">Cancel</a>
+                    <a href="/chall/{{ reply_to_edit.challenge_id }}/#sub-{{ reply_to_edit.id }}">Cancel</a>
                     <button type="submit" style="margin-top: 0px;">Delete</button>
                 </div>
             </form>
