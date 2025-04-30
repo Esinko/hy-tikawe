@@ -2,13 +2,14 @@ from re import S
 from traceback import print_exception
 from flask import redirect, request, session
 from database.abstract import ProfileEditable, UserNotFoundException
+from util.includes import includes
 from werkzeug.security import check_password_hash, generate_password_hash
 from util.has_permission import has_permission
 from util.get_db import get_db
 
 # MARK: Login & Register
 def api_login():
-    if "username" not in request.form.keys() or "password" not in request.form.keys():
+    if not includes(request.form, ["username", "password"]):
         return "Username or password missing.", 400
 
     username = request.form["username"]
@@ -31,11 +32,7 @@ def api_login():
         return redirect("/login?fail")
     
 def api_register():
-    if (
-        "username" not in request.form.keys() or
-        "password" not in request.form.keys() or
-        "password-again" not in request.form.keys()
-    ):
+    if not includes(request.form, ["username", "password", "password-again"]):
         return "Username or password missing.", 400
 
     username = request.form["username"]
@@ -67,11 +64,7 @@ def api_profile_edit():
     if "user" not in session:
         return "Not logged in.", 401
     
-    if (
-        "description" not in request.form.keys() or
-        "image" not in request.files.keys() or
-        "banner" not in request.files.keys()
-    ):
+    if not includes(request.files, ["image", "banner"]) or "description" not in request.form.keys():
         return "Incomplete data.", 400
 
     username = session["user"]["username"]
@@ -123,12 +116,7 @@ def api_post_challenge():
     if "user" not in session:
         return "Not logged in.", 401
     
-    if (
-        "title" not in request.form.keys() or
-        "category" not in request.form.keys() or
-        "body" not in request.form.keys() or
-        "accepts_submissions" not in request.form.keys()
-    ):
+    if not includes(request.form, ["title", "category", "body", "accepts_submissions"]):
         return "Incomplete data.", 400
 
     user_id = session["user"]["id"]
@@ -164,12 +152,7 @@ def api_edit_challenge():
     if "user" not in session:
         return "Not logged in.", 401
     
-    if (
-        "title" not in request.form.keys() or
-        "category" not in request.form.keys() or
-        "id" not in request.form.keys() or
-        "accepts_submissions" not in request.form.keys()
-    ):
+    if not includes(request.form, ["title", "category", "id", "accepts_submissions"]):
         return "Incomplete data.", 400
 
     title = request.form["title"]
@@ -368,12 +351,7 @@ def api_post_submission():
     if "user" not in session:
         return "Not logged in.", 401
     
-    if (
-        "title" not in request.form.keys() or
-        "body" not in request.form.keys() or
-        "script" not in request.files.keys() or 
-        "challenge_id" not in request.form.keys()
-    ):
+    if not includes(request.form, ["title", "body", "challenge_id"]) or "script" not in request.files.keys():
         return "Incomplete data.", 400
 
     user_id = session["user"]["id"]
@@ -410,11 +388,7 @@ def api_edit_submission():
     if "user" not in session:
         return "Not logged in.", 401
     
-    if (
-        "body" not in request.form.keys() or
-        "id" not in request.form.keys() or
-        "title" not in request.form.keys()
-    ):
+    if not includes(request.form, ["body", "id", "title"]):
         return "Incomplete data.", 400
 
     submission_id = request.form["id"]
