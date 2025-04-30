@@ -461,3 +461,24 @@ nav a, .user-box {
     margin: 0px;
     font-size: 24px;
 }
+
+.tab-select {
+    padding: 8px;
+    gap: 8px;
+    width: min-content;
+}
+.tab-select a {
+    color: white;
+    font-size: 14px;
+    background-color: black;
+}
+.tab-select a[data-selected] {
+    text-decoration: underline;
+}
+
+.user {
+    background-color: var(--card);
+}
+.user a {
+    font-size: 20px;
+}

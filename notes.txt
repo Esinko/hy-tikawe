@@ -12,10 +12,11 @@ Developer's Notes to Self:
 - Consider unifying delete forms
 
 Required:
-- Submissions
-- Check if can submit submission
+- [x] Submissions
+- [x] Check if can submit submission
 - User password change
-- Paginate profile page results
+- [x] Paginate profile page results
 - Search users
 - Pylint
-- prettify many keys checks
+- [x] prettify many keys checks
+- Multiple challenge assets

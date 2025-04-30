@@ -35,7 +35,7 @@ class Profile:
         self.image_asset = image_asset
         self.banner_asset = banner_asset
     
-    def to_dict (self):
+    def to_dict(self):
         return {
             "id": self.id,
             "user_id": self.user_id,

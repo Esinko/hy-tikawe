@@ -12,6 +12,24 @@
         <div class="content">
             <div class="row" style="justify-content: space-between; margin-bottom: 10px;">
                 <p><i>Search results for '{{ search_string }}'</i></p>
+                <div class="tab-select row">
+                    <a
+                        href="?page={{ page }}&s={{ search_string }}&t=0"
+                        {% if tab == "challenges" %}
+                            data-selected
+                        {% endif %}
+                    >
+                        Challenges
+                    </a>
+                    <a
+                        href="?page={{ page }}&s={{ search_string }}&t=1"
+                        {% if tab == "users" %}
+                            data-selected
+                        {% endif %}
+                    >
+                        Users
+                    </a>
+                </div>
                 {% include "./components/search-box.html" %}
             </div>
             <div class="stack">
@@ -20,7 +38,12 @@
                         {% include "./components/challenge.html" %}
                     {% endwith %}
                 {% endfor %}
-                {% if challenges | length == 0 %}
+                {% for user in users %}
+                    {% with spacer=15, no_edit_buttons=true %}
+                        {% include "./components/user.html" %}
+                    {% endwith %}
+                {% endfor %}
+                {% if challenges|length == 0 and users|length == 0 %}
                     <img src="/public/emptiness.gif" alt="futurama-emptiness-meme">
                     <p>(No search results)</p>
                 {% endif %}

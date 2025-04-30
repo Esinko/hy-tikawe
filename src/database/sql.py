@@ -164,6 +164,8 @@ sql_table = {
 
     "remove_challenge": "DELETE FROM Challenges WHERE id = ?",
 
+    # MARK: Search
+
     "search_challenges": """
         SELECT 
             C.id, 
@@ -200,6 +202,26 @@ sql_table = {
                 LOWER(C.body) LIKE LOWER('%' || ? || '%')
             )
         ORDER BY C.created DESC
+        LIMIT ? OFFSET ?;
+    """,
+
+    "search_users": """
+        SELECT
+            U.id AS user_id,
+            U.username,
+            U.is_admin,
+            P.id AS profile_id,
+            P.description,
+            P.image_asset_id AS profile_image_id,
+            A1.filename AS profile_image_filename,
+            A1.value AS profile_image_data
+        FROM Users AS U
+        LEFT JOIN Profiles AS P ON P.user_id = U.id
+        LEFT JOIN Assets AS A1 ON A1.id = P.image_asset_id
+        WHERE
+            LOWER(U.username) LIKE LOWER('%' || ? || '%')
+        ORDER BY
+            U.username ASC
         LIMIT ? OFFSET ?;
     """,
 

@@ -232,7 +232,8 @@ class AbstractDatabase:
         cursor.close()
         return post_id
     
-    def search_challenge(self, search_string: str, current_user_id: int, category_id: Optional[int], page: int):
+    # MARK: Search
+    def search_challenges(self, search_string: str, current_user_id: int, category_id: Optional[int], page: int):
         page_size = 10
         results = self.connection.query(query=sql_table["search_challenges"],
                                              parameters=(
@@ -243,10 +244,38 @@ class AbstractDatabase:
                                                  search_string,
                                                  page_size,
                                                  page * page_size))
-        challenges = []
+
+        return [ChallengeHusk(*result) for result in results]
+    
+    def search_users(self, search_string: str, page: int):
+        # This method does not returns complete user & profile information
+        # to optimize querying. To get full user info, use get_user
+        page_size = 10
+        results = self.connection.query(query=sql_table["search_users"],
+                                             parameters=(
+                                                 search_string,
+                                                 page_size,
+                                                 page * page_size))
+
+        users = []
         for result in results:
-            challenges.append(ChallengeHusk(*result))
-        return challenges
+            profile_image_asset = Asset(*result[5:8])
+            user_profile = Profile(result[3],
+                                   result[0],
+                                   result[4],
+                                   profile_image_asset,
+                                   None) # Stub 
+            user = User(
+                result[0],
+                result[1],
+                "",
+                False, # Stub
+                result[2] == 1,
+                user_profile
+            )
+            users.append(user)
+
+        return users
 
     # MARK: Voting abstractions
     def vote_for(self, type: Literal["submission", "comment", "challenge"], target_id: int, user_id: int):

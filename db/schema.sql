@@ -18,7 +18,6 @@ CREATE TABLE Users (
     password_hash TEXT NOT NULL,
     require_new_password INTEGER NOT NULL DEFAULT 0,
     is_admin INTEGER NOT NULL DEFAULT 0,
-    UNIQUE(username)
 );
 
 CREATE TABLE Profiles (
@@ -106,6 +105,6 @@ CREATE INDEX votes_submission_voter ON Votes(submission_id, voter_id)
 WHERE submission_id IS NOT NULL;
 
 -- Optimize matching thing id to author id (important for counting total votes for a user)
-CREATE INDEX challenge_id_to_author_id ON Challenges(id, author_id);
-CREATE INDEX comment_id_to_author_id ON Comments(id, author_id);
-CREATE INDEX submission_id_to_author_id ON Submissions(id, author_id);
+CREATE INDEX challenge_id_to_author_id ON Challenges(author_id);
+CREATE INDEX comment_id_to_author_id ON Comments(author_id);
+CREATE INDEX submission_id_to_author_id ON Submissions(author_id);

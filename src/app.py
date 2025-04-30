@@ -83,20 +83,28 @@ def home(category_id=None):
 @app.route("/search")
 def search():
     search_string = request.args.get("s")
+    search_tab = ("users" if request.args.get("t") == "1" else "challenges")
     page = int(request.args.get("page") if "page" in request.args.keys() else "0")
     if not search_string:
         return "No search to perform.", 400
+    
+    users, challenges = [], []
     categories = get_db().get_categories()
-    challenges = get_db().search_challenge(search_string,
+    if search_tab == "users":
+        users = get_db().search_users(search_string, page)
+    else:
+        challenges = get_db().search_challenges(search_string,
                                                        session["user"]["id"] if "user" in session else -1,
                                                        None,
                                                        page)
     return render_template("./search-results.html",
                            categories=categories,
                            challenges=challenges,
+                           users=users,
                            search_string=search_string,
                            page=page,
-                           top_text=get_random_top_text())
+                           top_text=get_random_top_text(),
+                           tab=search_tab)
 
 @app.route("/login")
 def login():
