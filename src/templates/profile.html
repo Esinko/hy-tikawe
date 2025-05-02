@@ -12,11 +12,18 @@
         <div class="content">
             <div
                 class="stack"
-                style="width: 100%; padding-top: 12px; gap: 8px;"
+                style="width: 100%; gap: 8px;"
             >
-                {% if session.user and username == session.user.username %}
                 <div class="row" style="justify-content: flex-end;">
-                    <a href="/me/edit">Edit Profile</a>
+                    {% include "./components/search-box.html" %}
+                </div>
+                {% if session.user and (username == session.user.username or session.user.is_admin) %}
+                <div class="row card" style="justify-content: space-between; width: 100%; margin-top: 10px;">
+                    <p style="width: 100%;"><b>Account Tools</b></p>
+                    <div class="row" style="justify-content: flex-end;">
+                        <a href="{{ '/u/' + username + '/settings' if session.user.is_admin else '/me/settings' }}">Account Settings</a>
+                        <a href="{{ '/u/' + username + '/edit' if session.user.is_admin else '/me/edit' }}">Edit Profile</a>
+                    </div>
                 </div>
                 {% endif %}
                 {% if profile.banner_asset %}
@@ -24,15 +31,17 @@
                 {% else %}
                 <span class="profile-banner profile-banner-placeholder"></span>
                 {% endif %}
-                <div class="row" style="padding: 8px;">
-                    {% if profile.image_asset %}
-                    <img width="80px" height="80px" class="profile-image" src="/a/{{ profile.image_asset.id }}"></img>
-                    {% else %}
-                    <p class="profile-text">{{ username[0].upper() + username[1] }}</p>
-                    {% endif %}
-                    <h2 style="margin-left: 20px;">{{ username }}</h2>
+                <div class="stack card" style="width: 100%;">
+                    <div class="row" style="padding: 8px;">
+                        {% if profile.image_asset %}
+                        <img width="80px" height="80px" class="profile-image" src="/a/{{ profile.image_asset.id }}"></img>
+                        {% else %}
+                        <p class="profile-text">{{ username[0].upper() + username[1] }}</p>
+                        {% endif %}
+                        <h2 style="margin-left: 20px;">{{ username }}</h2>
+                    </div>
+                    <pre class="profile-description">{{ profile.description if profile.description != "" else "No description."}}</pre>
                 </div>
-                <pre class="profile-description">{{ profile.description if profile.description != "" else "No description."}}</pre>
 
                 <h3 class="minimal align-center profile-intermediary">Received Votes</h3>
                 <div class="row" style="justify-content: center; gap: 15px;">

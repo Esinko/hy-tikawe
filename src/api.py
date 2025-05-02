@@ -3,6 +3,7 @@ from traceback import print_exception
 from flask import redirect, request, session
 from database.abstract import ProfileEditable, UserNotFoundException
 from util.includes import includes
+from util.password import is_good_password
 from werkzeug.security import check_password_hash, generate_password_hash
 from util.has_permission import has_permission
 from util.get_db import get_db
@@ -39,25 +40,105 @@ def api_register():
     password = request.form["password"]
     password_again = request.form["password-again"]
 
-    # Make sure username is free
-    try:
-        exists = get_db().user_exists(username)
-        if exists:
-            return redirect("/register?taken")
-    except Exception:
-        return "Internal Server Error.", 500
-    
     # Check passwords match
     if password != password_again:
         return redirect("/register?mismatch")
     
-    # Create user
+    # Check password strength
+    if not is_good_password(password):
+        return redirect("/register?weak")
+
     try:
+        # Make sure username is free
+        exists = get_db().user_exists(username)
+        if exists:
+            return redirect("/register?taken")
+        
+        # Create user
         user = get_db().create_user(username, generate_password_hash(password))
         session["user"] = user.to_dict()
         return redirect("/")
-    except:
-        return "Internal Server Error", 500
+    except Exception as err:
+        print("Register Error")
+        print_exception(err)
+        return "Internal Server Error.", 500
+    
+# MARK: User settings
+def api_change_password():
+    if "user" not in session:
+        return "Not logged in.", 401
+    
+    if not includes(request.form, ["password", "password-again"]):
+        return "Incomplete data.", 400
+    
+    # If user is specified, session user must be admin
+    if "u" in request.args and not session["user"]["is_admin"]:
+        return "Permission denied.", 401
+    
+    username = request.args.get("u", session["user"]["username"])
+    password = request.form["password"]
+    password_again = request.form["password-again"]
+
+    # Check passwords match
+    if password != password_again:
+        return redirect("/me/settings?p-mismatch")
+    
+    # Check password strength
+    if not is_good_password(password):
+        return redirect("/me/settings?p-weak")
+
+    try:
+        # Make sure user exists
+        if not get_db().user_exists(username):
+            return "User does not exist.", 400
+
+        # Change password
+        get_db().edit_user(username, {
+            "username": username,
+            "password_hash": generate_password_hash(password),
+            "require_new_password": False
+        })
+
+        # Admin does not get logged out
+        if "u" in request.args:
+            return redirect(f"/u/{username}")
+        else:   
+            session.clear()
+            return redirect("/login")
+
+    except Exception as err:
+        print("Password Change Error")
+        print_exception(err)
+        return "Internal Server Error.", 500
+    
+def api_require_password_change():
+    if "user" not in session:
+        return "Not logged in.", 401
+    
+    # Must be admin to use this endpoint
+    if not session["user"]["is_admin"]:
+        return "Permission denied.", 401
+
+    if not includes(request.form, ["u"]):
+        return "Incomplete data.", 400
+    
+    username = request.form["u"]
+    required = "required" in request.form.keys()
+    print("REQ", required)
+    
+    try:
+        # Make sure user exists
+        if not get_db().user_exists(username):
+            return "User does not exist.", 400
+
+        # Change password
+        get_db().set_user_new_password_required(username, required)
+        return redirect(f"/u/{username}/settings")
+
+    except Exception as err:
+        print("Password Change Request Error")
+        print_exception(err)
+        return "Internal Server Error.", 500
 
 # MARK: Profiles
 def api_profile_edit():
@@ -122,6 +203,7 @@ def api_post_challenge():
     user_id = session["user"]["id"]
     title = request.form["title"]
     body = request.form["body"]
+    attachments = request.files.getlist("attachments")
     try:
         category_id = int(request.form["category"])
         accepts_submissions = int(request.form["accepts_submissions"]) == 1

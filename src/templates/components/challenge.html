@@ -51,7 +51,7 @@
             <a class="minimal truncate" href="/c/{{ challenge.category_id }}" style="font-size: 14px; max-width: 200px;"><i>{{ challenge.category_name }}</i></a>
         </div>
         <a href="/chall/{{ challenge.id }}">{{ challenge.title }}</a>
-        <p>{{ challenge.body }}</p>
+        <pre>{{ challenge.body }}</pre>
         {% if session.user and (session.user.id == challenge.author_id or session.user.is_admin) and not no_edit_buttons %}
         <div class="challenge-mini-tools row" style="justify-content: flex-end; gap: 15px;">
             <a href="/chall/{{ challenge.id }}/edit">Edit</a>

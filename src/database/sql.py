@@ -2,9 +2,17 @@
 sql_table = {
     # MARK: User
 
-    "user_exists": "SELECT EXISTS (SELECT username FROM Users WHERE username = ?)",
+    "user_exists": """
+        SELECT EXISTS (
+            SELECT username FROM Users WHERE username = ?
+        )
+    """,
 
-    "create_user": "INSERT INTO Users (username, password_hash, require_new_password) VALUES (?, ?, False)",
+    "create_user": """
+        INSERT INTO Users (
+            username, password_hash, require_new_password
+        ) VALUES (?, ?, False)
+    """,
 
     "get_user": """
         SELECT
@@ -16,7 +24,17 @@ sql_table = {
         FROM Users WHERE username = ?
     """,
 
-    "edit_user": "UPDATE Users SET name = ?, password_hash = ?, require_new_password = ? WHERE name = ?",
+    "edit_user": """
+        UPDATE Users
+        SET username = ?, password_hash = ?, require_new_password = ?
+        WHERE username = ?
+    """,
+
+    "edit_user_new_password_required": """
+        UPDATE Users
+        SET require_new_password = ?
+        WHERE username = ?
+    """,
 
     # MARK: Profile
 

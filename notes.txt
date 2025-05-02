@@ -14,9 +14,10 @@ Developer's Notes to Self:
 Required:
 - [x] Submissions
 - [x] Check if can submit submission
-- User password change
+- [x] User password change
 - [x] Paginate profile page results
-- Search users
+- [x] Search users
 - Pylint
 - [x] prettify many keys checks
-- Multiple challenge assets
+- Challenge asset
+- Remove exits check bloat from API

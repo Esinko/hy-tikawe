@@ -5,13 +5,17 @@
 
 ![preview](preview.png)
 
-Käyttäjä voi luoda tilin, kirjautua, luoda haasteita, muokata haasteita, poistaa haasteita ja äänestää haasteita.
-Käyttäjä voi kommentoida haasteita, sekä muokata ja poistaa omia kommenttejaan.
-Lisäksi käyttäjä voi katsella toisten profiileja ja katsella sekä muokata omaa profiiliaan.
-Käyttäjä voi selata haasteita jostain tietystä tai kaikista kategorioista ja etsiä haasteita hakusanalla.
-Hakutulokset ja haastelistaukset on jaettu sivuihin.
-
-Admin tilillä voi muokata kaikkien julkaisemaa sisältöä.
+- Käyttäjä voi luoda tilin, kirjautua, luoda haasteita, muokata haasteita, poistaa haasteita ja äänestää haasteita.
+- Käyttäjä voi kommentoida haasteita, sekä muokata ja poistaa omia kommenttejaan.
+- Lisäksi käyttäjä voi katsella toisten profiileja ja katsella sekä muokata omaa profiiliaan.
+- Käyttäjä voi selata haasteita jostain tietystä tai kaikista kategorioista ja etsiä haasteita hakusanalla.
+- Käyttäjä voi hakea profiileja hakusanalla
+- Hakutulokset ja haastelistaukset on jaettu sivuihin.
+- Käyttäjä voi vaihtaa oman salasanasa
+- Admin tilillä voi muokata kaikkien julkaisemaa sisältöä
+- Admin tilillä voi muokata toisten tilien profiileja
+- Admin tilillä voi vaihtaa toisten tilien salasanoja
+- Admin tilillä voi edellyttää toista tiliä vaihtamaan salasansa kirjautuessa
 
 Projektirakenne on suht. locked-in ja komponentteja on jaettu eri tiedostoihin koodikannan kasvun seurauksena.
 
@@ -23,11 +27,11 @@ Projektirakenne on suht. locked-in ja komponentteja on jaettu eri tiedostoihin k
 - Käyttäjä pystyy lisäämään liitteitä haasteisiin
 - [X] Käyttäjä näkee sovellukseen itse ja toisten käyttäjien toimesta julkaistut haasteet
 - [X] Käyttäjä pystyy etsimään haasteita hakusanalla
-- Käyttäjä pystyy etsimään profiileja hakusanalla
+- [X] Käyttäjä pystyy etsimään profiileja hakusanalla
 - [X] Käyttäjä voi äänestää haasteita
 - [X] Käyttäjä voi luoda, muokata ja poistaa kommentteja
-- Käyttäjä voi luoda, muokata ja poistaa ratkaisuja
-- Käyttäjä voi äänestää ratkaisuja
+- [X] Käyttäjä voi luoda, muokata ja poistaa ratkaisuja
+- [X] Käyttäjä voi äänestää ratkaisuja
 - [X] Käyttäjä voi äänestää kommentteja
 
 

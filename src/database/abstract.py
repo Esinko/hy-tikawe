@@ -88,6 +88,17 @@ class AbstractDatabase:
                                                             username))
         cursor.close()
 
+    def set_user_new_password_required(self, username: str, is_required: bool):
+        # Check if user exists
+        if not self.user_exists(username):
+            raise UserNotFoundException(username)
+        
+        _, cursor = self.connection.execute(query=sql_table["edit_user_new_password_required"],
+                                                      parameters=(
+                                                            is_required,
+                                                            username))
+        cursor.close()
+
     # MARK: Profile Abstractions
     def get_profile(self, user_id: int):
         # Get profile

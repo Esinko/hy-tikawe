@@ -1,8 +1,21 @@
-<div class="row" style="width: 100%; justify-content: flex-end; padding-bottom: 10px;">
-    {% if page != 0 %}
-        <a href="?page={{ page - 1 }}{{ '&s=' + search_string if search_string else '' }}&t={{ tab }}">Previous page</a>
-    {% endif %}
+<div class="row" style="width: 100%; justify-content: space-between; padding-bottom: 10px; padding: 0px 50px 0px 50px;">
     {% if challenges | length != 0 or content | length != 0 or users | length != 0 %}
-        <a href="?page={{ page + 1 }}{{ '&s=' + search_string if search_string else '' }}&t={{ tab }}">Next page</a>
+    <p style="width: 200px;">Page {{ page + 1 }}</p>
     {% endif %}
+    <div class="row" style="justify-content: flex-end;">
+        {% if page != 0 %}
+            <a
+                href="?page={{ page - 1 }}{{ '&s=' + search_string if search_string else '' }}&t={{ '1' if tab == 'users' else '0' }}"
+            >
+                Previous page
+            </a>
+        {% endif %}
+        {% if challenges | length != 0 or content | length != 0 or users | length != 0 %}
+            <a
+                href="?page={{ page + 1 }}{{ '&s=' + search_string if search_string else '' }}&t={{ '1' if tab == 'users' else '0' }}"
+            >
+                Next page
+            </a>
+        {% endif %}
+    </div>
 </div>

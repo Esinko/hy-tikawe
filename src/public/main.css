@@ -98,7 +98,7 @@ button[type="submit"] {
 
 main {
     background-color: var(--main-background);
-    width: 800px;
+    width: 900px;
     height: calc(100vh - 80px);
     max-height: calc(100vh - 80px);
     margin-top: 80px;
@@ -118,19 +118,6 @@ nav a, .user-box {
     margin: 8px;
     background-color: black;
     white-space: nowrap;
-}
-
-.user-box {
-    display: flex;
-    width: min-content;
-    align-items: center;
-    justify-content: center;
-    padding: 0px 8px 0px 8px;
-    border-radius: 2px;
-    gap: 4px;
-}
-.user-box > a {
-    margin: 0px;
 }
 
 /* MARK: Classes */
@@ -199,13 +186,35 @@ nav a, .user-box {
     text-align: center;
 }
 
+.card {
+    background-color: var(--card);
+    padding: 8px;
+    width: min-content;
+    height: min-content;
+}
+
+.user-box {
+    display: flex;
+    width: min-content;
+    align-items: center;
+    justify-content: center;
+    padding: 0px 8px 0px 8px;
+    border-radius: 2px;
+    gap: 4px;
+}
+.user-box > a {
+    margin: 0px;
+}
+
 .profile-image {
     border-radius: 50%;
 }
 .profile-banner {
     position: relative;
     width: 100%;
-    min-height: 160px;
+    min-height: 180px;
+    height: max-content;
+    max-height: 220px;
     padding: 8px;
     border-radius: 4px;
 }
@@ -481,4 +490,8 @@ nav a, .user-box {
 }
 .user a {
     font-size: 20px;
+}
+
+.inline-flex {
+    display: inline-flex;
 }

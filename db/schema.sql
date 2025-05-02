@@ -5,12 +5,6 @@ CREATE TABLE Assets (
     value BLOB NOT NULL
 );
 
-CREATE TABLE Attachments ( -- Challenges can have many assets
-    id INTEGER PRIMARY KEY,
-    challenge_id INTEGER NOT NULL REFERENCES Challenges(id),
-    asset_id INTEGER NOT NULL REFERENCES Assets(id)
-);
-
 -- User Data
 CREATE TABLE Users (
     id INTEGER PRIMARY KEY,

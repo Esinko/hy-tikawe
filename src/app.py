@@ -10,6 +10,7 @@ from flask import (
     g
 )
 from api import (
+    api_change_password,
     api_delete_challenge,
     api_delete_submission,
     api_edit_challenge,
@@ -19,6 +20,7 @@ from api import (
     api_post_submission,
     api_profile_edit,
     api_register,
+    api_require_password_change,
     api_vote,
     api_delete_comment,
     api_edit_comment,
@@ -60,6 +62,20 @@ def close_connection(_):
 @app.route("/public/<path>")
 def public(path):
     return send_from_directory("public", path)
+
+# MARK: Before request
+# If password change is required, only required routes are allowed
+@app.before_request
+def check_required_password_change():
+    if (
+        "user" in session and
+        session["user"]["require_new_password"] and
+        not session["user"]["is_admin"] and
+        request.path not in ["/reset-password", "/api/change-password"] and
+        not request.path.startswith("/public/") and
+        not request.path.startswith("/a/")
+    ):
+        return redirect("/reset-password")
 
 # MARK: Pages
 @app.route("/")
@@ -118,6 +134,11 @@ def register():
 def logout():
     session.clear()
     return redirect("/")
+
+@app.get("/reset-password")
+def reset_password():
+    return render_template("./reset-password.html", top_text=get_random_top_text())
+    
 
 @app.get("/challenge-new")
 def new_post():
@@ -191,6 +212,20 @@ def profile_edit():
                            categories=categories,
                            top_text=get_random_top_text())
 
+@app.route("/me/settings")
+def user_settings():
+    # Must be logged in
+    if "user" not in session:
+        redirect("/")
+        return
+
+    categories = get_db().get_categories()
+
+    return render_template("./user-settings.html",
+                           user=session["user"],
+                           categories=categories,
+                           top_text=get_random_top_text())
+
 @app.get("/u/<username>")
 def profile(username):
     categories = get_db().get_categories()
@@ -215,6 +250,23 @@ def profile(username):
                            given_votes=given_votes,
                            top_text=get_random_top_text(),
                            page=page)
+
+@app.route("/u/<username>/settings")
+def target_user_settings(username):
+    # Must be logged in
+    if "user" not in session:
+        redirect("/")
+        return
+    
+    # Must be admin
+    if not session["user"]["is_admin"]:
+        return "Permission denied.", 401
+    
+    # Get user
+    user = get_db().get_user(username)
+    print(user.to_dict())
+
+    return render_template("./user-settings.html", user=user)
 
 @app.get("/a/<id>")
 def asset(id):
@@ -241,3 +293,5 @@ app.add_url_rule("/api/delete/comment", view_func=api_delete_comment, methods=["
 app.add_url_rule("/api/post/submission", view_func=api_post_submission, methods=["POST"])
 app.add_url_rule("/api/edit/submission", view_func=api_edit_submission, methods=["POST"])
 app.add_url_rule("/api/delete/submission", view_func=api_delete_submission, methods=["POST"])
+app.add_url_rule("/api/change-password", view_func=api_change_password, methods=["POST"])
+app.add_url_rule("/api/admin/request-password-change", view_func=api_require_password_change, methods=["POST"])
