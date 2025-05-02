@@ -1,7 +1,9 @@
 from random import random
 
+
 def get_random_top_text():
-    text =  [
+    # Cool banner texts
+    text = [
         'typeof NaN = "number"',
         '9999999999999999 = 10000000000000000',
         '0.5 + 0.1 === 0.6',
@@ -22,5 +24,5 @@ def get_random_top_text():
         '2 + 2 - 2 = 2',
         '"2" + "2" - "2" = 20'
     ]
-    
+
     return text[round((len(text) - 1) * random())]

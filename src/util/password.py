@@ -1,5 +1,6 @@
 import re
 
+
 def is_good_password(password: str) -> bool:
     return (
         len(password) >= 8 and

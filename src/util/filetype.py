@@ -10,7 +10,7 @@ def filename_to_file_type(filename: str):
         "tif": "image/tiff",
         "svg": "image/svg+xml",
         "avif": "image/avif",
-        "js": "text/plain; charset=utf-8" # Not as a script for a reason!
+        "js": "text/plain; charset=utf-8"  # Not as a script for a reason!
     }
 
     ending = filename.split(".")[-1]

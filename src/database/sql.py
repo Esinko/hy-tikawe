@@ -246,14 +246,14 @@ sql_table = {
     # MARK: Vote
 
     "create_vote_for_challenge": "INSERT INTO Votes (challenge_id, voter_id) VALUES (?, ?)",
-    
-    "create_vote_for_comment": "INSERT INTO Votes (comment_id, voter_id) VALUES (?, ?)" ,
+
+    "create_vote_for_comment": "INSERT INTO Votes (comment_id, voter_id) VALUES (?, ?)",
 
     "create_vote_for_submission": "INSERT INTO Votes (submission_id, voter_id) VALUES (?, ?)",
 
     "remove_vote_from_challenge": "DELETE FROM Votes WHERE challenge_id = ? AND voter_id = ?",
 
-    "remove_vote_from_comment": "DELETE FROM Votes WHERE comment_id = ? AND voter_id = ?" ,
+    "remove_vote_from_comment": "DELETE FROM Votes WHERE comment_id = ? AND voter_id = ?",
 
     "remove_vote_from_submission": "DELETE FROM Votes WHERE submission_id = ? AND voter_id = ?",
 
@@ -289,9 +289,13 @@ sql_table = {
 
     # MARK: Comment
 
-    "create_comment": "INSERT INTO Comments (created, challenge_id, body, author_id) VALUES (?, ?, ?, ?)",
+    "create_comment": """
+        INSERT INTO Comments (
+            created, challenge_id, body, author_id
+        ) VALUES (?, ?, ?, ?)
+    """,
 
-    "get_comment":"""
+    "get_comment": """
         SELECT
             'comment' AS type,
             Comments.id,
@@ -385,7 +389,7 @@ sql_table = {
 
     "remove_submission": "DELETE FROM Submissions WHERE id = ?",
 
-    "get_submission":"""
+    "get_submission": """
         SELECT
             'submission' AS type,
             Submissions.id,
@@ -412,10 +416,14 @@ sql_table = {
 
     "submission_exists": "SELECT EXISTS (SELECT id FROM Submissions WHERE id = ?)",
 
-    "edit_submission": "UPDATE Submissions SET title = ?, body = ?, solution_asset_id = ? WHERE id = ?",
+    "edit_submission": """
+        UPDATE Submissions
+        SET title = ?, body = ?, solution_asset_id = ?
+        WHERE id = ?
+    """,
 
     # MARK: Get all user content
-    
+
     "get_user_content": """
         SELECT
             'challenge' AS type,
