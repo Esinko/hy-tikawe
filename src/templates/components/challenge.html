@@ -10,6 +10,7 @@
     >
         <input name="vote_action" type="hidden" value="{{ 0 if challenge.has_my_vote else 1 }}">
         <input name="from_page" type="hidden" value="{{ request.path }}">
+        <input type="hidden" name="request_token" value="{{ session.request_token }}">
         <button
             type="submit"
             {% if no_vote %}

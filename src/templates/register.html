@@ -55,6 +55,7 @@
                                 name="password-again"
                                 required
                             >
+                            <input type="hidden" name="request_token" value="{{ session.request_token }}">
                             <div class="flex" style="justify-content: flex-end;">
                                 <button type="submit">Register</button>
                             </div>

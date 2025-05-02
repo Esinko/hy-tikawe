@@ -25,6 +25,7 @@
                     name="id"
                     value="{{ reply_to_edit.id }}"
                 >
+                <input type="hidden" name="request_token" value="{{ session.request_token }}">
                 <div class="row" style="justify-content: flex-end; gap: 15px; margin-top: 10px;">
                     <a href="/chall/{{ reply_to_edit.challenge_id }}/#sub-{{ reply_to_edit.id }}">Cancel</a>
                     <button type="submit" style="margin-top: 0px;">Delete</button>

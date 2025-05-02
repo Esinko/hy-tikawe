@@ -76,6 +76,29 @@ def check_required_password_change():
         not request.path.startswith("/a/")
     ):
         return redirect("/reset-password")
+    
+# Handle CSRF token for API endpoints
+@app.before_request
+def check_csrf():
+    if request.path.startswith("/api/"):
+        # API endpoints can only accept POST requests
+        if request.method != "POST":
+            return "Method not allowed.", 405
+        
+        # API endpoints require CSRF token in the form
+        if "request_token" not in request.form.keys():
+            return "Request token is required for API endpoints.", 401
+        
+        # Request token must match the one in the session
+        if request.form["request_token"] != session["request_token"]:
+            return "Invalid request token.", 401
+        
+        # If we reach this point, we are executing an API call
+        # We want to expire the old request-token at this point
+        session["request_token"] = token_urlsafe(16)
+    elif "request_token" not in session:
+        # Generate initial request token, if not present
+        session["request_token"] = token_urlsafe(16)
 
 # MARK: Pages
 @app.route("/")

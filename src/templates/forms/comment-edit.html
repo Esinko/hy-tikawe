@@ -19,7 +19,8 @@
                     placeholder="Uhm actually"
                     style="padding: 8px; margin-bottom: 10px"
                 >{{ reply_to_edit.body }}</textarea>
-
+                
+                <input type="hidden" name="request_token" value="{{ session.request_token }}">
                 <div class="row" style="justify-content: flex-end; gap: 15px; margin-top: 10px;">
                     <a href="/chall/{{ challenge.id }}/#com-{{ reply_to_edit.id }}">Cancel</a>
                     <button type="submit" style="margin-top: 0px;">Save</button>
