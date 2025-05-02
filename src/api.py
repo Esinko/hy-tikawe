@@ -1,5 +1,6 @@
 from re import S
 from traceback import print_exception
+from database.types import ChallengeNotFoundException, CommentNotFoundException, SubmissionNotFoundException, UserExistsException
 from flask import redirect, request, session
 from database.abstract import ProfileEditable, UserNotFoundException
 from util.includes import includes
@@ -49,15 +50,14 @@ def api_register():
         return redirect("/register?weak")
 
     try:
-        # Make sure username is free
-        exists = get_db().user_exists(username)
-        if exists:
-            return redirect("/register?taken")
-        
         # Create user
         user = get_db().create_user(username, generate_password_hash(password))
         session["user"] = user.to_dict()
         return redirect("/")
+    
+    except UserExistsException:
+        return redirect("/register?taken")
+    
     except Exception as err:
         print("Register Error")
         print_exception(err)
@@ -88,10 +88,6 @@ def api_change_password():
         return redirect("/me/settings?p-weak")
 
     try:
-        # Make sure user exists
-        if not get_db().user_exists(username):
-            return "User does not exist.", 400
-
         # Change password
         get_db().edit_user(username, {
             "username": username,
@@ -105,7 +101,9 @@ def api_change_password():
         else:   
             session.clear()
             return redirect("/login")
-
+        
+    except UserNotFoundException:
+        return "User does not exist.", 400
     except Exception as err:
         print("Password Change Error")
         print_exception(err)
@@ -127,14 +125,12 @@ def api_require_password_change():
     print("REQ", required)
     
     try:
-        # Make sure user exists
-        if not get_db().user_exists(username):
-            return "User does not exist.", 400
-
-        # Change password
         get_db().set_user_new_password_required(username, required)
         return redirect(f"/u/{username}/settings")
 
+    except UserNotFoundException:
+        return "User does not exist.", 400
+    
     except Exception as err:
         print("Password Change Request Error")
         print_exception(err)
@@ -252,10 +248,6 @@ def api_edit_challenge():
         if not any(category.id == category_id for category in categories):
             return "Invalid category.", 400
         
-        # Check challenge already exists
-        if not get_db().challenge_exists(challenge_id):
-            return "Challenge does not exit.", 400
-        
         # Check permission
         challenge = get_db().get_challenge(session["user"]["id"], challenge_id)
         if not has_permission(session["user"], "edit", "challenge", challenge.author_id):
@@ -270,6 +262,9 @@ def api_edit_challenge():
             "accepts_submissions": accepts_submissions
         })
         return redirect(f"/chall/{challenge_id}")
+    
+    except ChallengeNotFoundException:
+        return "Challenge does not exit.", 400
         
     except Exception as err:
         print("Challenge Edit Error")
@@ -287,10 +282,6 @@ def api_delete_challenge():
     challenge_id = request.form["id"]
 
     try:
-        # Check challenge already exists
-        if not get_db().challenge_exists(challenge_id):
-            return "Challenge does not exit.", 400
-        
         challenge = get_db().get_challenge(session["user"]["id"], challenge_id)
         
         # Check permission
@@ -300,6 +291,9 @@ def api_delete_challenge():
         # Delete challenge
         get_db().remove_challenge(challenge_id)
         return redirect(f"/")
+    
+    except ChallengeNotFoundException:
+        return "Challenge does not exit.", 400
         
     except Exception as err:
         print("Challenge Delete Error:")
@@ -320,6 +314,8 @@ def api_vote(type, target_id):
     
     try:
         # Vote for or remove
+        # FIXME: Does not check target exists, so we might create "ghost" votes.
+        #       I don't see why that is an issue though.
         if vote_action == "1":
             get_db().vote_for(type, target_id, user_id)
         else:
@@ -354,14 +350,13 @@ def api_post_comment():
     challenge_id = request.form["challenge_id"]
     body = request.form["body"]
 
-    try:
-        # Check that challenge exists
-        if not get_db().challenge_exists(challenge_id):
-            return "Challenge does not exit.", 400
-            
+    try:    
         # Create challenge comment
         comment_id = get_db().create_comment(challenge_id, body, user_id)
         return redirect(f"/chall/{challenge_id}/#c-{comment_id}")
+    
+    except ChallengeNotFoundException:
+        return "Challenge does not exit.", 400
         
     except Exception as err:
         print("Comment Post Error")
@@ -379,10 +374,6 @@ def api_edit_comment():
     comment_id = request.form["id"]
 
     try:
-        # Check that comment exists
-        if not get_db().comment_exists(comment_id):
-            return "Comment does not exit.", 400
-        
         # Check permission
         comment = get_db().get_comment(session["user"]["id"], comment_id)
         if not has_permission(session["user"], "edit", "comment", comment.author_id):
@@ -393,6 +384,9 @@ def api_edit_comment():
             "body": body
         })
         return redirect(f"/chall/{comment.challenge_id}/#com-{comment_id}")
+    
+    except CommentNotFoundException:
+        return "Comment does not exist.", 400
         
     except Exception as err:
         print("Comment Edit Error")
@@ -409,10 +403,6 @@ def api_delete_comment():
     comment_id = request.form["id"]
 
     try:
-        # Check challenge already exists
-        if not get_db().comment_exists(comment_id):
-            return "Challenge does not exit.", 400
-        
         comment = get_db().get_comment(session["user"]["id"], comment_id)
         
         # Check permission
@@ -422,6 +412,9 @@ def api_delete_comment():
         # Delete challenge
         get_db().remove_comment(comment.id)
         return redirect(f"/chall/{comment.challenge_id}")
+    
+    except CommentNotFoundException:
+        return "Challenge does not exit.", 400
         
     except Exception as err:
         print("Comment Delete Error")
@@ -444,10 +437,6 @@ def api_post_submission():
     script_name = script.filename + ".js" if not script.filename.endswith(".js") else script.filename
 
     try:
-        # Check that challenge exists
-        if not get_db().challenge_exists(challenge_id):
-            return "Challenge does not exit.", 400
-        
         # Verify challenge accepts submissions
         if not get_db().get_challenge(user_id, challenge_id).accepts_submissions:
             return "Challenge does not accept submissions.", 401
@@ -460,6 +449,9 @@ def api_post_submission():
         submission_id = get_db().create_submission(challenge_id, title, body, user_id, script_asset.id if script_asset else None)
  
         return redirect(f"/chall/{challenge_id}/#s-{submission_id}")
+    
+    except ChallengeNotFoundException:
+        return "Challenge does not exit.", 400
         
     except Exception as err:
         print("Comment Post Error")
@@ -484,10 +476,6 @@ def api_edit_submission():
         script_name = script.filename + ".js" if not script.filename.endswith(".js") else script.filename
 
     try:
-        # Check that submission exists
-        if not get_db().submission_exists(submission_id):
-            return "Submission does not exit.", 400
-        
         # Check permission
         submission = get_db().get_submission(session["user"]["id"], submission_id)
         if not has_permission(session["user"], "edit", "submission", submission.author_id):
@@ -503,6 +491,9 @@ def api_edit_submission():
         })
 
         return redirect(f"/chall/{submission.challenge_id}/#sub-{submission.id}")
+    
+    except SubmissionNotFoundException:
+        return "Submission does not exit.", 400
         
     except Exception as err:
         print("Submission Edit Error")
@@ -519,10 +510,6 @@ def api_delete_submission():
     submission_id = request.form["id"]
 
     try:
-        # Check submissions already exists
-        if not get_db().comment_exists(submission_id):
-            return "Challenge does not exit.", 400
-        
         submission = get_db().get_comment(session["user"]["id"], submission_id)
         
         # Check permission
@@ -532,6 +519,9 @@ def api_delete_submission():
         # Delete challenge
         get_db().remove_submission(submission.id)
         return redirect(f"/chall/{submission.challenge_id}")
+    
+    except CommentNotFoundException:
+        return "Challenge does not exit.", 400
         
     except Exception as err:
         print("Submission Delete Error")
