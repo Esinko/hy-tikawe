@@ -31,6 +31,7 @@ from database.types import (
 
 page_size = 10
 
+
 class AbstractDatabase:
     def __init__(self, connection=DatabaseConnection):
         self.connection = connection
@@ -190,7 +191,7 @@ class AbstractDatabase:
         for result in results:
             challenges.append(ChallengeHusk(*result))
         return challenges
-    
+
     def challenge_exists(self, challenge_id: int) -> bool:
         return self.connection.query(query=sql_table["challenge_exists"],
                                      parameters=(challenge_id,), limit=1)[0][0] == 1
@@ -199,7 +200,7 @@ class AbstractDatabase:
         # Check if challenge exists
         if not self.challenge_exists(challenge_id):
             raise ChallengeNotFoundException(challenge_id)
-        
+
         [result] = self.connection.query(query=sql_table["get_full_challenge"],
                                          parameters=(current_user_id, challenge_id))
         if not result:

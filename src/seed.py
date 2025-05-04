@@ -1,6 +1,5 @@
 import random
 from collections import defaultdict
-from database.params import database_params
 from database.abstract import AbstractDatabase
 from database.connection import DatabaseConnection
 
@@ -36,8 +35,8 @@ descriptions = [
     "Hide logic inside .toString() overrides."
 ]
 
-# Utils to create markov chain
-def build_markov_chain(sentences):
+
+def build_markov_chain(sentences): # Util to create markov chain
     chain = defaultdict(list)
     for sentence in sentences:
         words = ["<S>"] + sentence.split() + ["<E>"]
@@ -46,7 +45,8 @@ def build_markov_chain(sentences):
             chain[key].append(words[i + 2])
     return chain
 
-def generate_sentence(chain, max_words=20):
+
+def generate_sentence(chain, max_words=20): # Text generation with chain
     current = ("<S>", random.choice([k[1] for k in chain if k[0] == "<S>"]))
     result = [current[1]]
     for _ in range(max_words - 1):
@@ -57,6 +57,7 @@ def generate_sentence(chain, max_words=20):
         current = (current[1], next_word)
     return " ".join(result)
 
+
 # Build chains with training data
 title_chain = build_markov_chain(titles)
 desc_chain = build_markov_chain(descriptions)
@@ -64,8 +65,10 @@ desc_chain = build_markov_chain(descriptions)
 # Create dummy challenges
 n = 50000
 
-db = db = AbstractDatabase(connection=DatabaseConnection("../main.db", "../db/schema.sql", "../db/init.sql").open())
+db = db = AbstractDatabase(connection=DatabaseConnection(
+    "../main.db", "../db/schema.sql", "../db/init.sql").open())
 for _ in range(n + 1):
-    db.create_challenge(generate_sentence(title_chain), generate_sentence(desc_chain), random.randint(1, 3), 0, False)
+    db.create_challenge(generate_sentence(title_chain), generate_sentence(
+        desc_chain), random.randint(1, 3), 0, False)
 
 db.connection.close()

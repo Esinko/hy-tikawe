@@ -12,7 +12,6 @@ from flask import (
     session,
     g
 )
-from util.has_permission import has_permission
 from werkzeug.exceptions import NotFound
 from api import (
     api_change_password,
@@ -56,6 +55,7 @@ secret_key = Path("./.secret")
 if not secret_key.exists():
     secret_key.write_text(token_urlsafe(32), "utf-8")
 app.secret_key = secret_key.read_text("utf-8")
+
 
 @app.template_filter("epoch_to_date")  # MARK: Filters
 def epoch_to_date_filter(epoch):
@@ -126,7 +126,8 @@ def home(category_id=None):
     return render_template("./pages/home.html",
                            at_home=request.path == "/",
                            challenges=challenges,
-                           category_name=categories[category_id - 1].name if category_id else None,
+                           category_name=categories[category_id -
+                                                    1].name if category_id else None,
                            page=page)
 
 
@@ -190,17 +191,17 @@ def new_post():
 
 
 @app.get("/chall/<challenge_id>",
-           defaults={"sub_path": "", "sub_action": "", "reply_id": ""})
+         defaults={"sub_path": "", "sub_action": "", "reply_id": ""})
 @app.get("/chall/<challenge_id>/",
-           defaults={"sub_path": "", "sub_action": "", "reply_id": ""})
+         defaults={"sub_path": "", "sub_action": "", "reply_id": ""})
 @app.get("/chall/<int:challenge_id>/<path:sub_path>/",
-           defaults={"sub_action": "", "reply_id": ""})
+         defaults={"sub_action": "", "reply_id": ""})
 @app.get("/chall/<int:challenge_id>/<path:sub_path>/<int:reply_id>/<path:sub_action>")
 def challenge(challenge_id, sub_path, reply_id, sub_action):
     # Performing actions requires to be logged in
-    if sub_path and not "user" in session:
-        return redirect(f"/login")
-    
+    if sub_path and "user" not in session:
+        return redirect("/login")
+
     user_id = session["user"]["id"] if "user" in session else -1
     page = int(request.args.get("page")
                if "page" in request.args.keys() else "0")
@@ -212,21 +213,23 @@ def challenge(challenge_id, sub_path, reply_id, sub_action):
     # Get comments and submissions or comment/submission to edit
     comments_and_submissions, reply_to_edit = ([], None)
     if not reply_id:
-        comments_and_submissions = get_db().get_challenge_replies(user_id, challenge_id, page)
+        comments_and_submissions = get_db().get_challenge_replies(
+            user_id, challenge_id, page)
     elif sub_path == "com":
         reply_to_edit = get_db().get_comment(user_id, reply_id)
     elif sub_path == "sub":
         reply_to_edit = get_db().get_submission(user_id, reply_id)
     else:
         return "Unknown reply type.", 404
-    
+
     # Performing actions requires user to be admin or own the content
     # NOTE: Checked in API too
-    if sub_path in ("edit", "delete") and not sub_action and not session["user"]["is_admin"] and challenge_data.author_id != user_id:
-        return redirect(f"/chall/{challenge_id}")
-    if sub_action and not session["user"]["is_admin"] and reply_to_edit.author_id != user_id:
-        return redirect(f"/chall/{challenge_id}/{reply_id}")
-    
+    if not session["user"]["is_admin"]:
+        if sub_path in ("edit", "delete") and not sub_action and challenge_data.author_id != user_id:
+            return redirect(f"/chall/{challenge_id}")
+        if sub_action and reply_to_edit.author_id != user_id:
+            return redirect(f"/chall/{challenge_id}/{reply_id}")
+
     # To send submissions, challenge must be accepting them
     # NOTE: Checked in API too
     if sub_path == "sub" and not sub_action and not challenge_data.accepts_submissions:
@@ -259,19 +262,20 @@ def challenge(challenge_id, sub_path, reply_id, sub_action):
                            page=page)
 
 
-@app.get("/me", defaults={ "username": "" })
+@app.get("/me", defaults={"username": ""})
 @app.get("/u/<string:username>")
 def profile(username):
     # If accessing from /me, must be logged in
     if not username and "user" not in session:
         return redirect("/login")
-    
+
     try:
         # Get user data
-        user = get_db().get_user(username if username else session["user"]["username"])
+        user = get_db().get_user(
+            username if username else session["user"]["username"])
     except UserNotFoundException:
         return redirect("/")
-    
+
     page = int(request.args.get("page")
                if "page" in request.args.keys() else "0")
     content = get_db().get_user_content(session["user"]["id"] if "user" in session else -1,
@@ -288,20 +292,21 @@ def profile(username):
                            page=page)
 
 
-@app.get("/me/edit", defaults={ "username": "" })
+@app.get("/me/edit", defaults={"username": ""})
 @app.get("/u/<string:username>/edit")
 def profile_edit(username):
     # If accessing from /me, must be logged in
     if not username and "user" not in session:
         return redirect("/login")
-    
+
     # If using specified username, must be admin
     # NOTE: Checked in the API too.
     if username and not session["user"]["is_admin"]:
         return redirect("/me/edit")
 
     try:
-        target_user = get_db().get_user(username if username else session["user"]["username"])
+        target_user = get_db().get_user(
+            username if username else session["user"]["username"])
     except UserNotFoundException:
         return "User not found", 404
 
@@ -310,7 +315,7 @@ def profile_edit(username):
                            username=target_user.username)
 
 
-@app.get("/me/settings", defaults={ "username": "" })
+@app.get("/me/settings", defaults={"username": ""})
 @app.get("/u/<string:username>/settings")
 def target_user_settings(username):
     # Must be logged in
@@ -323,7 +328,8 @@ def target_user_settings(username):
         return redirect("/me/settings")
 
     # Get user
-    user = get_db().get_user(username if username else session["user"]["username"])
+    user = get_db().get_user(
+        username if username else session["user"]["username"])
 
     return render_template("./pages/user-settings.html", user=user)
 
@@ -373,13 +379,14 @@ app.add_url_rule("/api/change-password",
 app.add_url_rule("/api/admin/request-password-change",
                  view_func=api_require_password_change, methods=["POST"])
 
+
 @app.errorhandler(NotFound)  # MARK: Default error handlers
-def handle_exception(_):
+def handle_exception_not_found(_):
     return "Not found.", 404
 
 
 @app.errorhandler(Exception)
-def handle_exception(e):
+def handle_exception_general(e):
     print("Internal Server Error")
     print_exception(e)
     return "Internal server error.", 500

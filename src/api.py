@@ -466,7 +466,8 @@ def api_delete_submission():
     submission_id = request.form["id"]
 
     try:
-        submission = get_db().get_submission(session["user"]["id"], submission_id)
+        submission = get_db().get_submission(
+            session["user"]["id"], submission_id)
 
         # Check permission
         if not has_permission(session["user"], "delete", "submission", submission.author_id):
