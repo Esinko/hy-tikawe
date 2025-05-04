@@ -111,16 +111,20 @@ def home(category_id=None):
     page = int(request.args.get("page")
                if "page" in request.args.keys() else "0")
     categories = get_db().get_categories()
+
+    # Make sure category is valid
+    if isinstance(category_id, int) and category_id not in range(1, len(categories) + 1):
+        return redirect("/")
+
     challenges = get_db().get_challenges(
         session["user"]["id"] if "user" in session else -1,
         category_id,
         page)
-    category_name = categories[category_id - 1].name if category_id else None
     return render_template("./home.html",
                            at_home=request.path == "/",
                            categories=categories,
                            challenges=challenges,
-                           category_name=category_name,
+                           category_name=categories[category_id - 1].name if category_id else None,
                            page=page,
                            top_text=get_random_top_text())
 
@@ -194,9 +198,9 @@ def new_post():
            defaults={"sub_path": "", "sub_action": "", "reply_id": ""})
 @app.get("/chall/<challenge_id>/",
            defaults={"sub_path": "", "sub_action": "", "reply_id": ""})
-@app.get("/chall/<string:challenge_id>/<path:sub_path>/",
+@app.get("/chall/<int:challenge_id>/<path:sub_path>/",
            defaults={"sub_action": "", "reply_id": ""})
-@app.get("/chall/<string:challenge_id>/<path:sub_path>/<string:reply_id>/<path:sub_action>")
+@app.get("/chall/<int:challenge_id>/<path:sub_path>/<int:reply_id>/<path:sub_action>")
 def challenge(challenge_id, sub_path, reply_id, sub_action):
     # Performing actions requires to be logged in
     if sub_path and not "user" in session:
