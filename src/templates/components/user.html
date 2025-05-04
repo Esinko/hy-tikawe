@@ -3,7 +3,7 @@
     style="margin-bottom: {{ spacer or 0 }}px"
 >
     <div class="row" style="padding: 8px;">
-        {% if user.profile.image_asset %}
+        {% if user.profile.image_asset.id %}
         <img width="80px" height="80px" class="profile-image" src="/a/{{ user.profile.image_asset.id }}"></img>
         {% else %}
         <p class="profile-text">{{ user.username[0].upper() + user.username[1] }}</p>
