@@ -15,12 +15,12 @@
                 style="width: 100%; padding-top: 12px; gap: 8px;"
             >
                 <div class="row" style="justify-content: flex-end;">
-                    <a href="/me">Cancel</a>
+                    <a href="/u/{{ username | urlencode }}">Cancel</a>
                 </div>
                 <form action="/api/profile/edit" method="POST" enctype="multipart/form-data">
                     <div class="profile-banner profile-banner-placeholder" style="padding: 0px;">
                         {% if profile.banner_asset %}
-                        <img class="profile-banner" style="padding: 0px;" src="/a/{{profile.banner_asset.id }}" alt="profile banner">
+                        <img class="profile-banner" style="padding: 0px;" src="/a/{{ profile.banner_asset.id }}" alt="profile banner">
                         {% endif %}
                         <div class="center" style="position: absolute; top: 0px; width: 100%; height: 100%;">
                             <div class="stack" style="width: min-content; justify-content: center;">
