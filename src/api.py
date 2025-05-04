@@ -359,7 +359,7 @@ def api_delete_comment():
         comment = get_db().get_comment(session["user"]["id"], comment_id)
 
         # Check permission
-        if not has_permission(session["user"], "delete", "challenge", comment.author_id):
+        if not has_permission(session["user"], "delete", "comment", comment.author_id):
             return "Permission denied.", 401
 
         # Delete challenge
@@ -436,6 +436,8 @@ def api_edit_submission():
             return "Permission denied.", 401
 
         # TODO: Add edited date?
+        # FIXME: This differs from the usual pattern!
+        #        Asset should be created separately!
         get_db().edit_submission(submission.id, {
             "title": title,
             "body": body,
