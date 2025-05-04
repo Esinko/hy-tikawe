@@ -34,7 +34,7 @@
             </div>
             <div class="stack">
                 {% for challenge in challenges %}
-                    {% with spacer=15, no_edit_buttons=true %}
+                    {% with spacer=15, no_edit_buttons=true, from_page="/search?page=" + page|string + "&s=" + search_string + "&t=0" %}
                         {% include "./components/challenge.html" %}
                     {% endwith %}
                 {% endfor %}
