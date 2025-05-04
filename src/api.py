@@ -464,15 +464,15 @@ def api_delete_submission():
     submission_id = request.form["id"]
 
     try:
-        submission = get_db().get_comment(session["user"]["id"], submission_id)
+        submission = get_db().get_submission(session["user"]["id"], submission_id)
 
         # Check permission
         if not has_permission(session["user"], "delete", "submission", submission.author_id):
             return "Permission denied.", 401
 
-        # Delete challenge
+        # Delete submission
         get_db().remove_submission(submission.id)
         return redirect(f"/chall/{submission.challenge_id}")
 
-    except CommentNotFoundException:
-        return "Challenge does not exit.", 400
+    except SubmissionNotFoundException:
+        return "Submission does not exit.", 400
