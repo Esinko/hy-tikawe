@@ -1,7 +1,6 @@
 -- Clear database
 DELETE FROM ChallengeCategories;
 DELETE FROM Assets;
-DELETE FROM Attachments;
 DELETE FROM Users;
 DELETE FROM Profiles;
 DELETE FROM Challenges;
