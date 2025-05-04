@@ -96,12 +96,9 @@ def check_csrf():  # Handle CSRF token for API endpoints
         # Request token must match the one in the session
         if request.form["request_token"] != session["request_token"]:
             return "Invalid request token.", 401
-
-        # If we reach this point, we are executing an API call
-        # We want to expire the old request-token at this point
-        session["request_token"] = token_urlsafe(16)
     elif "request_token" not in session:
         # Generate initial request token, if not present
+        # Expired every logout
         session["request_token"] = token_urlsafe(16)
 
 
