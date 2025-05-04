@@ -42,17 +42,17 @@ CREATE TABLE Challenges (
 CREATE TABLE Submissions (
     id INTEGER PRIMARY KEY,
     created INTEGER NOT NULL,
-    challenge_id INTEGER NOT NULL REFERENCES Challenges(id),
+    challenge_id INTEGER NOT NULL REFERENCES Challenges(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     body TEXT NOT NULL,
-    solution_asset_id INTEGER NOT NULL REFERENCES Assets(id),
+    solution_asset_id INTEGER NOT NULL REFERENCES Assets(id) ON DELETE CASCADE,
     author_id INTEGER NOT NULL
 );
 
 CREATE TABLE Comments (
     id INTEGER PRIMARY KEY,
     created INTEGER NOT NULL,
-    challenge_id INTEGER NOT NULL REFERENCES Challenges(id),
+    challenge_id INTEGER NOT NULL REFERENCES Challenges(id) ON DELETE CASCADE,
     body TEXT NOT NULL,
     author_id INTEGER NOT NULL REFERENCES Users(id)
 );
