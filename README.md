@@ -7,10 +7,12 @@
 
 - Käyttäjä voi luoda tilin, kirjautua, luoda haasteita, muokata haasteita, poistaa haasteita ja äänestää haasteita.
 - Käyttäjä voi kommentoida haasteita, sekä muokata ja poistaa omia kommenttejaan.
-- Lisäksi käyttäjä voi katsella toisten profiileja ja katsella sekä muokata omaa profiiliaan.
+- Käyttäjä voi lähettää ratkaisuja haasteisiin, sekä muokata ja poistaa omia ratkaisujaan.
+- Käyttäjä voi äänestää kommentteja ja ratkaisuja.
+- Käyttäjä voi katsella toisten profiileja ja katsella sekä muokata omaa profiiliaan.
 - Käyttäjä voi selata haasteita jostain tietystä tai kaikista kategorioista ja etsiä haasteita hakusanalla.
 - Käyttäjä voi hakea profiileja hakusanalla
-- Hakutulokset ja haastelistaukset on jaettu sivuihin.
+- Hakutulokset ja haastelistaukset on jaettu sivuihin
 - Käyttäjä voi vaihtaa oman salasanansa
 - Admin tilillä voi muokata kaikkien julkaisemaa sisältöä
 - Admin tilillä voi muokata toisten tilien profiileja
@@ -59,7 +61,7 @@ $ flask --app ./src/app.py run --debug
 ```
 
 ### Suuret tietomäärät
-`src/seed.py` lisää tietokantaan 50 000 tuhatta haastetta. Haasteiden haku, äänestäminen, lisääminen ja muokkaaminen toimii edelleen viiveettä.
+`src/seed.py` lisää tietokantaan 50 000 haastetta. Haasteiden haku, äänestäminen, lisääminen ja muokkaaminen toimii edelleen viiveettä.
 Tilastojen laskenta käyttäjäsivuilla toimii myös tehokkaasti.
 
 On kuitenkin huomioitava, että tämä ei tarkoita sovelluksen skaalautuvan suuria käyttäjämääriä varten. Tämä testi vaatisi monimutkaisempaa valmisteltua.
