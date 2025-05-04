@@ -8,6 +8,10 @@ def has_permission(  # Logic for checking permissions for users
         target_type: Literal["profile", "user", "challenge", "comment", "submission"],
         target_owner_id: int
 ):
+    # Pre: if not user provided, deny
+    if not user:
+        return False
+
     # 1. If the user is admin, allow everything
     if user["is_admin"]:
         return True

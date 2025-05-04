@@ -27,10 +27,10 @@
                     <span class="vertical-line" style="margin-left: 23px; visibility: {{ 'hidden' if replies|length == 0 else '' }}"></span>
                     <div class="row" style="justify-content: flex-end; gap: 5px; margin-bottom: 20px; margin-top: 10px;">
                         {% if session.user %}
-                            <a href="{{ request.path + '/com' }}" class="no-select">Post Comment</a>
+                            <a href="{{ request.path + 'com' }}" class="no-select">Post Comment</a>
                             {% if challenge.accepts_submissions or session.user.is_admin %}
                                 <a
-                                    href="{{ request.path + '/sub' }}"
+                                    href="{{ request.path + 'sub' }}"
                                     class="no-select"
                                     {% if not challenge.accepts_submissions %}
                                         style="text-decoration: line-through;"

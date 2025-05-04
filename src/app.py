@@ -12,6 +12,7 @@ from flask import (
     session,
     g
 )
+from util.has_permission import has_permission
 from werkzeug.exceptions import NotFound
 from api import (
     api_change_password,
@@ -41,13 +42,14 @@ from util.random_text import get_random_top_text
 
 # Initialize Flask
 app = Flask(__name__)
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Strict"
 
 # Generate secret
 secret_key = Path("./.secret")
 if not secret_key.exists():
     secret_key.write_text(token_urlsafe(32), "utf-8")
 app.secret_key = secret_key.read_text("utf-8")
-
 
 @app.template_filter("epoch_to_date")  # MARK: Filters
 def epoch_to_date_filter(epoch):
@@ -61,7 +63,7 @@ def close_connection(_):  # Auto-closes the database connection
         db.close()
 
 
-@app.route("/public/<string:path>")  # Public dir route
+@app.get("/public/<string:path>")  # Public dir route
 def public(path):
     return send_from_directory("public", path)
 
@@ -103,8 +105,8 @@ def check_csrf():  # Handle CSRF token for API endpoints
         session["request_token"] = token_urlsafe(16)
 
 
-@app.route("/")  # MARK: Pages
-@app.route("/c/<int:category_id>")
+@app.get("/")  # MARK: Pages
+@app.get("/c/<int:category_id>")
 def home(category_id=None):
     page = int(request.args.get("page")
                if "page" in request.args.keys() else "0")
@@ -123,7 +125,7 @@ def home(category_id=None):
                            top_text=get_random_top_text())
 
 
-@app.route("/search")
+@app.get("/search")
 def search():
     search_string = request.args.get("s")
     search_tab = ("users" if request.args.get("t") == "1" else "challenges")
@@ -151,13 +153,21 @@ def search():
                            tab=search_tab)
 
 
-@app.route("/login")
+@app.get("/login")
 def login():
+    # If already logged in, go to home page
+    if "user" in session:
+        return redirect("/")
+
     return render_template("./login.html", top_text=get_random_top_text())
 
 
-@app.route("/register")
+@app.get("/register")
 def register():
+    # If already logged in, go to home page
+    if "user" in session:
+        return redirect("/")
+
     return render_template("./register.html", top_text=get_random_top_text())
 
 
@@ -180,14 +190,18 @@ def new_post():
                            top_text=get_random_top_text())
 
 
-@app.route("/chall/<challenge_id>",
+@app.get("/chall/<challenge_id>",
            defaults={"sub_path": "", "sub_action": "", "reply_id": ""})
-@app.route("/chall/<challenge_id>/",
+@app.get("/chall/<challenge_id>/",
            defaults={"sub_path": "", "sub_action": "", "reply_id": ""})
-@app.route("/chall/<string:challenge_id>/<path:sub_path>/",
+@app.get("/chall/<string:challenge_id>/<path:sub_path>/",
            defaults={"sub_action": "", "reply_id": ""})
-@app.route("/chall/<string:challenge_id>/<path:sub_path>/<string:reply_id>/<path:sub_action>")
+@app.get("/chall/<string:challenge_id>/<path:sub_path>/<string:reply_id>/<path:sub_action>")
 def challenge(challenge_id, sub_path, reply_id, sub_action):
+    # Performing actions requires to be logged in
+    if sub_path and not "user" in session:
+        return redirect(f"/login")
+    
     categories = get_db().get_categories()
     user_id = session["user"]["id"] if "user" in session else -1
     try:
@@ -205,6 +219,18 @@ def challenge(challenge_id, sub_path, reply_id, sub_action):
         reply_to_edit = get_db().get_submission(user_id, reply_id)
     else:
         return "Unknown reply type.", 404
+    
+    # Performing actions requires user to be admin or own the content
+    # NOTE: Checked in API too
+    if sub_path in ("edit", "delete") and not sub_action and not session["user"]["is_admin"] and challenge_data.author_id != user_id:
+        return redirect(f"/chall/{challenge_id}")
+    if sub_action and not session["user"]["is_admin"] and reply_to_edit.author_id != user_id:
+        return redirect(f"/chall/{challenge_id}/{reply_id}")
+    
+    # To send submissions, challenge must be accepting them
+    # NOTE: Checked in API too
+    if sub_path == "sub" and not sub_action and not challenge_data.accepts_submissions:
+        return redirect(f"/chall/{challenge_id}")
 
     # Default challenge template
     template = "./challenge.html"
@@ -234,47 +260,22 @@ def challenge(challenge_id, sub_path, reply_id, sub_action):
                            top_text=get_random_top_text())
 
 
-@app.get("/me")
-def profile_me():
-    return profile(session["user"]["username"])
-
-
-@app.get("/me/edit")
-def profile_edit():
-    categories = get_db().get_categories()
-    user = get_db().get_user(session["user"]["username"])
-    return render_template("./forms/profile-edit.html",
-                           profile=user.profile.to_dict(),
-                           username=user.username,
-                           categories=categories,
-                           top_text=get_random_top_text())
-
-
-@app.route("/me/settings")
-def user_settings():
-    # Must be logged in
-    if "user" not in session:
-        return redirect("/")
-
-    categories = get_db().get_categories()
-
-    return render_template("./user-settings.html",
-                           user=session["user"],
-                           categories=categories,
-                           top_text=get_random_top_text())
-
-
+@app.get("/me", defaults={ "username": "" })
 @app.get("/u/<string:username>")
 def profile(username):
+    # If accessing from /me, must be logged in
+    if not username and "user" not in session:
+        return redirect("/login")
+    
+    try:
+        # Get user data
+        user = get_db().get_user(username if username else session["user"]["username"])
+    except UserNotFoundException:
+        return redirect("/")
+    
     categories = get_db().get_categories()
     page = int(request.args.get("page")
                if "page" in request.args.keys() else "0")
-    try:
-        # Get user data
-        user = get_db().get_user(username)
-    except UserNotFoundException:
-        return redirect("/")
-
     content = get_db().get_user_content(session["user"]["id"] if "user" in session else -1,
                                         user.id, page)
     received_votes = get_db().get_received_votes(user.id)
@@ -282,7 +283,7 @@ def profile(username):
 
     return render_template("./profile.html",
                            profile=user.profile.to_dict(),
-                           username=username,
+                           username=user.username,
                            categories=categories,
                            content=content,
                            received_votes=received_votes,
@@ -291,18 +292,45 @@ def profile(username):
                            page=page)
 
 
-@app.route("/u/<string:username>/settings")
+@app.get("/me/edit", defaults={ "username": "" })
+@app.get("/u/<string:username>/edit")
+def profile_edit(username):
+    # If accessing from /me, must be logged in
+    if not username and "user" not in session:
+        return redirect("/login")
+    
+    # If using specified username, must be admin
+    # NOTE: Checked in the API too.
+    if username and not session["user"]["is_admin"]:
+        return redirect("/me/edit")
+
+    try:
+        target_user = get_db().get_user(username if username else session["user"]["username"])
+    except UserNotFoundException:
+        return "User not found", 404
+
+    categories = get_db().get_categories()
+    return render_template("./forms/profile-edit.html",
+                           profile=target_user.profile.to_dict(),
+                           username=target_user.username,
+                           categories=categories,
+                           top_text=get_random_top_text())
+
+
+@app.get("/me/settings", defaults={ "username": "" })
+@app.get("/u/<string:username>/settings")
 def target_user_settings(username):
     # Must be logged in
     if "user" not in session:
-        return redirect("/")
+        return redirect("/login")
 
     # Must be admin
-    if not session["user"]["is_admin"]:
-        return "Permission denied.", 401
+    # NOTE: Checked in the API too
+    if username and not session["user"]["is_admin"]:
+        return redirect("/me/settings")
 
     # Get user
-    user = get_db().get_user(username)
+    user = get_db().get_user(username if username else session["user"]["username"])
 
     return render_template("./user-settings.html", user=user)
 

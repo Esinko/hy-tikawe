@@ -17,7 +17,7 @@ Required:
 - [x] User password change
 - [x] Paginate profile page results
 - [x] Search users
-- Pylint
+- [x] Pylint
 - [x] prettify many keys checks
 - Challenge asset
-- Remove exits check bloat from API
+- [x] Remove exits check bloat from API

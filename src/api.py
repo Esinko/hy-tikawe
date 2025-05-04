@@ -289,10 +289,13 @@ def api_vote(target_type, target_id):  # MARK: Vote
     # Redirect back
     # Needs separate rules for each place the request can be from.
     # To properly focus/go to the right place back
-    if target_type == "comment":
-        return redirect(from_page + "#com-" + str(target_id))
-    if target_type == "submission":
-        return redirect(from_page + "#sub-" + str(target_id))
+    tag = {
+        "comment": "com",
+        "submission": "sub",
+        "challenge": "chall"
+    }
+
+    return redirect(from_page + f"#{tag.get(target_type, "chall")}-" + str(target_id))
 
 
 def api_post_comment():  # MARK: Comment
