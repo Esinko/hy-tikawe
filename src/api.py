@@ -423,7 +423,7 @@ def api_edit_submission():
 
     # Script replacement is optional, maintain original if not present
     script, script_name = None, None
-    if "script" in request.form.keys():
+    if "script" in request.files.keys():
         script = request.files["script"]
         script_name = script.filename + \
             ".js" if not script.filename.endswith(".js") else script.filename
@@ -443,6 +443,10 @@ def api_edit_submission():
             "script_name": script_name,
             "script_bytes": script.stream.read() if script else None
         })
+
+        # Delete original asset, if required
+        if script:
+            get_db().remove_asset(submission.script_id)
 
         return redirect(f"/chall/{submission.challenge_id}/#sub-{submission.id}")
 
