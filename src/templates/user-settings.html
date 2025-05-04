@@ -10,7 +10,10 @@
     <main>
         {% include "./components/header.html" %}
         <div class="content">
-            <p>User settings for '{{ user.username }}'</p>
+            <div class="row" style="justify-content: space-between;">
+                <p>User settings for '{{ user.username }}'</p>
+                <a href="/me">Cancel</a>
+            </div>
 
             <div class="row" style="gap: 10px; align-items: flex-start;">
                 <div class="stack card" style="width: 400px;">
