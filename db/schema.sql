@@ -11,7 +11,7 @@ CREATE TABLE Users (
     username TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     require_new_password INTEGER NOT NULL DEFAULT 0,
-    is_admin INTEGER NOT NULL DEFAULT 0,
+    is_admin INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE Profiles (
