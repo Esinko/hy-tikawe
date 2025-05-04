@@ -18,7 +18,8 @@
 - Admin tilillä voi edellyttää toista tiliä vaihtamaan salasansa kirjautuessa
 
 **Jatkokehitysideat**
-Formu-palveluksi muodostunut sovellus tarvitsee tehokkaita sisällönhallintatyökaluja sisällön moderointia varten. Nämä ovat mm. sisällön piilottamista, porttikiellon antamisen mahdollisuus ym. Nämä puuttuvat sovelluksesta.
+
+Forum-palveluksi muodostunut sovellus tarvitsee tehokkaita sisällönhallintatyökaluja moderointia varten. Nämä ovat mm. sisällön piilottamista, porttikiellon antamisen mahdollisuus ym. Nämä puuttuvat sovelluksesta.
 
 Haasteisiin / pääpostauksiin voisi lisätä liitteitä. Haasteita voisi olla hyvä myös järjestää esim. eniten ääniä -järjestykseen.
 
