@@ -1,7 +1,7 @@
 {% if content | length == 0 %}
     <div class="stack auto-max-height" style="width: 400px">
         <img src="/public/emptiness.gif" alt="futurama-emptiness-meme">
-        <p>(You went too far back)</p>
+        <p>({{ meme_text or "You went too far back" }})</p>
     </div>
 {% endif %}
 

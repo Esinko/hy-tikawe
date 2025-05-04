@@ -22,7 +22,7 @@
         </div>
         {% include "./components/search-box.html" %}
     </div>
-    <ul class="stack">
+    <ul class="stack auto-max-height">
         {% for challenge in challenges %}
             {% with spacer=15, no_edit_buttons=true, from_page="/search?page=" + page | string + "&s=" + search_string | urlencode + "&t=0" %}
                 <li>
@@ -37,19 +37,13 @@
                 </li>
             {% endwith %}
         {% endfor %}
-        {% if challenges | length == 0 and users | length == 0 %}
-            <li>
-                <img src="/public/emptiness.gif" alt="futurama-emptiness-meme">
-                <p>(No search results)</p>
-            </li>
-        {% endif %}
     </ul>
     {% if challenges %}
-        {% with content=challenges %}
+        {% with content=challenges, meme_text="No search results" %}
             {% include "./components/page-selection.html" %}
         {% endwith %}
     {% else %}
-        {% with content=users %}
+        {% with content=users, meme_text="No search results" %}
             {% include "./components/page-selection.html" %}
         {% endwith %}
     {% endif %}
