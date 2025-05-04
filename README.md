@@ -27,6 +27,8 @@ Haasteisiin / pääpostauksiin voisi lisätä liitteitä. Haasteita voisi olla h
 
 Hakuun voisi lisätä kommenttien ja ratkaisujen haun.
 
+Käyttäjille voisi lisätä mahdollisuuden luoda useita profiileja ja vaihtaa aktiivista profiilia.
+
 ### Sovelluksen käyttö
 - Sovelluksen ainut riippuvuus on `flask`.
 - Sovellus edellyttää Python version `>=3.8`.
