@@ -22,7 +22,7 @@ def has_permission(  # Logic for checking permissions for users
     if (
         action == "create" and
         target_type in ("challenge", "comment", "submission") and
-        not user.require_new_password
+        not user["require_new_password"]
     ):
         return True
 
