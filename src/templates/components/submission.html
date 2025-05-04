@@ -43,7 +43,7 @@
             <p class="minimal">|</p>
             <p class="minimal">{{ submission.created | epoch_to_date }}</p>
             <p class="minimal">|</p>
-            <a href="{{ '/chall/' + submission.challenge_id|string + '/#sub-' + submission.id|string }}" >Permalink</a>
+            <a href="{{ '/chall/' + submission.challenge_id | string + '/#sub-' + submission.id | string }}" >Permalink</a>
         </div>
 
         <div class="row">
@@ -76,8 +76,8 @@
 
         {% if session.user and (session.user.id == submission.author_id or session.user.is_admin) and not no_edit_buttons %}
         <div class="row" style="justify-content: flex-end; gap: 15px;">
-            <a href="{{ '/chall/' + submission.challenge_id|string + '/sub/' + submission.id|string + '/edit' }}">Edit</a>
-            <a href="{{ '/chall/' + submission.challenge_id|string + '/sub/' + submission.id|string + '/delete' }}">Delete</a>
+            <a href="{{ '/chall/' + submission.challenge_id | string + '/sub/' + submission.id | string + '/edit' }}">Edit</a>
+            <a href="{{ '/chall/' + submission.challenge_id | string + '/sub/' + submission.id | string + '/delete' }}">Delete</a>
         </div>
         {% endif %}
     </div>

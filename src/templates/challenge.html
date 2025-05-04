@@ -24,7 +24,7 @@
                 {% endwith %}
                 
                 <div class="row">
-                    <span class="vertical-line" style="margin-left: 23px; visibility: {{ 'hidden' if replies|length == 0 else '' }}"></span>
+                    <span class="vertical-line" style="margin-left: 23px; visibility: {{ 'hidden' if replies | length == 0 else '' }}"></span>
                     <div class="row" style="justify-content: flex-end; gap: 5px; margin-bottom: 20px; margin-top: 10px;">
                         {% if session.user %}
                             <a href="{{ request.path + 'com' }}" class="no-select">Post Comment</a>

@@ -47,14 +47,14 @@
             <p class="minimal">|</p>
             <p class="minimal">{{ comment.created | epoch_to_date }}</p>
             <p class="minimal">|</p>
-            <a href="{{ '/chall/' + comment.challenge_id|string + '/#com-' + comment.id|string }}" >Permalink</a>
+            <a href="{{ '/chall/' + comment.challenge_id | string + '/#com-' + comment.id | string }}" >Permalink</a>
         </div>
         <pre class="text minimal">{{ comment.body }}</pre>
 
         {% if session.user and (session.user.id == comment.author_id or session.user.is_admin) and not no_edit_buttons %}
         <div class="row" style="justify-content: flex-end; gap: 15px;">
-            <a href="{{ '/chall/' + comment.challenge_id|string + '/com/' + comment.id|string + '/edit' }}">Edit</a>
-            <a href="{{ '/chall/' + comment.challenge_id|string + '/com/' + comment.id|string + '/delete' }}">Delete</a>
+            <a href="{{ '/chall/' + comment.challenge_id | string + '/com/' + comment.id | string + '/edit' }}">Edit</a>
+            <a href="{{ '/chall/' + comment.challenge_id | string + '/com/' + comment.id | string + '/delete' }}">Delete</a>
         </div>
         {% endif %}
     </div>

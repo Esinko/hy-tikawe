@@ -14,7 +14,7 @@
                 <p><i>Search results for '{{ search_string }}'</i></p>
                 <div class="tab-select row">
                     <a
-                        href="?page={{ page }}&s={{ search_string }}&t=0"
+                        href="?page={{ page }}&s={{ search_string | urlencode }}&t=0"
                         {% if tab == "challenges" %}
                             data-selected
                         {% endif %}
@@ -22,7 +22,7 @@
                         Challenges
                     </a>
                     <a
-                        href="?page={{ page }}&s={{ search_string }}&t=1"
+                        href="?page={{ page }}&s={{ search_string | urlencode }}&t=1"
                         {% if tab == "users" %}
                             data-selected
                         {% endif %}
@@ -34,7 +34,7 @@
             </div>
             <div class="stack">
                 {% for challenge in challenges %}
-                    {% with spacer=15, no_edit_buttons=true, from_page="/search?page=" + page|string + "&s=" + search_string + "&t=0" %}
+                    {% with spacer=15, no_edit_buttons=true, from_page="/search?page=" + page | string + "&s=" + search_string | urlencode + "&t=0" %}
                         {% include "./components/challenge.html" %}
                     {% endwith %}
                 {% endfor %}
@@ -43,7 +43,7 @@
                         {% include "./components/user.html" %}
                     {% endwith %}
                 {% endfor %}
-                {% if challenges|length == 0 and users|length == 0 %}
+                {% if challenges|length == 0 and users | length == 0 %}
                     <img src="/public/emptiness.gif" alt="futurama-emptiness-meme">
                     <p>(No search results)</p>
                 {% endif %}
