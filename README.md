@@ -73,7 +73,7 @@ On kuitenkin huomioitava, että tämä ei tarkoita sovelluksen skaalautuvan suur
 - [X] Käyttäjä voi luoda ja muokata omaa profiiliaan (kuvaus, profiilikuva ja taustakuva)
 - [X] Käyttäjä näkee äänestystilastoja profiilistaan
 - [X] Käyttäjä pystyy lisäämään, muokkaamaan ja poistamaan haasteita.
-- [] Käyttäjä pystyy lisäämään liitteitä haasteisiin
+- Käyttäjä pystyy lisäämään liitteitä haasteisiin
 - [X] Käyttäjä näkee sovellukseen itse ja toisten käyttäjien toimesta julkaistut haasteet
 - [X] Käyttäjä pystyy etsimään haasteita hakusanalla
 - [X] Käyttäjä pystyy etsimään profiileja hakusanalla
