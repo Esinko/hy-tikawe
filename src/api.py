@@ -294,8 +294,9 @@ def api_vote(target_type, target_id):  # MARK: Vote
         "submission": "sub",
         "challenge": "chall"
     }
+    target_tag = tag.get(target_type, "chall")
 
-    return redirect(from_page + f"#{tag.get(target_type, "chall")}-" + str(target_id))
+    return redirect(from_page + f"#{target_tag}-" + str(target_id))
 
 
 def api_post_comment():  # MARK: Comment
