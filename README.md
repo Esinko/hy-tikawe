@@ -43,7 +43,9 @@ $ source venv/bin/activate
 #### Asenna riippuvuudet
 `requirements.txt` sisältää `flask`-kirjaston lisäksi `python-dotnev`-kirjaston, joka mahdollistaa `flask run` komennon toimivuuden repositorion juuressa.
 
-**[!]** Kirjasto `python-dotenv` ei ole itse sovelluksen riippuvuus, joten sen asentaminen on vapaaehtoista!
+Kirjasto tarvitaan kyseistä komentoa varten, sillä sovelluksen koodi on siisteyden vuoksi kokonaisuudessaan `src/` kansiossa. Kirjasto ei kuitenkaan ole edellytys sovelluksen toiminnalle!
+
+Käynnistysohjeet löydät `Suorita sovellus`-kohdasta alempaa.
 
 ```bash
 $ pip install -r requirements.txt
