@@ -329,7 +329,7 @@ nav a, .user-box {
     font-size: 20px;
 }
 
-.challenge .profile-text, .comment .profile-text {
+.challenge .profile-text, .comment .profile-text, .submission .profile-text {
     width: 26px;
     height: 26px;
     line-height: 26px;
