@@ -298,7 +298,7 @@ class SubmissionNotFoundException(Exception):
 class SubmissionEditable(TypedDict):
     title: str
     body: str
-    script_id: int | None
+    script_id: Optional[int]
     script_name: str
     script_bytes: str
 

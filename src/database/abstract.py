@@ -389,7 +389,7 @@ class AbstractDatabase:
                           title: str,
                           body: str,
                           author_id: int,
-                          asset_id: int | None) -> int:
+                          asset_id: Optional[int]) -> int:
         _, cursor = self.connection.execute(query=sql_table["create_submission"],
                                             parameters=(
             int(time()),
