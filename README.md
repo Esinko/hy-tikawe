@@ -11,29 +11,16 @@
 - Käyttäjä voi selata haasteita jostain tietystä tai kaikista kategorioista ja etsiä haasteita hakusanalla.
 - Käyttäjä voi hakea profiileja hakusanalla
 - Hakutulokset ja haastelistaukset on jaettu sivuihin.
-- Käyttäjä voi vaihtaa oman salasanasa
+- Käyttäjä voi vaihtaa oman salasanansa
 - Admin tilillä voi muokata kaikkien julkaisemaa sisältöä
 - Admin tilillä voi muokata toisten tilien profiileja
 - Admin tilillä voi vaihtaa toisten tilien salasanoja
 - Admin tilillä voi edellyttää toista tiliä vaihtamaan salasansa kirjautuessa
 
-Projektirakenne on suht. locked-in ja komponentteja on jaettu eri tiedostoihin koodikannan kasvun seurauksena.
+**Jatkokehitysideat**
+Formu-palveluksi muodostunut sovellus tarvitsee tehokkaita sisällönhallintatyökaluja sisällön moderointia varten. Nämä ovat mm. sisällön piilottamista, porttikiellon antamisen mahdollisuus ym. Nämä puuttuvat sovelluksesta.
 
-### Sovelluksen toiminnot
-- [X] Käyttäjä pystyy luomaan tunnuksen ja kirjautumaan sisään sovellukseen.
-- [X] Käyttäjä voi luoda ja muokata omaa profiiliaan (kuvaus, profiilikuva ja taustakuva)
-- [X] Käyttäjä näkee äänestystilastoja profiilistaan
-- [X] Käyttäjä pystyy lisäämään, muokkaamaan ja poistamaan haasteita.
-- Käyttäjä pystyy lisäämään liitteitä haasteisiin
-- [X] Käyttäjä näkee sovellukseen itse ja toisten käyttäjien toimesta julkaistut haasteet
-- [X] Käyttäjä pystyy etsimään haasteita hakusanalla
-- [X] Käyttäjä pystyy etsimään profiileja hakusanalla
-- [X] Käyttäjä voi äänestää haasteita
-- [X] Käyttäjä voi luoda, muokata ja poistaa kommentteja
-- [X] Käyttäjä voi luoda, muokata ja poistaa ratkaisuja
-- [X] Käyttäjä voi äänestää ratkaisuja
-- [X] Käyttäjä voi äänestää kommentteja
-
+Haasteisiin / pääpostauksiin voisi lisätä liitteitä. Haasteita voisi olla hyvä myös järjestää esim. eniten ääniä -järjestykseen.
 
 ### Sovelluksen käyttö
 - Sovelluksen ainut riippuvuus on `flask`.
@@ -70,7 +57,30 @@ Muussa tapauksessa:
 $ flask --app ./src/app.py run --debug
 ```
 
+### Suuret tietomäärät
+`src/seed.py` lisää tietokantaan 50 000 tuhatta haastetta. Haasteiden haku, äänestäminen, lisääminen ja muokkaaminen toimii edelleen viiveettä.
+Tilastojen laskenta käyttäjäsivuilla toimii myös tehokkaasti.
+
+On kuitenkin huomioitava, että tämä ei tarkoita sovelluksen skaalautuvan suuria käyttäjämääriä varten. Tämä testi vaatisi monimutkaisempaa valmisteltua.
+
 ### Suunnitelma
+
+#### Sovelluksen toiminnot
+- [X] Käyttäjä pystyy luomaan tunnuksen ja kirjautumaan sisään sovellukseen.
+- [X] Käyttäjä voi luoda ja muokata omaa profiiliaan (kuvaus, profiilikuva ja taustakuva)
+- [X] Käyttäjä näkee äänestystilastoja profiilistaan
+- [X] Käyttäjä pystyy lisäämään, muokkaamaan ja poistamaan haasteita.
+- [] Käyttäjä pystyy lisäämään liitteitä haasteisiin
+- [X] Käyttäjä näkee sovellukseen itse ja toisten käyttäjien toimesta julkaistut haasteet
+- [X] Käyttäjä pystyy etsimään haasteita hakusanalla
+- [X] Käyttäjä pystyy etsimään profiileja hakusanalla
+- [X] Käyttäjä voi äänestää haasteita
+- [X] Käyttäjä voi luoda, muokata ja poistaa kommentteja
+- [X] Käyttäjä voi luoda, muokata ja poistaa ratkaisuja
+- [X] Käyttäjä voi äänestää ratkaisuja
+- [X] Käyttäjä voi äänestää kommentteja
+
+#### Kirjallinen suunnitelma
 Forum/kilpailu-sivusto, jossa käyttäjät voivat luoda ja osallistua code-golf haasteisiin.
 
 Perinteisen code golfin sijaan sivulla on kategoriat:
