@@ -33,6 +33,7 @@ Käyttäjille voisi lisätä mahdollisuuden luoda useita profiileja ja vaihtaa a
 - Sovelluksen ainut riippuvuus on `flask`.
 - Sovellus edellyttää Python version `>=3.8`.
 - Tietokanta alustuu automaattisesti.
+- `Admin` tilin oletus-salasana on `1234`
 
 #### Projektiympäristö (vaihtoehtoinen)
 Luo virtuaaliympäristö:
