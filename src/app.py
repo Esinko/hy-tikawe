@@ -34,7 +34,8 @@ from api import (
 from database.abstract import (
     AssetNotFoundException,
     ChallengeNotFoundException,
-    UserNotFoundException
+    UserNotFoundException,
+    page_size
 )
 from util.get_db import get_db
 from util.filetype import filename_to_file_type
@@ -48,6 +49,7 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Strict"
 # Add custom functions to templates
 app.jinja_env.globals["get_random_top_text"] = get_random_top_text
 app.jinja_env.globals["get_categories"] = lambda: get_db().get_categories()
+app.jinja_env.globals["get_page_size"] = lambda: page_size
 
 # Generate secret
 secret_key = Path("./.secret")

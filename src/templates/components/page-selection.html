@@ -1,7 +1,7 @@
 {% if content | length == 0 %}
     <div class="stack auto-max-height" style="width: 400px">
         <img src="/public/emptiness.gif" alt="futurama-emptiness-meme">
-        <p>({{ meme_text or "You went too far back" }})</p>
+        <p>({{ meme_text or ("You went too far back" if page != 0 else "Only emptiness here") }})</p>
     </div>
 {% endif %}
 
@@ -15,9 +15,9 @@
         </a>
     {% endif %}
     </div>
-    <p style="width: 200px;">Page {{ page + 1 }}</p>
+    <p class="align-center" style="width: 200px;">Page {{ page + 1 }}</p>
     <div class="row" style="justify-content: flex-end;">
-        {% if content | length != 0 %}
+        {% if content | length != 0 and content | length == get_page_size() %}
             <a
                 href="?page={{ page + 1 }}{{ '&s=' + search_string if search_string else '' }}&t={{ '1' if tab == 'users' else '0' }}"
             >

@@ -29,6 +29,7 @@ from database.types import (
     StatsException
 )
 
+page_size = 10
 
 class AbstractDatabase:
     def __init__(self, connection=DatabaseConnection):
@@ -178,7 +179,6 @@ class AbstractDatabase:
                        current_user_id: int,
                        category_id: Optional[int],
                        page: int) -> List[ChallengeHusk]:
-        page_size = 10
         results = self.connection.query(query=sql_table["get_full_challenges"],
                                         parameters=(
             current_user_id,
@@ -210,7 +210,6 @@ class AbstractDatabase:
                               current_user_id: int,
                               challenge_id: int,
                               page: int) -> List[Union[CommentHusk, SubmissionHusk]]:
-        page_size = 10
         results = self.connection.query(query=sql_table["get_comments_and_submissions"],
                                         parameters=(
             current_user_id,
@@ -272,7 +271,6 @@ class AbstractDatabase:
                           current_user_id: int,
                           category_id: Optional[int],
                           page: int):
-        page_size = 10
         results = self.connection.query(query=sql_table["search_challenges"],
                                         parameters=(
             current_user_id,
@@ -288,7 +286,6 @@ class AbstractDatabase:
     def search_users(self, search_string: str, page: int):
         # This method does not returns complete user & profile information
         # to optimize querying. To get full user info, use get_user
-        page_size = 10
         results = self.connection.query(query=sql_table["search_users"],
                                         parameters=(
             search_string,
@@ -467,7 +464,6 @@ class AbstractDatabase:
                          as_user_id: int,
                          for_user_id: int,
                          page: int) -> List[Union[ChallengeHusk, CommentHusk, SubmissionHusk]]:
-        page_size = 10
         results = self.connection.query(query=sql_table["get_user_content"],
                                         parameters=(
             as_user_id,
