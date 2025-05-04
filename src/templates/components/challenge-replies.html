@@ -6,26 +6,32 @@
                     <div class="comment-trunk">
                         <span class="vertical-line"></span>
                     </div>
-                    <div class="stack comment-branch" style="justify-content: center; width: 40px;">
+                    <div class="stack comment-branch" style="width: 40px;">
                         <span class="horizontal-line"></span>
                     </div>
-                    {% if reply.type == "comment" %}
-                        {% with comment=reply %}
-                            {% include "./components/comment.html" %}
-                        {% endwith %}
-                    {% elif reply.type == "submission" %}
-                        {% with submission=reply %}
-                            {% include "./components/submission.html" %}
-                        {% endwith %}
-                    {% else %}
-                        <p>Unsupported reply type.</p>
-                    {% endif %}
+                    {% with from_page="/chall/" + challenge.id | string + "?page=" + page | string %}
+                        {% if reply.type == "comment" %}
+                            {% with comment=reply %}
+                                {% include "./components/comment.html" %}
+                            {% endwith %}
+                        {% elif reply.type == "submission" %}
+                            {% with submission=reply %}
+                                {% include "./components/submission.html" %}
+                            {% endwith %}
+                        {% else %}
+                            <p>Unsupported reply type.</p>
+                        {% endif %}
+                    {% endwith %}
                 </li>
             {% endfor %}
          </ul>
     </div>
     
-    {% if replies | length == 0 %}
+    {% if replies | length == 0 and page == 0 %}
         <p style="text-align: center;">No comments or submissions yet.</p>
+    {% else %}
+        {% with content=replies %}
+            {% include "./components/page-selection.html" %}
+        {% endwith %}
     {% endif %}
 </div>

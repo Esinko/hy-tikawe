@@ -177,6 +177,9 @@ nav a, .user-box {
     padding: 0px;
     margin: 0px;
 }
+.auto-max-height {
+    height: max-content;
+}
 
 .row {
     display: flex;
@@ -393,7 +396,7 @@ nav a, .user-box {
 .comment-branch {
     height: 100%;
     width: 100%;
-    justify-content: flex-end;
+    justify-content: center;
     align-items: flex-end;
 }
 

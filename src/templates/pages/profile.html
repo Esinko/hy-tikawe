@@ -34,7 +34,7 @@
     </div>
 
     <h3 class="minimal align-center profile-intermediary">Received Votes</h3>
-    <div class="row" style="justify-content: center; gap: 15px;">
+    <div class="row center" style="gap: 15px;">
         <div class="stat">
             <h4>For Challenges</h4>
             <p>{{ received_votes.challenge }}</p>
@@ -50,7 +50,7 @@
     </div>
 
     <h3 class="minimal align-center profile-intermediary">Given Votes</h3>
-    <div class="row" style="justify-content: center; gap: 15px;">
+    <div class="row center" style=" gap: 15px;">
         <div class="stat">
             <h4>To Challenges</h4>
             <p>{{ given_votes.challenge }}</p>
@@ -65,7 +65,14 @@
         </div>
     </div>
 
-    <h3 class="minimal align-center profile-intermediary">Content by {{ username }}</h3>
+    <h3 class="minimal align-center profile-intermediary" id="content">Content by {{ username }}</h3>
     {% include "./components/full-content.html" %}
-    {% include "./components/page-selection.html" %}  
+
+    {% if content | length == 0 %}
+        <p style="text-align: center;">No challenges, comments or submissions yet.</p>
+    {% else %}
+        {% with content=content %}
+            {% include "./components/page-selection.html" %}
+        {% endwith %}
+    {% endif %}
 {% endblock %}

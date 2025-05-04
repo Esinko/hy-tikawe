@@ -200,6 +200,8 @@ def challenge(challenge_id, sub_path, reply_id, sub_action):
         return redirect(f"/login")
     
     user_id = session["user"]["id"] if "user" in session else -1
+    page = int(request.args.get("page")
+               if "page" in request.args.keys() else "0")
     try:
         challenge_data = get_db().get_challenge(user_id, challenge_id)
     except ChallengeNotFoundException:
@@ -208,7 +210,7 @@ def challenge(challenge_id, sub_path, reply_id, sub_action):
     # Get comments and submissions or comment/submission to edit
     comments_and_submissions, reply_to_edit = ([], None)
     if not reply_id:
-        comments_and_submissions = get_db().get_challenge_replies(user_id, challenge_id)
+        comments_and_submissions = get_db().get_challenge_replies(user_id, challenge_id, page)
     elif sub_path == "com":
         reply_to_edit = get_db().get_comment(user_id, reply_id)
     elif sub_path == "sub":
@@ -251,7 +253,8 @@ def challenge(challenge_id, sub_path, reply_id, sub_action):
     return render_template(template,
                            challenge=challenge_data,
                            replies=comments_and_submissions,
-                           reply_to_edit=reply_to_edit)
+                           reply_to_edit=reply_to_edit,
+                           page=page)
 
 
 @app.get("/me", defaults={ "username": "" })

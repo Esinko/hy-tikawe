@@ -16,10 +16,10 @@
         </p>
     {% endif %}
     <div class="row space-between" style=" margin-bottom: 10px;">
-        <p><i>Challenges from {{ 'all categories' if not category_name else category_name }}</i></p>
+        <p><i>Latest challenges from {{ 'all categories' if not category_name else category_name }}</i></p>
         {% include "./components/search-box.html" %}
     </div>
-    <ul class="stack">
+    <ul class="stack auto-max-height">
         {% for challenge in challenges %}
             {% with spacer=20, no_edit_buttons=true %}
                 <li>
@@ -27,13 +27,8 @@
                 </li>
             {% endwith %}
         {% endfor %}
-        {% if challenges | length == 0 %}
-            <li>
-                <img src="/public/emptiness.gif" alt="futurama-emptiness-meme">
-                <p>(You went too far back)</p>
-            </li>
-        {% endif %}
-
-        {% include "./components/page-selection.html" %}
     </ul>
+    {% with content=challenges %}
+        {% include "./components/page-selection.html" %}
+    {% endwith %}
 {% endblock %}

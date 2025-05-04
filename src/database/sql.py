@@ -122,7 +122,7 @@ sql_table = {
         ) AS UserVotes ON UserVotes.challenge_id = C.id
         WHERE (? IS NULL OR C.category_id = ?)
         ORDER BY C.created DESC
-        LIMIT ? OFFSET ?;
+        LIMIT ? OFFSET ?
     """,
 
     "get_full_challenge": """
@@ -220,7 +220,7 @@ sql_table = {
                 LOWER(C.body) LIKE LOWER('%' || ? || '%')
             )
         ORDER BY C.created DESC
-        LIMIT ? OFFSET ?;
+        LIMIT ? OFFSET ?
     """,
 
     "search_users": """
@@ -240,7 +240,7 @@ sql_table = {
             LOWER(U.username) LIKE LOWER('%' || ? || '%')
         ORDER BY
             U.username ASC
-        LIMIT ? OFFSET ?;
+        LIMIT ? OFFSET ?
     """,
 
     # MARK: Vote
@@ -271,7 +271,7 @@ sql_table = {
 
             (SELECT COUNT(*) FROM Votes
             JOIN Submissions ON Votes.submission_id = Submissions.id
-            WHERE Submissions.author_id = ?) AS submission_votes;
+            WHERE Submissions.author_id = ?) AS submission_votes
     """,
 
     "get_given_votes": """
@@ -284,7 +284,7 @@ sql_table = {
             WHERE voter_id = ? AND comment_id IS NOT NULL) AS comment_votes,
 
             (SELECT COUNT(*) FROM Votes
-            WHERE voter_id = ? AND submission_id IS NOT NULL) AS submission_votes;
+            WHERE voter_id = ? AND submission_id IS NOT NULL) AS submission_votes
     """,
 
     # MARK: Comment
@@ -366,6 +366,7 @@ sql_table = {
         WHERE Submissions.challenge_id = ?
 
         ORDER BY created DESC
+        LIMIT ? OFFSET ?
     """,
 
     "remove_comment": "DELETE FROM Comments WHERE id = ?",
@@ -506,6 +507,6 @@ sql_table = {
         WHERE Submissions.author_id = ?
 
         ORDER BY created DESC
-        LIMIT ? OFFSET ?;
+        LIMIT ? OFFSET ?
     """
 }

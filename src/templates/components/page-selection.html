@@ -1,16 +1,23 @@
+{% if content | length == 0 %}
+    <div class="stack auto-max-height" style="width: 400px">
+        <img src="/public/emptiness.gif" alt="futurama-emptiness-meme">
+        <p>(You went too far back)</p>
+    </div>
+{% endif %}
+
 <div class="row space-between" style="width: 100%; padding-bottom: 10px; padding: 0px 50px 0px 50px;">
-    {% if challenges | length != 0 or content | length != 0 or users | length != 0 %}
-    <p style="width: 200px;">Page {{ page + 1 }}</p>
-    {% endif %}
-    <div class="row" style="justify-content: flex-end;">
+    <div class="row" style="justify-content: flex-start;">
         {% if page != 0 %}
-            <a
-                href="?page={{ page - 1 }}{{ '&s=' + search_string if search_string else '' }}&t={{ '1' if tab == 'users' else '0' }}"
-            >
-                Previous page
-            </a>
-        {% endif %}
-        {% if challenges | length != 0 or content | length != 0 or users | length != 0 %}
+        <a
+            href="?page={{ page - 1 }}{{ '&s=' + search_string if search_string else '' }}&t={{ '1' if tab == 'users' else '0' }}"
+        >
+            Previous page
+        </a>
+    {% endif %}
+    </div>
+    <p style="width: 200px;">Page {{ page + 1 }}</p>
+    <div class="row" style="justify-content: flex-end;">
+        {% if content | length != 0 %}
             <a
                 href="?page={{ page + 1 }}{{ '&s=' + search_string if search_string else '' }}&t={{ '1' if tab == 'users' else '0' }}"
             >

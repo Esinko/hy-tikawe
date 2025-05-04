@@ -208,15 +208,17 @@ class AbstractDatabase:
 
     def get_challenge_replies(self,
                               current_user_id: int,
-                              challenge_id: int) -> List[Union[CommentHusk, SubmissionHusk]]:
-        # TODO: Pagination
+                              challenge_id: int,
+                              page: int) -> List[Union[CommentHusk, SubmissionHusk]]:
+        page_size = 10
         results = self.connection.query(query=sql_table["get_comments_and_submissions"],
                                         parameters=(
             current_user_id,
             challenge_id,
             current_user_id,
-            challenge_id),
-            limit=100)
+            challenge_id,
+            page_size,
+            page * page_size))
 
         all_replies = []
         for entry_type, *result in results:

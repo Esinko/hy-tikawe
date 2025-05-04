@@ -37,13 +37,20 @@
                 </li>
             {% endwith %}
         {% endfor %}
-        {% if challenges|length == 0 and users | length == 0 %}
+        {% if challenges | length == 0 and users | length == 0 %}
             <li>
                 <img src="/public/emptiness.gif" alt="futurama-emptiness-meme">
                 <p>(No search results)</p>
             </li>
         {% endif %}
-        
-        {% include "./components/page-selection.html" %}
     </ul>
+    {% if challenges %}
+        {% with content=challenges %}
+            {% include "./components/page-selection.html" %}
+        {% endwith %}
+    {% else %}
+        {% with content=users %}
+            {% include "./components/page-selection.html" %}
+        {% endwith %}
+    {% endif %}
 {% endblock %}
