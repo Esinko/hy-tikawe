@@ -25,6 +25,8 @@ Forum-palveluksi muodostunut sovellus tarvitsee tehokkaita sisällönhallintaty�
 
 Haasteisiin / pääpostauksiin voisi lisätä liitteitä. Haasteita voisi olla hyvä myös järjestää esim. eniten ääniä -järjestykseen.
 
+Hakuun voisi lisätä kommenttien ja ratkaisujen haun.
+
 ### Sovelluksen käyttö
 - Sovelluksen ainut riippuvuus on `flask`.
 - Sovellus edellyttää Python version `>=3.8`.
