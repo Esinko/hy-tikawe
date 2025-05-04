@@ -1,6 +1,6 @@
 <div class="header">
     <div class="stack">
-        <h1 class="with-jumping-text" data-text="{{ top_text }}">JavaScript Code Golf Club</h1>
+        <h1 class="with-jumping-text" data-text="{{ get_random_top_text() }}">JavaScript Code Golf Club</h1>
         <div class="marquee">
             <p>It's a frontend, It's a backend, I love it!</p>
             <p>Most obscene, JavaScript coding challenges. On a forum!</p>
@@ -23,7 +23,7 @@
                 </a>
                 <div class="user-box">
                     {% if session.user and session.user.profile.image_asset %}
-                    <img width="25px" height="25px" class="profile-image" src="/a/{{ session.user.profile.image_asset.id }}" alt="profile image"></img>
+                    <img width="25px" height="25px" class="profile-image" src="/a/{{ session.user.profile.image_asset.id }}" alt="logged in account image"></img>
                     {% endif %}
                     <a href="/me">
                         {{ session.user.username }}
@@ -44,7 +44,7 @@
             </div>
         </nav>
         <nav>
-            {% for category in categories %}
+            {% for category in get_categories() %}
             <a href="/c/{{ category.id }}" style="font-size: 12px">
                 {{ category.name }}
             </a>

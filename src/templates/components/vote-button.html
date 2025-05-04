@@ -1,0 +1,39 @@
+<form
+    class="vote stack"
+    action="{{ '/api/vote/' + type + '/' + (content.id | string) if 'user' in session else '/login' }}"
+    method="{{ 'GET' if 'user' not in session else 'POST' }}"
+>
+    <input name="vote_action" type="hidden" value="{{ 0 if content.has_my_vote else 1 }}">
+    <input name="from_page" type="hidden" value="{{ from_page or request.path }}">
+    <input type="hidden" name="request_token" value="{{ session.request_token }}">
+    <button
+        type="submit"
+        {% if no_vote %}
+            disabled="true"
+        {% endif %}
+    >
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            {% if content.has_my_vote %}
+                style="stroke: var(--very-yellow); transform: rotate(180deg);"
+            {% else %}
+                style="stroke: black"
+            {% endif %}
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        >
+            <path d="M6 15l6 -6l6 6" />
+        </svg>
+        {% if content.has_my_vote %}
+            Downvote
+        {% else %}
+            Upvote
+        {% endif %}
+    </button>
+    <p>{{ content.votes }}</p>
+</form>

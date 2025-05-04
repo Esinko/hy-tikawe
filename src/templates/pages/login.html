@@ -1,0 +1,35 @@
+{% extends "./base.html" %}
+{% block content %}
+    <div class="center">
+        <div
+            class="stack"
+            style="width: 300px; padding-top: 12px;"
+        >
+            <div class="stack" style="justify-content: flex-start;">
+                <h2 style="margin-left: 0px; padding-left: 0px;">Login</h2>
+                <p>Use your username and password.</p>
+                {% if 'fail' in request.args %}
+                <p class="error">Check your username and password.</p>
+                {% endif %}
+                <form action="/api/login" method="POST">
+                    <label for="username">Username</label>
+                    <input
+                        type="text"
+                        name="username"
+                        required
+                    >
+                    <label for="password">Password</label>
+                    <input
+                        type="password"
+                        name="password"
+                        required
+                    >
+                    <input type="hidden" name="request_token" value="{{ session.request_token }}">
+                    <div class="flex" style="justify-content: flex-end;">
+                        <button type="submit">Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>    
+{% endblock %}

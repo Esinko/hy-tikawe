@@ -14,7 +14,7 @@
             <form action="/api/post/challenge" method="POST" enctype="multipart/form-data">
                 <label for="category">Challenge Category</label>
                 <select name="category" style="width: 300px; margin-bottom: 10px;">
-                    {% for category in categories %}
+                    {% for category in get_categories() %}
                         <option value="{{ category.id }}">
                             {{ category.name }}
                         </option>

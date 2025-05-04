@@ -45,6 +45,10 @@ app = Flask(__name__)
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Strict"
 
+# Add custom functions to templates
+app.jinja_env.globals["get_random_top_text"] = get_random_top_text
+app.jinja_env.globals["get_categories"] = lambda: get_db().get_categories()
+
 # Generate secret
 secret_key = Path("./.secret")
 if not secret_key.exists():
@@ -117,13 +121,11 @@ def home(category_id=None):
         session["user"]["id"] if "user" in session else -1,
         category_id,
         page)
-    return render_template("./home.html",
+    return render_template("./pages/home.html",
                            at_home=request.path == "/",
-                           categories=categories,
                            challenges=challenges,
                            category_name=categories[category_id - 1].name if category_id else None,
-                           page=page,
-                           top_text=get_random_top_text())
+                           page=page)
 
 
 @app.get("/search")
@@ -136,7 +138,6 @@ def search():
         return "No search to perform.", 400
 
     users, challenges = [], []
-    categories = get_db().get_categories()
     if search_tab == "users":
         users = get_db().search_users(search_string, page)
     else:
@@ -144,13 +145,11 @@ def search():
                                                 session["user"]["id"] if "user" in session else -1,
                                                 None,
                                                 page)
-    return render_template("./search-results.html",
-                           categories=categories,
+    return render_template("./pages/search-results.html",
                            challenges=challenges,
                            users=users,
                            search_string=search_string,
                            page=page,
-                           top_text=get_random_top_text(),
                            tab=search_tab)
 
 
@@ -160,7 +159,7 @@ def login():
     if "user" in session:
         return redirect("/")
 
-    return render_template("./login.html", top_text=get_random_top_text())
+    return render_template("./pages/login.html")
 
 
 @app.get("/register")
@@ -169,7 +168,7 @@ def register():
     if "user" in session:
         return redirect("/")
 
-    return render_template("./register.html", top_text=get_random_top_text())
+    return render_template("./pages/register.html")
 
 
 @app.get("/logout")
@@ -180,15 +179,12 @@ def logout():
 
 @app.get("/reset-password")
 def reset_password():
-    return render_template("./reset-password.html", top_text=get_random_top_text())
+    return render_template("./pages/reset-password.html")
 
 
 @app.get("/challenge-new")
 def new_post():
-    categories = get_db().get_categories()
-    return render_template("./forms/challenge-new.html",
-                           categories=categories,
-                           top_text=get_random_top_text())
+    return render_template("./forms/challenge-new.html")
 
 
 @app.get("/chall/<challenge_id>",
@@ -203,7 +199,6 @@ def challenge(challenge_id, sub_path, reply_id, sub_action):
     if sub_path and not "user" in session:
         return redirect(f"/login")
     
-    categories = get_db().get_categories()
     user_id = session["user"]["id"] if "user" in session else -1
     try:
         challenge_data = get_db().get_challenge(user_id, challenge_id)
@@ -234,7 +229,7 @@ def challenge(challenge_id, sub_path, reply_id, sub_action):
         return redirect(f"/chall/{challenge_id}")
 
     # Default challenge template
-    template = "./challenge.html"
+    template = "./pages/challenge.html"
 
     # If sub_path (and possibly sub_action), pick the proper form template
     if sub_path:
@@ -254,11 +249,9 @@ def challenge(challenge_id, sub_path, reply_id, sub_action):
         template = forms[form_key]
 
     return render_template(template,
-                           categories=categories,
                            challenge=challenge_data,
                            replies=comments_and_submissions,
-                           reply_to_edit=reply_to_edit,
-                           top_text=get_random_top_text())
+                           reply_to_edit=reply_to_edit)
 
 
 @app.get("/me", defaults={ "username": "" })
@@ -274,7 +267,6 @@ def profile(username):
     except UserNotFoundException:
         return redirect("/")
     
-    categories = get_db().get_categories()
     page = int(request.args.get("page")
                if "page" in request.args.keys() else "0")
     content = get_db().get_user_content(session["user"]["id"] if "user" in session else -1,
@@ -282,14 +274,12 @@ def profile(username):
     received_votes = get_db().get_received_votes(user.id)
     given_votes = get_db().get_given_votes(user.id)
 
-    return render_template("./profile.html",
+    return render_template("./pages/profile.html",
                            profile=user.profile.to_dict(),
                            username=user.username,
-                           categories=categories,
                            content=content,
                            received_votes=received_votes,
                            given_votes=given_votes,
-                           top_text=get_random_top_text(),
                            page=page)
 
 
@@ -310,12 +300,9 @@ def profile_edit(username):
     except UserNotFoundException:
         return "User not found", 404
 
-    categories = get_db().get_categories()
     return render_template("./forms/profile-edit.html",
                            profile=target_user.profile.to_dict(),
-                           username=target_user.username,
-                           categories=categories,
-                           top_text=get_random_top_text())
+                           username=target_user.username)
 
 
 @app.get("/me/settings", defaults={ "username": "" })
@@ -333,7 +320,7 @@ def target_user_settings(username):
     # Get user
     user = get_db().get_user(username if username else session["user"]["username"])
 
-    return render_template("./user-settings.html", user=user)
+    return render_template("./pages/user-settings.html", user=user)
 
 
 @app.get("/a/<int:asset_id>")
@@ -382,7 +369,7 @@ app.add_url_rule("/api/admin/request-password-change",
                  view_func=api_require_password_change, methods=["POST"])
 
 @app.errorhandler(NotFound)  # MARK: Default error handlers
-def handle_exception(e):
+def handle_exception(_):
     return "Not found.", 404
 
 

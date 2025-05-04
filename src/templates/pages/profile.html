@@ -1,0 +1,71 @@
+{% extends "./base.html" %}
+{% block content %}
+    <div
+        class="stack"
+        style="width: 100%; gap: 8px;"
+    >
+    <div class="row" style="justify-content: flex-end;">
+        {% include "./components/search-box.html" %}
+    </div>
+    {% if session.user and (username == session.user.username or session.user.is_admin) %}
+    <div class="row card space-between" style=" width: 100%; margin-top: 10px;">
+        <p style="width: 100%;"><b>Account Tools</b></p>
+        <div class="row" style="justify-content: flex-end;">
+            <a href="{{ '/u/' + username + '/settings' if session.user.is_admin else '/me/settings' }}">Account Settings</a>
+            <a href="{{ '/u/' + username + '/edit' if session.user.is_admin else '/me/edit' }}">Edit Profile</a>
+        </div>
+    </div>
+    {% endif %}
+    {% if profile.banner_asset %}
+    <img class="profile-banner" src="/a/{{ profile.banner_asset.id }}" alt="profile banner">
+    {% else %}
+    <span class="profile-banner profile-banner-placeholder"></span>
+    {% endif %}
+    <div class="stack card" style="width: 100%;">
+        <div class="row" style="padding: 8px;">
+            {% if profile.image_asset %}
+            <img width="80px" height="80px" class="profile-image" src="/a/{{ profile.image_asset.id }}"></img>
+            {% else %}
+            <p class="profile-text">{{ username[0].upper() + username[1] }}</p>
+            {% endif %}
+            <h2 style="margin-left: 20px;">{{ username }}</h2>
+        </div>
+        <pre class="profile-description">{{ profile.description if profile.description != "" else "No description."}}</pre>
+    </div>
+
+    <h3 class="minimal align-center profile-intermediary">Received Votes</h3>
+    <div class="row" style="justify-content: center; gap: 15px;">
+        <div class="stat">
+            <h4>For Challenges</h4>
+            <p>{{ received_votes.challenge }}</p>
+        </div>
+        <div class="stat">
+            <h4>For Comments</h4>
+            <p>{{ received_votes.comment }}</p>
+        </div>
+        <div class="stat">
+            <h4>For Submissions</h4>
+            <p>{{ received_votes.submission }}</p>
+        </div>
+    </div>
+
+    <h3 class="minimal align-center profile-intermediary">Given Votes</h3>
+    <div class="row" style="justify-content: center; gap: 15px;">
+        <div class="stat">
+            <h4>To Challenges</h4>
+            <p>{{ given_votes.challenge }}</p>
+        </div>
+        <div class="stat">
+            <h4>To Comments</h4>
+            <p>{{ given_votes.comment }}</p>
+        </div>
+        <div class="stat">
+            <h4>To Submissions</h4>
+            <p>{{ given_votes.submission }}</p>
+        </div>
+    </div>
+
+    <h3 class="minimal align-center profile-intermediary">Content by {{ username }}</h3>
+    {% include "./components/full-content.html" %}
+    {% include "./components/page-selection.html" %}  
+{% endblock %}

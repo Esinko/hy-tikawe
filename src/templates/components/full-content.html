@@ -8,24 +8,26 @@
 <div class="row" style="padding-bottom: 18px;">
     <div class="stack comment-tree" style="padding-right: 50px; padding-left: 50px; gap: 20px;">
         {% for entry in content %}
-            <div class="stack">
-                {% if entry.type == "challenge" %}
-                    <p class="content-label">Posted a challenge</p>
-                    {% with challenge=entry, spacer=0 %}
-                        {% include "./components/challenge.html" %}
-                    {% endwith %}
-                {% elif entry.type == "comment" %}
-                    <p class="content-label">Commented<a></a></p>
-                    {% with comment=entry %}
-                        {% include "./components/comment.html" %}
-                    {% endwith %}
-                {% elif entry.type == "submission" %}
-                    <p class="content-label">Submitted a solution<a></a></p>
-                    {% with submission=entry %}
-                        {% include "./components/submission.html" %}
-                    {% endwith %}
-                {% endif %}
-            </div>
+            <ul class="stack">
+                <li>
+                    {% if entry.type == "challenge" %}
+                        <p class="content-label">Posted a challenge</p>
+                        {% with challenge=entry, spacer=0 %}
+                            {% include "./components/challenge.html" %}
+                        {% endwith %}
+                    {% elif entry.type == "comment" %}
+                        <p class="content-label">Commented<a></a></p>
+                        {% with comment=entry %}
+                            {% include "./components/comment.html" %}
+                        {% endwith %}
+                    {% elif entry.type == "submission" %}
+                        <p class="content-label">Submitted a solution<a></a></p>
+                        {% with submission=entry %}
+                            {% include "./components/submission.html" %}
+                        {% endwith %}
+                    {% endif %}
+                </li>
+            </ul>
         {% endfor %}
     </div>
 </div>

@@ -1,0 +1,68 @@
+{% extends "./base.html" %}
+{% block content %}
+    <div class="row space-between">
+        <p>User settings for '{{ user.username }}'</p>
+        <a href="/u/{{ user.username | urlencode }}">Cancel</a>
+    </div>
+
+    <div class="row" style="gap: 10px; align-items: flex-start;">
+        <div class="stack card" style="width: 400px;">
+            <p><b>Change Password</b></p>
+            <p>You will need to login again after you change your password.</p>
+            <p class="minimal">Password requirements:</p>
+            <ul>
+                <li>Length of 8 or more.</li>
+                <li>At least one uppercase letter.</li>
+                <li>At least one lowercase letter.</li>
+                <li>At least one number or symbol.</li>
+            </ul>
+            {% if 'p-mismatch' in request.args %}
+            <p class="error">Passwords did not match.</p>
+            {% endif %}
+            {% if 'p-weak' in request.args %}
+            <p class="error">Your password is too weak.</p>
+            {% endif %}
+            <form action="/api/change-password{{ '?u=' + user.username if 'user' in session and session.user.is_admin else '' }}" method="POST">
+                <label for="password">New Password</label>
+                <input
+                    type="password"
+                    name="password"
+                    required
+                >
+                <label for="password-again">New Password Again</label>
+                <input
+                    type="password"
+                    name="password-again"
+                    required
+                >
+                <input type="hidden" name="request_token" value="{{ session.request_token }}">
+                <div class="flex" style="justify-content: flex-end;">
+                    <button type="submit">Change</button>
+                </div>
+            </form>
+        </div>
+        {% if 'user' in session and session.user.is_admin %}
+        <div class="stack card" style="width: 400px;">
+            <p><b>New Password Required (Admin Only)</b></p>
+            <p>User must set a new password before accessing their account.</p>
+            <form action="/api/admin/request-password-change" method="POST">
+                <label>
+                    <input
+                        type="checkbox"
+                        name="required"
+                        value="yes"
+                        {% if user.require_new_password %}
+                        checked
+                        {% endif %}
+                    > Require Password Change
+                </label>
+                <input type="hidden" name="u" value="{{ user.username }}">
+                <input type="hidden" name="request_token" value="{{ session.request_token }}">
+                <div class="flex" style="justify-content: flex-end;">
+                    <button type="submit">Set</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}

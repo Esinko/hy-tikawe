@@ -1,0 +1,49 @@
+{% extends "./base.html" %}
+{% block content %}
+    <div class="row space-between" style="margin-bottom: 10px;">
+        <p><i>Search results for '{{ search_string }}'</i></p>
+        <div class="tab-select row">
+            <a
+                href="?page={{ page }}&s={{ search_string | urlencode }}&t=0"
+                {% if tab == "challenges" %}
+                    data-selected
+                {% endif %}
+            >
+                Challenges
+            </a>
+            <a
+                href="?page={{ page }}&s={{ search_string | urlencode }}&t=1"
+                {% if tab == "users" %}
+                    data-selected
+                {% endif %}
+            >
+                Users
+            </a>
+        </div>
+        {% include "./components/search-box.html" %}
+    </div>
+    <ul class="stack">
+        {% for challenge in challenges %}
+            {% with spacer=15, no_edit_buttons=true, from_page="/search?page=" + page | string + "&s=" + search_string | urlencode + "&t=0" %}
+                <li>
+                    {% include "./components/challenge.html" %}
+                </li>
+            {% endwith %}
+        {% endfor %}
+        {% for user in users %}
+            {% with spacer=15, no_edit_buttons=true %}
+                <li>
+                    {% include "./components/user.html" %}
+                </li>
+            {% endwith %}
+        {% endfor %}
+        {% if challenges|length == 0 and users | length == 0 %}
+            <li>
+                <img src="/public/emptiness.gif" alt="futurama-emptiness-meme">
+                <p>(No search results)</p>
+            </li>
+        {% endif %}
+        
+        {% include "./components/page-selection.html" %}
+    </ul>
+{% endblock %}
