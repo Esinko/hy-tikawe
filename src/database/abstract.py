@@ -146,19 +146,19 @@ class AbstractDatabase:
         return Asset(asset_id, filename, value)
 
     def get_asset(self, asset_id: int) -> Asset:
-        [asset] = self.connection.query(
+        result = self.connection.query(
             query=sql_table["get_asset"], parameters=(asset_id,), limit=1)
-        if not asset:
+        if not result:
             raise AssetNotFoundException(asset_id)
-        return Asset(asset_id, asset[0], asset[1])
+        return Asset(asset_id, result[0][0], result[0][1])
 
     def get_asset_with_submission_id(self, submission_id: int) -> Asset:
         # Handy shortcut used in processing edits to submissions
-        [asset] = self.connection.query(
+        result = self.connection.query(
             query=sql_table["get_asset_with_submission_id"], parameters=(submission_id,), limit=1)
-        if not asset:
+        if not result:
             raise AssetNotFoundException("unknown")
-        return Asset(asset[0], asset[1], asset[2])
+        return Asset(result[0][0], result[0][1], value=result[0][2])
 
     def remove_asset(self, asset_id: int):
         self.connection.execute(

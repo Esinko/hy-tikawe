@@ -142,12 +142,6 @@ def api_profile_edit():  # MARK: Profiles
         # Get user
         user = get_db().get_user(username)
 
-        # Delete existing assets, if necessary
-        if user.profile.banner_asset and banner_file:
-            get_db().remove_asset(user.profile.banner_asset.id)
-        if user.profile.image_asset and image_file:
-            get_db().remove_asset(user.profile.image_asset.id)
-
         # Create new assets, if necessary
         image_file_id = user.profile.image_asset.id if user.profile.image_asset else None
         banner_file_id = user.profile.banner_asset.id if user.profile.banner_asset else None
@@ -167,6 +161,13 @@ def api_profile_edit():  # MARK: Profiles
             "description": description
         }
         get_db().edit_profile(user_id, new_profile)
+
+        # Delete old assets, if necessary
+        # Must be after edit_profile to ensure asset is no longer referenced
+        if user.profile.banner_asset and banner_file:
+            get_db().remove_asset(user.profile.banner_asset.id)
+        if user.profile.image_asset and image_file:
+            get_db().remove_asset(user.profile.image_asset.id)
 
         # Refresh session
         session["user"] = get_db().get_user(username).to_dict()
